@@ -72,8 +72,11 @@ SUBSYSTEM_DEF(event)
 		if (MC_TICK_CHECK)
 			return
 
-/datum/controller/subsystem/event/stat_entry()
-	..("E:[active_events.len]")
+/datum/controller/subsystem/event/stat_entry(text, force)
+	IF_UPDATE_STAT
+		force = TRUE
+		text = "[text] | Active Events: [active_events.len]"
+	..(text, force)
 
 //Actual event handling
 /datum/controller/subsystem/event/proc/event_complete(var/datum/event/E)
@@ -348,4 +351,3 @@ SUBSYSTEM_DEF(event)
 	set category = "Admin"
 	if(SSevent)
 		SSevent.Interact(usr)
-	SSstatistics.add_field_details("admin_verb","EMP") //If you are copy-pasting this, ensure the 2nd parameter is unique to the new proc!
