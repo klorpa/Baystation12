@@ -5,7 +5,7 @@ SUBSYSTEM_DEF(presence)
 	name = "Player Presence"
 	priority = SS_PRIORITY_PRESENCE
 	runlevels = RUNLEVEL_GAME
-	wait = 10 SECONDS
+	wait = 2 SECONDS
 	var/static/tmp/list/levels = list()
 	var/static/tmp/list/queue = list()
 	var/static/tmp/list/build
@@ -24,7 +24,7 @@ SUBSYSTEM_DEF(presence)
 		player = queue[i]
 		if (QDELETED(player) || !istype(player))
 			continue
-		++build["[player.z]"]
+		++build["[get_z(player)]"]
 		if (no_mc_tick)
 			CHECK_TICK
 		else if (MC_TICK_CHECK)

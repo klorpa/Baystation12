@@ -649,6 +649,15 @@
 	)
 	result = /obj/item/reagent_containers/food/snacks/meatballsoup
 
+/datum/recipe/onionsoup
+	reagents = list(
+		/datum/reagent/water = 10
+	)
+	fruit = list(
+		"onion" = 2
+	)
+	result = /obj/item/reagent_containers/food/snacks/onionsoup
+
 
 /datum/recipe/vegetablesoup
 	reagents = list(
@@ -1283,7 +1292,7 @@
 
 /datum/recipe/tossedsalad
 	fruit = list(
-		"cabbage" = 2,
+		"lettuce" = 2,
 		"tomato" = 1,
 		"carrot" = 1,
 		"apple" = 1

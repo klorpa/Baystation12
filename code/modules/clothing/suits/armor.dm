@@ -102,8 +102,8 @@
 	blood_overlay_type = "armor"
 	armor = null
 
-/obj/item/clothing/suit/armor/reactive/New()
-	..()
+/obj/item/clothing/suit/armor/reactive/Initialize()
+	. = ..()
 	slowdown_per_slot[slot_wear_suit] = 1
 
 /obj/item/clothing/suit/armor/reactive/handle_shield(mob/user, var/damage, atom/damage_source = null, mob/attacker = null, var/def_zone = null, var/attack_text = "the attack")
@@ -426,7 +426,14 @@
 	icon_state = "centcom"
 	w_class = ITEM_SIZE_HUGE//bulky item
 	body_parts_covered = UPPER_TORSO|LOWER_TORSO|LEGS|FEET|ARMS|HANDS
-	allowed = list(/obj/item/gun/energy,/obj/item/melee/baton,/obj/item/handcuffs,/obj/item/tank/emergency)
+	allowed = list(
+		/obj/item/gun/energy,
+		/obj/item/melee/baton,
+		/obj/item/handcuffs,
+		/obj/item/tank/oxygen_emergency,
+		/obj/item/tank/oxygen_emergency_extended,
+		/obj/item/tank/nitrogen_emergency,
+	)
 	flags_inv = HIDEGLOVES|HIDESHOES|HIDEJUMPSUIT
 	cold_protection = UPPER_TORSO | LOWER_TORSO | LEGS | FEET | ARMS | HANDS
 	min_cold_protection_temperature = SPACE_SUIT_MIN_COLD_PROTECTION_TEMPERATURE
@@ -442,8 +449,8 @@
 	flags_inv = HIDEGLOVES|HIDESHOES|HIDEJUMPSUIT
 	siemens_coefficient = 0
 
-/obj/item/clothing/suit/armor/heavy/New()
-	..()
+/obj/item/clothing/suit/armor/heavy/Initialize()
+	. = ..()
 	slowdown_per_slot[slot_wear_suit] = 3
 
 /obj/item/clothing/suit/armor/tdome

@@ -17,11 +17,10 @@
 	// has_eye_glow = TRUE
 
 	faction = "spiders"
-	maxHealth = 125
-	health = 125
+	maxHealth = 110
+	health = 110
 	natural_weapon = /obj/item/natural_weapon/bite/spider
 	pass_flags = PASS_FLAG_TABLE
-	movement_cooldown = 10
 	poison_resist = 0.5
 
 	see_in_dark = 10

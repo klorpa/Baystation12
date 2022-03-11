@@ -38,7 +38,9 @@
 		/obj/item/clothing/accessory/medal,
 		/obj/item/clothing/accessory/armor_tag,
 		/obj/item/clothing/ring,
-		/obj/item/passport
+		/obj/item/passport,
+		/obj/item/clothing/accessory/pride_pin,
+		/obj/item/clothing/accessory/pronouns
 	)
 
 	slot_flags = SLOT_ID
@@ -88,6 +90,20 @@
 		return I.GetAccess()
 	else
 		return ..()
+
+
+/obj/item/storage/wallet/AltClick(mob/user)
+	if (user != loc || user.incapacitated() || !ishuman(user))
+		return ..()
+
+	var/obj/item/card/id/id = GetIdCard()
+	if (istype(id))
+		remove_from_storage(id)
+		user.put_in_hands(id)
+		return
+
+	return ..()
+
 
 /obj/item/storage/wallet/random/New()
 	..()

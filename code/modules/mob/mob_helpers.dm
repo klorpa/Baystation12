@@ -235,13 +235,15 @@ proc/slur(phrase)
 			if(lowertext(newletter)=="s")	newletter="ch"
 			if(lowertext(newletter)=="a")	newletter="ah"
 			if(lowertext(newletter)=="c")	newletter="k"
-		switch(rand(1,15))
-			if(1,3,5,8)	newletter="[lowertext(newletter)]"
-			if(2,4,6,15)	newletter="[uppertext(newletter)]"
-			if(7)	newletter+="'"
-			//if(9,10)	newletter="<b>[newletter]</b>"
-			//if(11,12)	newletter="<big>[newletter]</big>"
-			//if(13)	newletter="<small>[newletter]</small>"
+		var/randomizer = rand(1, 15)
+		switch(randomizer)
+			if (1 to 4)
+				newletter="[lowertext(newletter)]"
+			if (5 to 8)
+				newletter="[uppertext(newletter)]"
+			if (9)
+				newletter+="'"
+			// 10-15 - Do nothing
 		newphrase+="[newletter]";counter-=1
 	return newphrase
 
@@ -344,7 +346,7 @@ var/list/intents = list(I_HELP,I_DISARM,I_GRAB,I_HURT)
 	set name = "a-intent"
 	set hidden = 1
 
-	if(ishuman(src) || isbrain(src) || isslime(src) || ischorus(src))
+	if(ishuman(src) || isbrain(src) || isslime(src))
 		switch(input)
 			if(I_HELP,I_DISARM,I_GRAB,I_HURT)
 				a_intent = input
