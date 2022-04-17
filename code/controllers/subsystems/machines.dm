@@ -104,7 +104,7 @@ SUBSYSTEM_DEF(machines)
 	for(var/datum/powernet/powernet as anything in powernets)
 		qdel(powernet)
 	powernets.Cut()
-	setup_powernets_for_cables(cable_list)
+	setup_powernets_for_cables(GLOB.cable_list)
 
 
 /datum/controller/subsystem/machines/proc/setup_powernets_for_cables(list/cables)
@@ -131,23 +131,22 @@ SUBSYSTEM_DEF(machines)
 		CHECK_TICK
 
 
-/datum/controller/subsystem/machines/stat_entry(text, force)
-	IF_UPDATE_STAT
-		force = TRUE
-		text = {"[text]\n\
-			Queues: \
-			Pipes [pipenets.len] \
-			Machines [processing.len] \
-			Networks [powernets.len] \
-			Objects [power_objects.len]\n\
-			Costs: \
-			Pipes [Round(cost_pipenets)] \
-			Machines [Round(cost_machinery)] \
-			Networks [Round(cost_powernets)] \
-			Objects [Round(cost_power_objects)]\n\
-			Overall [Roundm(cost ? processing.len / cost : 0, 0.1)]
-		"}
-	..(text, force)
+/datum/controller/subsystem/machines/UpdateStat(time)
+	if (PreventUpdateStat(time))
+		return ..()
+	..({"\
+		Queues: \
+		Pipes [pipenets.len] \
+		Machines [processing.len] \
+		Networks [powernets.len] \
+		Objects [power_objects.len]\n\
+		Costs: \
+		Pipes [Round(cost_pipenets)] \
+		Machines [Round(cost_machinery)] \
+		Networks [Round(cost_powernets)] \
+		Objects [Round(cost_power_objects)]\n\
+		Overall [Roundm(cost ? processing.len / cost : 0, 0.1)]
+	"})
 
 
 /datum/controller/subsystem/machines/proc/process_pipenets(resumed, no_mc_tick)

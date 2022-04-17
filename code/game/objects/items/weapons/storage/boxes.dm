@@ -196,7 +196,6 @@
 /obj/item/storage/box/ammo/sniperammo/apds
 	name = "box of sniper APDS shells"
 	startswith = list(/obj/item/ammo_casing/shell/apds = 3)
-
 /obj/item/storage/box/flashbangs
 	name = "box of flashbangs"
 	desc = "A box containing 7 antipersonnel flashbang grenades.<br> WARNING: These devices are extremely dangerous and can cause blindness or deafness from repeated use."
@@ -286,18 +285,6 @@
 	desc = "It has pictures of paper cups on the front."
 	startswith = list(/obj/item/reagent_containers/food/drinks/sillycup = 7)
 
-/obj/item/storage/box/donkpockets
-	name = "box of donk-pockets"
-	desc = "<B>Instructions:</B> <I>Heat in microwave. Product will cool if not eaten within seven minutes.</I>"
-	icon_state = "donk_kit"
-	startswith = list(/obj/item/reagent_containers/food/snacks/donkpocket = 6)
-
-/obj/item/storage/box/sinpockets
-	name = "box of sin-pockets"
-	desc = "<B>Instructions:</B> <I>Crush bottom of package to initiate chemical heating. Wait for 20 seconds before consumption. Product will cool if not eaten within seven minutes.</I>"
-	icon_state = "donk_kit"
-	startswith = list(/obj/item/reagent_containers/food/snacks/donkpocket/sinpocket = 6)
-
 //cubed animals
 
 /obj/item/storage/box/monkeycubes
@@ -382,7 +369,7 @@
 /obj/item/storage/box/matches/attackby(obj/item/flame/match/W as obj, mob/user as mob)
 	if(istype(W) && !W.lit && !W.burnt)
 		W.lit = 1
-		W.damtype = "burn"
+		W.damtype = INJURY_TYPE_BURN
 		W.icon_state = "match_lit"
 		START_PROCESSING(SSobj, W)
 		playsound(src.loc, 'sound/items/match.ogg', 60, 1, -4)

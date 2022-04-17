@@ -85,7 +85,7 @@
 //TODO: Integrate defence zones and targeting body parts with the actual organ system, move these into organ definitions.
 
 //The base miss chance for the different defence zones
-var/list/global/base_miss_chance = list(
+var/global/list/base_miss_chance = list(
 	BP_HEAD = 70,
 	BP_CHEST = 10,
 	BP_GROIN = 20,
@@ -101,7 +101,7 @@ var/list/global/base_miss_chance = list(
 
 //Used to weight organs when an organ is hit randomly (i.e. not a directed, aimed attack).
 //Also used to weight the protection value that armour provides for covering that body part when calculating protection from full-body effects.
-var/list/global/organ_rel_size = list(
+var/global/list/organ_rel_size = list(
 	BP_HEAD = 25,
 	BP_CHEST = 70,
 	BP_GROIN = 30,
@@ -168,20 +168,18 @@ var/list/global/organ_rel_size = list(
 		for(var/obj/item/grab/G in target.grabbed_by)
 			if(G.stop_move())
 				return zone
-
+				
 	var/miss_chance = 10
-	var/scatter_chance
 	if (zone in base_miss_chance)
 		miss_chance = base_miss_chance[zone]
 	miss_chance = max(miss_chance + miss_chance_mod, 0)
-	scatter_chance = min(95, miss_chance + 60)
 	if(prob(miss_chance))
-		if(ranged_attack && prob(scatter_chance))
-			return null
-		else if(prob(70))
-			return null
-		return (ran_zone())
-	return zone
+		return null
+	else 
+		if (prob(miss_chance))
+			return (ran_zone())
+		else
+			return zone
 
 //Replaces some of the characters with *, used in whispers. pr = probability of no star.
 //Will try to preserve HTML formatting. re_encode controls whether the returned text is HTML encoded outside tags.
@@ -326,7 +324,7 @@ proc/Gibberish(t, p)//t is the inputted message, and any value higher than 70 fo
 	return FALSE
 
 //converts intent-strings into numbers and back
-var/list/intents = list(I_HELP,I_DISARM,I_GRAB,I_HURT)
+var/global/list/intents = list(I_HELP,I_DISARM,I_GRAB,I_HURT)
 /proc/intent_numeric(argument)
 	if(istext(argument))
 		switch(argument)

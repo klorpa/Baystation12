@@ -111,7 +111,7 @@ GLOBAL_LIST_INIT(possible_say_verbs, list(
 /mob/living/silicon/pai/proc/show_silenced()
 	if(silence_time)
 		var/timeleft = round((silence_time - world.timeofday)/10 ,1)
-		stat(null, "Communications system reboot in -[(timeleft / 60) % 60]:[add_zero(num2text(timeleft % 60), 2)]")
+		stat(null, "Communications system reboot in -[(timeleft / 60) % 60]:[pad_left(num2text(timeleft % 60), 2, "0")]")
 
 /mob/living/silicon/pai/Stat()
 	. = ..()
@@ -128,6 +128,8 @@ GLOBAL_LIST_INIT(possible_say_verbs, list(
 	return !istype(loc, /obj/item/device/paicard) && ..()
 
 /mob/living/silicon/pai/emp_act(severity)
+	if (status_flags & GODMODE)
+		return
 	// Silence for 2 minutes
 	// 20% chance to kill
 		// 33% chance to unbind

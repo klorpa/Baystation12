@@ -4,8 +4,8 @@
 #define SET_THROTTLE(TIME, REASON) throttle[1] = base_throttle + (TIME); throttle[2] = (REASON);
 
 
-/var/server_name = "Baystation 12"
-/var/game_id = null
+var/global/server_name = "Baystation 12"
+var/global/game_id = null
 
 GLOBAL_VAR(href_logfile)
 
@@ -101,8 +101,8 @@ GLOBAL_VAR(href_logfile)
 	//logs
 	SetupLogs()
 	var/date_string = time2text(world.realtime, "YYYY/MM/DD")
-	diary = file("data/logs/[date_string].log")
-	to_file(diary, "[log_end]\n[log_end]\nStarting up. (ID: [game_id]) [time2text(world.timeofday, "hh:mm.ss")][log_end]\n---------------------[log_end]")
+	GLOB.diary = file("data/logs/[date_string].log")
+	to_file(GLOB.diary, "[log_end]\n[log_end]\nStarting up. (ID: [game_id]) [time2text(world.timeofday, "hh:mm.ss")][log_end]\n---------------------[log_end]")
 
 	if(config && config.server_name != null && config.server_suffix && world.port > 0)
 		config.server_name += " #[(world.port % 1000) / 100]"
@@ -145,7 +145,7 @@ GLOBAL_VAR_INIT(world_topic_last, world.timeofday)
 
 
 /world/Topic(T, addr, master, key)
-	to_file(diary, "TOPIC: \"[T]\", from:[addr], master:[master], key:[key][log_end]")
+	to_file(GLOB.diary, "TOPIC: \"[T]\", from:[addr], master:[master], key:[key][log_end]")
 
 	if (GLOB.world_topic_last > world.timeofday)
 		GLOB.world_topic_throttle = list() //probably passed midnight
@@ -431,7 +431,7 @@ GLOBAL_VAR_INIT(world_topic_last, world.timeofday)
 		sound_to(C, 'sound/misc/staff_message.ogg')
 		to_chat(C, message)
 
-		for(var/client/A in GLOB.admins)
+		for(var/client/A as anything in GLOB.admins)
 			if(A != C)
 				to_chat(A, amessage)
 		return "Message Successful"
@@ -552,8 +552,8 @@ GLOBAL_VAR_INIT(world_topic_last, world.timeofday)
 	to_file(GLOB.world_qdel_log, "\n\nStarting up round ID [game_id]. [time_stamp()]\n---------------------")
 
 
-var/failed_db_connections = 0
-var/failed_old_db_connections = 0
+var/global/failed_db_connections = 0
+var/global/failed_old_db_connections = 0
 
 /hook/startup/proc/connectDB()
 	if(!setup_database_connection())

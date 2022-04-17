@@ -11,7 +11,7 @@
 	atom_flags = ATOM_FLAG_CAN_BE_PAINTED
 
 	var/damage_overlay = 0
-	var/global/damage_overlays[16]
+	var/static/damage_overlays[16]
 	var/active
 	var/can_open = 0
 	var/material/material
@@ -24,7 +24,7 @@
 	var/floor_type = /turf/simulated/floor/plating //turf it leaves after destruction
 	var/paint_color
 	var/stripe_color
-	var/global/list/wall_stripe_cache = list()
+	var/static/list/wall_stripe_cache = list()
 	var/list/blend_turfs = list(/turf/simulated/wall/cult, /turf/simulated/wall/wood, /turf/simulated/wall/walnut, /turf/simulated/wall/maple, /turf/simulated/wall/mahogany, /turf/simulated/wall/ebony)
 	var/list/blend_objects = list(/obj/machinery/door, /obj/structure/wall_frame, /obj/structure/grille, /obj/structure/window/reinforced/full, /obj/structure/window/reinforced/polarized/full, /obj/structure/window/shuttle, ,/obj/structure/window/phoronbasic/full, /obj/structure/window/phoronreinforced/full) // Objects which to blend with
 	var/list/noblend_objects = list(/obj/machinery/door/window) //Objects to avoid blending with (such as children of listed blend objects.)
@@ -92,8 +92,8 @@
 		brute_armor = round(1 / brute_armor, 0.01)
 	if (burn_armor)
 		burn_armor = round(1 / burn_armor, 0.01)
-	set_damage_resistance(BRUTE, brute_armor)
-	set_damage_resistance(BURN, burn_armor)
+	set_damage_resistance(DAMAGE_BRUTE, brute_armor)
+	set_damage_resistance(DAMAGE_BURN, burn_armor)
 
 /turf/simulated/wall/bullet_act(var/obj/item/projectile/Proj)
 	if(istype(Proj,/obj/item/projectile/beam))
@@ -187,7 +187,7 @@
 /turf/simulated/wall/adjacent_fire_act(turf/simulated/floor/adj_turf, datum/gas_mixture/adj_air, adj_temp, adj_volume)
 	burn(adj_temp)
 	if(adj_temp > material.melting_point)
-		damage_health(log(Frand(0.9, 1.1) * (adj_temp - material.melting_point)), BURN)
+		damage_health(log(Frand(0.9, 1.1) * (adj_temp - material.melting_point)), DAMAGE_BURN)
 
 	return ..()
 

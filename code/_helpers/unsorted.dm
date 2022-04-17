@@ -865,20 +865,37 @@ proc/get_mob_with_client_list()
 	return get_turf(location)
 
 
-//Quick type checks for some tools
-var/global/list/common_tools = list(
-/obj/item/stack/cable_coil,
-/obj/item/wrench,
-/obj/item/weldingtool,
-/obj/item/screwdriver,
-/obj/item/wirecutters,
-/obj/item/device/multitool,
-/obj/item/crowbar)
+/obj/item/proc/istool()
+	return FALSE
 
-/proc/istool(O)
-	if(O && is_type_in_list(O, common_tools))
-		return 1
-	return 0
+
+/obj/item/stack/cable_coil/istool()
+	return TRUE
+
+
+/obj/item/wrench/istool()
+	return TRUE
+
+
+/obj/item/weldingtool/istool()
+	return TRUE
+
+
+/obj/item/screwdriver/istool()
+	return TRUE
+
+
+/obj/item/wirecutters/istool()
+	return TRUE
+
+
+/obj/item/device/multitool/istool()
+	return TRUE
+
+
+/obj/item/crowbar/istool()
+	return TRUE
+
 
 /proc/is_hot(obj/item/W as obj)
 	switch(W.type)
@@ -908,7 +925,7 @@ var/global/list/common_tools = list(
 		if(/obj/item/melee/energy)
 			return 3500
 		if(/obj/item/blob_tendril)
-			if(W.damtype == BURN)
+			if (W.damtype == DAMAGE_BURN)
 				return 1000
 			else
 				return 0
@@ -1001,7 +1018,7 @@ var/global/list/common_tools = list(
 /*
 Checks if that loc and dir has a item on the wall
 */
-var/list/WALLITEMS = list(
+var/global/list/WALLITEMS = list(
 	/obj/machinery/power/apc, /obj/machinery/alarm, /obj/item/device/radio/intercom,
 	/obj/structure/extinguisher_cabinet, /obj/structure/reagent_dispensers/peppertank,
 	/obj/machinery/status_display, /obj/machinery/requests_console, /obj/machinery/light_switch, /obj/structure/sign,
@@ -1101,8 +1118,6 @@ GLOBAL_DATUM_INIT(dview_mob, /mob/dview, new)
 /proc/crash_at(msg, file, line)
 	CRASH("%% [file],[line] %% [msg]")
 
-/proc/pass()
-	return
 
 //clicking to move pulled objects onto assignee's turf/loc
 /proc/do_pull_click(mob/user, atom/A)
