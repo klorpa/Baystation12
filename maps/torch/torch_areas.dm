@@ -349,11 +349,12 @@
 
 //Charon
 
-/area/exploration_shuttle/
+/area/exploration_shuttle
 	name = "\improper Charon"
 	icon_state = "shuttlered"
 	base_turf = /turf/simulated/floor/plating
 	area_flags = AREA_FLAG_RAD_SHIELDED | AREA_FLAG_ION_SHIELDED | AREA_FLAG_HIDE_FROM_HOLOMAP
+	base_turf_special_handling = TRUE
 
 /area/exploration_shuttle/cockpit
 	name = "\improper Charon - Cockpit"
@@ -374,6 +375,12 @@
 /area/exploration_shuttle/airlock
 	name = "\improper Charon - Airlock Compartment"
 
+/area/exploration_shuttle/fuel
+	name = "\improper Charon - Fuel Compartment"
+
+/area/exploration_shuttle/medical
+	name = "\improper Charon - Medical Compartment"
+
 //Aquila
 
 /area/aquila
@@ -383,6 +390,7 @@
 	requires_power = 1
 	dynamic_lighting = 1
 	area_flags = AREA_FLAG_RAD_SHIELDED | AREA_FLAG_ION_SHIELDED | AREA_FLAG_HIDE_FROM_HOLOMAP
+	base_turf_special_handling = TRUE
 
 /area/aquila/cockpit
 	name = "\improper SEV Aquila - Cockpit"
@@ -426,6 +434,7 @@
 	dynamic_lighting = 1
 	area_flags = AREA_FLAG_RAD_SHIELDED | AREA_FLAG_ION_SHIELDED | AREA_FLAG_HIDE_FROM_HOLOMAP
 	req_access = list(access_guppy)
+	base_turf_special_handling = TRUE
 
 
 //Petrov
@@ -610,7 +619,7 @@
 
 /area/command/conference
 	name = "Briefing Room"
-	icon_state = "head_quarters"
+	icon_state = "briefing_room"
 	sound_env = MEDIUM_SOFTFLOOR
 
 /area/command/captainmess
@@ -621,14 +630,14 @@
 
 /area/command/pathfinder
 	name = "\improper Pathfinder's Office"
-	icon_state = "head_quarters"
+	icon_state = "pathfinder_office"
 	sound_env = MEDIUM_SOFTFLOOR
 	req_access = list(access_pathfinder)
 	holomap_color = HOLOMAP_AREACOLOR_EXPLORATION
 
 /area/command/pilot
 	name = "\improper Pilot's Lounge"
-	icon_state = "head_quarters"
+	icon_state = "pilot_lounge"
 	sound_env = MEDIUM_SOFTFLOOR
 	req_access = list(access_pilot)
 	holomap_color = HOLOMAP_AREACOLOR_EXPLORATION
@@ -793,7 +802,7 @@
 
 /area/vacant/prototype/engine
 	name = "\improper Prototype Fusion Reactor Chamber"
-	icon_state = "firingrange"
+	icon_state = "rust_reactor"
 
 /area/vacant/cargo
 	name = "\improper Requisitions Office"
@@ -909,14 +918,15 @@
 	sound_env = LARGE_ENCLOSED
 	req_access = list(access_hangar)
 
-/area/quartermaster/hangar/top
-	name = "\improper Hangar Upper Walkway"
+/area/quartermaster/hangar/catwalks_port
+	name = "\improper Hangar Port Upper Walkway"
 	req_access = list()
+	icon_state = "hangar_catwalk_p"
 
-/area/quartermaster/flightcontrol
-	name = "\improper Flight Control Tower"
-	icon_state = "hangar"
-	req_access = list(access_hangar)
+/area/quartermaster/hangar/catwalks_starboard
+	name = "\improper Hangar Starboard Upper Walkway"
+	req_access = list()
+	icon_state = "hangar_catwalk_s"
 
 // Research
 /area/rnd/canister
@@ -1568,7 +1578,7 @@
 	name = "\improper Robotics Laboratory"
 	req_access = list(list(access_medical,access_robotics))
 
-area/assembly/robotics/office
+/area/assembly/robotics/office
 	name = "\improper Robotics Office"
 
 /area/assembly/robotics/surgery
@@ -1646,7 +1656,7 @@ area/assembly/robotics/office
 	name = "\improper Custodial Storage Closet"
 
 // Tcomm
-/area/tcommsat/
+/area/tcommsat
 	ambience = list('sound/ambience/ambisin2.ogg', 'sound/ambience/signal.ogg', 'sound/ambience/signal.ogg', 'sound/ambience/ambigen10.ogg')
 	req_access = list(access_tcomsat)
 

@@ -104,6 +104,12 @@
 		if (occupied)
 			to_chat(G.assailant, "<span class='danger'>There's \a [occupied] in the way.</span>")
 			return TRUE
+		if (!do_after(G.assailant, 3 SECONDS, G.affecting, DO_PUBLIC_UNIQUE))
+			return TRUE
+		occupied = turf_is_crowded()
+		if (occupied)
+			to_chat(G.assailant, "<span class='danger'>There's \a [occupied] in the way.</span>")
+			return TRUE
 		G.affecting.forceMove(src.loc)
 		G.affecting.Weaken(rand(2,5))
 		visible_message("<span class='danger'>[G.assailant] puts [G.affecting] on \the [src].</span>")

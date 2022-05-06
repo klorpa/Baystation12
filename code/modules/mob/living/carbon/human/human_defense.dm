@@ -314,7 +314,7 @@ meteor_act
 //this proc handles being hit by a thrown atom
 /mob/living/carbon/human/hitby(atom/movable/AM as mob|obj, var/datum/thrownthing/TT)
 
-	if(istype(AM,/obj/))
+	if(isobj(AM))
 		var/obj/O = AM
 
 		if(in_throw_mode && !get_active_hand() && TT.speed <= THROWFORCE_SPEED_DIVISOR)	//empty active hand and we're in throw mode
@@ -400,7 +400,7 @@ meteor_act
 
 			if(!O || !src) return
 
-			if(O.loc == src && O.sharp) //Projectile is embedded and suitable for pinning.
+			if(O.loc == src && O.sharp && !(mob_flags & MOB_FLAG_UNPINNABLE)) //Projectile is embedded and suitable for pinning.
 				var/turf/T = near_wall(dir,2)
 
 				if(T)

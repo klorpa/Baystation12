@@ -148,7 +148,7 @@
 	if (!aura_check(AURA_TYPE_THROWN, AM, TT))
 		return
 
-	if(istype(AM,/obj/))
+	if(isobj(AM))
 		var/obj/O = AM
 		var/dtype = O.damtype
 		var/throw_damage = O.throwforce*(TT.speed/THROWFORCE_SPEED_DIVISOR)
@@ -185,7 +185,7 @@
 
 			if(!O || !src) return
 
-			if(O.can_embed()) //Projectile is suitable for pinning.
+			if(O.can_embed() && !(mob_flags & MOB_FLAG_UNPINNABLE)) //Projectile is suitable for pinning.
 				//Handles embedding for non-humans and simple_animals.
 				embed(O)
 

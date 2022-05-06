@@ -156,17 +156,15 @@
 
 	var/burn_damage = 0
 	switch (severity)
-		if (1)
+		if (EMP_ACT_HEAVY)
 			burn_damage = 30
-		if (2)
+		if (EMP_ACT_LIGHT)
 			burn_damage = 15
-		if (3)
-			burn_damage = 7.5
 
 	var/mult = 1 + !!(BP_IS_ASSISTED(src)) // This macro returns (large) bitflags.
 	burn_damage *= mult/species.get_burn_mod(owner) //ignore burn mod for EMP damage
 
-	var/power = 4 - severity //stupid reverse severity
+	var/power = 3 - severity //stupid reverse severity
 	for(var/obj/item/I in implants)
 		if(I.obj_flags & OBJ_FLAG_CONDUCTIBLE)
 			burn_damage += I.w_class * rand(power, 3*power)
@@ -180,6 +178,8 @@
 
 	if(owner && limb_flags & ORGAN_FLAG_CAN_STAND)
 		owner.stance_damage_prone(src)
+
+	..()
 
 /obj/item/organ/external/attack_self(var/mob/user)
 	if((owner && loc == owner) || !contents.len)
@@ -387,8 +387,7 @@
 			return 0
 
 	user.setClickCooldown(DEFAULT_ATTACK_COOLDOWN)
-	if(!do_after(user, 1 SECOND, owner))
-		to_chat(user, "<span class='warning'>You must stand still to do that.</span>")
+	if(!do_after(user, 1 SECOND, owner, DO_SURGERY))
 		return 0
 
 	switch(damage_type)
@@ -1011,7 +1010,7 @@ Note that amputating the affected organ does in fact remove the infection from t
 		if(W.clamped)
 			return 1
 
-obj/item/organ/external/proc/remove_clamps()
+/obj/item/organ/external/proc/remove_clamps()
 	var/rval = 0
 	for(var/datum/wound/W in wounds)
 		rval |= W.clamped
