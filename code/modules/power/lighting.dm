@@ -71,7 +71,7 @@
 			if (LIGHT_STAGE_EMPTY)
 				playsound(loc, 'sound/items/Ratchet.ogg', 50, TRUE)
 				to_chat(user, SPAN_NOTICE("You begin deconstructing \the [src]."))
-				if (!user.do_skilled(3 SECONDS, SKILL_CONSTRUCTION, src))
+				if (!user.do_skilled(3 SECONDS, SKILL_CONSTRUCTION, src, do_flags = DO_REPAIR_CONSTRUCT))
 					return
 				new /obj/item/stack/material/steel( get_turf(loc), sheets_refunded )
 				user.visible_message(
@@ -590,13 +590,13 @@
 // destroy the whole light fixture or just shatter it
 /obj/machinery/light/ex_act(severity)
 	switch(severity)
-		if(1)
+		if(EX_ACT_DEVASTATING)
 			qdel(src)
 			return
-		if(2)
+		if(EX_ACT_HEAVY)
 			if (prob(75))
 				broken()
-		if(3)
+		if(EX_ACT_LIGHT)
 			if (prob(50))
 				broken()
 

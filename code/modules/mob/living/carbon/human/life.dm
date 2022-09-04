@@ -94,7 +94,7 @@
 /mob/living/carbon/human/get_stamina()
 	return stamina
 
-/mob/living/carbon/human/adjust_stamina(var/amt)
+/mob/living/carbon/human/adjust_stamina(amt)
 	var/last_stamina = stamina
 	if(stat == DEAD)
 		stamina = 0
@@ -112,7 +112,7 @@
 		var/mod = (lying + (nutrition / initial(nutrition))) / 2
 		adjust_stamina(max(config.minimum_stamina_recovery, config.maximum_stamina_recovery * mod) * (1+chem_effects[CE_ENERGETIC]))
 
-/mob/living/carbon/human/set_stat(var/new_stat)
+/mob/living/carbon/human/set_stat(new_stat)
 	var/old_stat = stat
 	. = ..()
 	if(stat)
@@ -156,7 +156,7 @@
 	return pressure_adjustment_coefficient
 
 // Calculate how much of the environment pressure-difference affects the human.
-/mob/living/carbon/human/calculate_affecting_pressure(var/pressure)
+/mob/living/carbon/human/calculate_affecting_pressure(pressure)
 	var/pressure_difference
 
 	// First get the absolute pressure difference.
@@ -262,10 +262,10 @@
 					if(!lying)
 						emote("collapse")
 				if(prob(5) && prob(100 * RADIATION_SPEED_COEFFICIENT) && species.get_bodytype(src) == SPECIES_HUMAN) //apes go bald
-					if((h_style != "Bald" || f_style != "Shaved" ))
+					if((head_hair_style != "Bald" || facial_hair_style != "Shaved" ))
 						to_chat(src, "<span class='warning'>Your hair falls out.</span>")
-						h_style = "Bald"
-						f_style = "Shaved"
+						head_hair_style = "Bald"
+						facial_hair_style = "Shaved"
 						update_hair()
 
 		if (radiation > 75)
@@ -293,7 +293,7 @@
 
 	/** breathing **/
 
-/mob/living/carbon/human/handle_chemical_smoke(var/datum/gas_mixture/environment)
+/mob/living/carbon/human/handle_chemical_smoke(datum/gas_mixture/environment)
 	if(wear_mask && (wear_mask.item_flags & ITEM_FLAG_BLOCK_GAS_SMOKE_EFFECT))
 		return
 	if(glasses && (glasses.item_flags & ITEM_FLAG_BLOCK_GAS_SMOKE_EFFECT))
@@ -311,7 +311,7 @@
 			if(!rig.offline && (rig.air_supply && internal == rig.air_supply))
 				rig_supply = rig.air_supply
 
-		if (!rig_supply && (!list_find(contents, internal) || !((wear_mask && (wear_mask.item_flags & ITEM_FLAG_AIRTIGHT)) || (head && (head.item_flags & ITEM_FLAG_AIRTIGHT)))))
+		if (!rig_supply && (!contents.Find(internal) || !((wear_mask && (wear_mask.item_flags & ITEM_FLAG_AIRTIGHT)) || (head && (head.item_flags & ITEM_FLAG_AIRTIGHT)))))
 			set_internals(null)
 
 		if(internal)
@@ -512,7 +512,7 @@
 	var/thermal_protection_flags = get_cold_protection_flags(temperature)
 	return get_thermal_protection(thermal_protection_flags)
 
-/mob/living/carbon/human/proc/get_thermal_protection(var/flags)
+/mob/living/carbon/human/proc/get_thermal_protection(flags)
 	.=0
 	if(flags)
 		if(flags & HEAD)
@@ -879,7 +879,7 @@
 			playsound_local(src,pick(GLOB.scarySounds),50, 1, -1)
 
 	var/area/A = get_area(src)
-	if(client && world.time >= client.played + 600)
+	if(client && world.time >= client.next_ambience_time + 5 MINUTES)
 		A.play_ambience(src)
 	if(stat == UNCONSCIOUS && world.time - l_move_time < 5 && prob(10))
 		to_chat(src,"<span class='notice'>You feel like you're [pick("moving","flying","floating","falling","hovering")].</span>")

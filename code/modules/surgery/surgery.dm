@@ -162,7 +162,7 @@ GLOBAL_LIST_INIT(surgery_tool_exception_cache, new)
 			. -= 10
 	. = max(., 0)
 
-/proc/spread_germs_to_organ(var/obj/item/organ/external/E, var/mob/living/carbon/human/user)
+/proc/spread_germs_to_organ(obj/item/organ/external/E, mob/living/carbon/human/user)
 	if(!istype(user) || !istype(E)) return
 
 	var/germ_level = user.germ_level
@@ -201,6 +201,7 @@ GLOBAL_LIST_INIT(surgery_tool_exception_cache, new)
 		if(S && !user.skill_check_multiple(S.get_skill_reqs(user, M, src, zone)))
 			S = pick(possible_surgeries)
 
+	var/obj/item/gripper/gripper = user.get_active_hand()
 	// We didn't find a surgery, or decided not to perform one.
 	if(!istype(S))
 		// If we're on an optable, we are protected from some surgery fails. Bypass this for some items (like health analyzers).
@@ -216,7 +217,7 @@ GLOBAL_LIST_INIT(surgery_tool_exception_cache, new)
 			return TRUE
 
 	// Otherwise we can make a start on surgery!
-	else if(istype(M) && !QDELETED(M) && user.a_intent != I_HURT && user.get_active_hand() == src)
+	else if(istype(M) && !QDELETED(M) && user.a_intent != I_HURT && (user.get_active_hand() == src || (istype(gripper) && gripper.wrapped == src)))
 		// Double-check this in case it changed between initial check and now.
 		if(zone in M.surgeries_in_progress)
 			to_chat(user, SPAN_WARNING("You can't operate on this area while surgery is already in progress."))

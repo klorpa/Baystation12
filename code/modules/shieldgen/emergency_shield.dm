@@ -60,7 +60,7 @@
 
 	..()
 
-/obj/machinery/shield/bullet_act(var/obj/item/projectile/Proj)
+/obj/machinery/shield/bullet_act(obj/item/projectile/Proj)
 	health -= Proj.get_structure_damage()
 	..()
 	check_failure()
@@ -69,13 +69,13 @@
 
 /obj/machinery/shield/ex_act(severity)
 	switch(severity)
-		if(1.0)
+		if(EX_ACT_DEVASTATING)
 			if (prob(75))
 				qdel(src)
-		if(2.0)
+		if(EX_ACT_HEAVY)
 			if (prob(50))
 				qdel(src)
-		if(3.0)
+		if(EX_ACT_LIGHT)
 			if (prob(25))
 				qdel(src)
 	return
@@ -90,7 +90,7 @@
 	..()
 
 
-/obj/machinery/shield/hitby(AM as mob|obj, var/datum/thrownthing/TT)
+/obj/machinery/shield/hitby(AM as mob|obj, datum/thrownthing/TT)
 	//Let everyone know we've been hit!
 	visible_message("<span class='notice'><B>\[src] was hit by [AM].</B></span>")
 
@@ -226,15 +226,15 @@
 
 /obj/machinery/shieldgen/ex_act(severity)
 	switch(severity)
-		if(1.0)
+		if(EX_ACT_DEVASTATING)
 			src.health -= 75
 			src.checkhp()
-		if(2.0)
+		if(EX_ACT_HEAVY)
 			src.health -= 30
 			if (prob(15))
 				src.malfunction = 1
 			src.checkhp()
-		if(3.0)
+		if(EX_ACT_LIGHT)
 			src.health -= 10
 			src.checkhp()
 	return
@@ -277,7 +277,7 @@
 			to_chat(user, "The device must first be secured to the floor.")
 	return TRUE
 
-/obj/machinery/shieldgen/emag_act(var/remaining_charges, var/mob/user)
+/obj/machinery/shieldgen/emag_act(remaining_charges, mob/user)
 	if(!malfunction)
 		malfunction = 1
 		update_icon()

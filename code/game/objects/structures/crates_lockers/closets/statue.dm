@@ -13,7 +13,7 @@
 	var/intialOxy = 0
 	var/timer = 240 //eventually the person will be freed
 
-/obj/structure/closet/statue/New(loc, var/mob/living/L)
+/obj/structure/closet/statue/New(loc, mob/living/L)
 	if(L && (ishuman(L) || L.is_species(SPECIES_MONKEY) || iscorgi(L)))
 		if(L.buckled)
 			L.buckled = 0
@@ -80,12 +80,11 @@
 /obj/structure/closet/statue/toggle()
 	return
 
-/obj/structure/closet/statue/handle_death_change(new_death_state)
-	if (new_death_state)
-		for (var/mob/M in src)
-			shatter(M)
+/obj/structure/closet/statue/on_death()
+	for (var/mob/M in src)
+		shatter(M)
 
-/obj/structure/closet/statue/attack_generic(var/mob/user, damage, attacktext, environment_smash)
+/obj/structure/closet/statue/attack_generic(mob/user, damage, attacktext, environment_smash)
 	if(damage && environment_smash)
 		kill_health()
 

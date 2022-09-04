@@ -72,7 +72,7 @@ var/global/const/HOLOPAD_MODE = RANGE_BASED
 	callstring = SPAN_NOTICE(callstring)
 	to_chat(user, callstring)
 
-/obj/machinery/hologram/holopad/interface_interact(var/mob/living/carbon/human/user) //Carn: Hologram requests.
+/obj/machinery/hologram/holopad/interface_interact(mob/living/carbon/human/user) //Carn: Hologram requests.
 	if(!CanInteract(user, DefaultTopicState()))
 		return FALSE
 	if(incoming_connection && caller_id)
@@ -95,7 +95,7 @@ var/global/const/HOLOPAD_MODE = RANGE_BASED
 	var/handle_type = "Holocomms"
 	var/ai_exists = FALSE
 
-	for(var/mob/living/silicon/ai/AI in GLOB.living_mob_list_)
+	for(var/mob/living/silicon/ai/AI in GLOB.alive_mobs)
 		if(!AI.client)	continue
 		ai_exists = TRUE
 		break
@@ -109,7 +109,7 @@ var/global/const/HOLOPAD_MODE = RANGE_BASED
 				last_request = world.time
 				to_chat(user, "<span class='notice'>You request an AI's presence.</span>")
 				var/area/area = get_area(src)
-				for(var/mob/living/silicon/ai/AI in GLOB.living_mob_list_)
+				for(var/mob/living/silicon/ai/AI in GLOB.alive_mobs)
 					if(!AI.client)	continue
 					if (holopadType != HOLOPAD_LONG_RANGE && !AreConnectedZLevels(AI.z, src.z))
 						continue
@@ -153,7 +153,7 @@ var/global/const/HOLOPAD_MODE = RANGE_BASED
 				to_chat(user, "<span class='notice'>A request for holographic communication was already sent recently.</span>")
 
 
-/obj/machinery/hologram/holopad/proc/make_call(var/obj/machinery/hologram/holopad/targetpad, var/mob/living/carbon/user)
+/obj/machinery/hologram/holopad/proc/make_call(obj/machinery/hologram/holopad/targetpad, mob/living/carbon/user)
 	targetpad.last_request = world.time
 	targetpad.sourcepad = src //This marks the holopad you are making the call from
 	targetpad.caller_id = user //This marks you as the caller
@@ -252,7 +252,7 @@ For the other part of the code, check silicon say.dm. Particularly robot talk.*/
 	var/message
 	if(isanimal(M) && !M.universal_speak)
 		var/datum/say_list/SA = M.say_list
-		if (SA?.speak)
+		if (SA && length(SA.speak))
 			message = get_hear_message(name_used, pick(SA.speak), verb, speaking)
 	else
 		message = get_hear_message(name_used, text, verb, speaking)
@@ -410,12 +410,12 @@ For the other part of the code, check silicon say.dm. Particularly robot talk.*/
 //Destruction procs.
 /obj/machinery/hologram/ex_act(severity)
 	switch(severity)
-		if(1.0)
+		if(EX_ACT_DEVASTATING)
 			qdel(src)
-		if(2.0)
+		if(EX_ACT_HEAVY)
 			if (prob(50))
 				qdel(src)
-		if(3.0)
+		if(EX_ACT_LIGHT)
 			if (prob(5))
 				qdel(src)
 	return

@@ -30,7 +30,7 @@
 /obj/structure/grille/proc/is_broken()
 	return istype(src, /obj/structure/grille/broken)
 
-/obj/structure/grille/Initialize(mapload, var/new_material)
+/obj/structure/grille/Initialize(mapload, new_material)
 	. = ..()
 	if(!new_material)
 		new_material = init_material
@@ -118,7 +118,7 @@
 		else
 			return !density
 
-/obj/structure/grille/bullet_act(var/obj/item/projectile/Proj)
+/obj/structure/grille/bullet_act(obj/item/projectile/Proj)
 	if(!Proj)	return
 
 	//Flimsy grilles aren't so great at stopping projectiles. However they can absorb some of the impact
@@ -195,18 +195,16 @@
 	if (!(W.obj_flags & OBJ_FLAG_CONDUCTIBLE) || !shock(user, 70))
 		..()
 
-/obj/structure/grille/handle_death_change(new_death_state)
-	if (new_death_state)
-		visible_message(SPAN_WARNING("\The [src] falls to pieces!"))
-		new /obj/item/stack/material/rods(get_turf(src), 1, material.name)
-		new /obj/structure/grille/broken(get_turf(src), material.name)
-		qdel(src)
+/obj/structure/grille/on_death(new_death_state)
+	visible_message(SPAN_WARNING("\The [src] falls to pieces!"))
+	new /obj/item/stack/material/rods(get_turf(src), 1, material.name)
+	new /obj/structure/grille/broken(get_turf(src), material.name)
+	qdel(src)
 
-/obj/structure/grille/broken/handle_death_change(new_death_state)
-	if (new_death_state)
-		visible_message(SPAN_WARNING("The remains of \the [src] break apart!"))
-		new /obj/item/stack/material/rods(get_turf(src), 1, material.name)
-		qdel(src)
+/obj/structure/grille/broken/on_death(new_death_state)
+	visible_message(SPAN_WARNING("The remains of \the [src] break apart!"))
+	new /obj/item/stack/material/rods(get_turf(src), 1, material.name)
+	qdel(src)
 
 // shock user with probability prb (if all connections & power are working)
 // returns 1 if shocked, 0 otherwise
@@ -262,7 +260,7 @@
 		return
 	to_chat(user, "<span class='notice'>Assembling grille...</span>")
 	ST.in_use = 1
-	if (!do_after(user, 1 SECOND, do_flags = DO_DEFAULT | DO_USER_UNIQUE_ACT | DO_PUBLIC_PROGRESS))
+	if (!do_after(user, 1 SECOND, loc, DO_REPAIR_CONSTRUCT))
 		ST.in_use = 0
 		return
 	if(!ST.use(2))

@@ -113,7 +113,7 @@ GLOBAL_LIST(end_titles)
 	else
 		titles += "<center><h1>EPISODE [rand(1,1000)]<br>[GLOB.end_credits_title]<h1></h1></h1></center>"
 
-	for(var/mob/living/carbon/human/H in GLOB.living_mob_list_|GLOB.dead_mob_list_)
+	for(var/mob/living/carbon/human/H in GLOB.alive_mobs|GLOB.dead_mobs)
 		if(findtext(H.real_name,"(mannequin)"))
 			continue
 		if(H.is_species(SPECIES_MONKEY) && findtext(H.real_name,"[lowertext(H.species.name)]")) //no monki
@@ -158,7 +158,7 @@ GLOBAL_LIST(end_titles)
 
 	var/list/corpses = list()
 	var/list/monkies = list()
-	for(var/mob/living/carbon/human/H in GLOB.dead_mob_list_)
+	for(var/mob/living/carbon/human/H in GLOB.dead_mobs)
 		if(H.timeofdeath < 5 MINUTES) //no prespawned corpses
 			continue
 		if(H.is_species(SPECIES_MONKEY) && findtext(H.real_name,"[lowertext(H.species.name)]"))
@@ -172,11 +172,12 @@ GLOBAL_LIST(end_titles)
 		titles += "<center>BASED ON REAL EVENTS<br>In memory of [english_list(corpses)].</center>"
 
 	var/list/staff = list("PRODUCTION STAFF:")
-	var/list/staffjobs = list("Coffe Fetcher", "Cameraman", "Angry Yeller", "Chair Operator", "Choreographer", "Historical Consultant", "Costume Designer", "Chief Editor", "Executive Assistant")
+	var/list/staffjobs = list("Coffee Fetcher", "Cameraman", "Angry Yeller", "Chair Operator", "Choreographer", "Historical Consultant", "Costume Designer", "Chief Editor", "Executive Assistant")
 	var/list/goodboys = list()
 	for(var/client/C)
-		if(!C.holder)
+		if(!C.holder || C.is_stealthed())
 			continue
+
 		if(C.holder.rights & (R_DEBUG|R_ADMIN))
 			var/decl/cultural_info/cult = SSculture.cultural_info_by_name[pick(SSculture.cultural_info_by_name)]
 			staff += "[uppertext(pick(staffjobs))] - [cult.get_random_name(pick(MALE, FEMALE))] a.k.a. '[C.key]'"

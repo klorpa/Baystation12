@@ -92,7 +92,7 @@
 	else
 		icon_state = "paper"
 
-/obj/item/paper/proc/update_space(var/new_text)
+/obj/item/paper/proc/update_space(new_text)
 	if(new_text)
 		free_space -= length(strip_html_properly(new_text))
 
@@ -218,7 +218,7 @@
 		return
 	user.examinate(src)
 
-/obj/item/paper/attack_ai(var/mob/living/silicon/ai/user)
+/obj/item/paper/attack_ai(mob/living/silicon/ai/user)
 	show_content(user)
 
 /obj/item/paper/attack(mob/living/carbon/M as mob, mob/living/carbon/user as mob)
@@ -232,7 +232,7 @@
 			var/mob/living/carbon/human/H = M
 			if(H == user)
 				to_chat(user, "<span class='notice'>You wipe off the lipstick with [src].</span>")
-				H.lip_style = null
+				H.makeup_style = null
 				H.update_body()
 			else
 				user.visible_message("<span class='warning'>[user] begins to wipe [H]'s lipstick off with \the [src].</span>", \
@@ -240,10 +240,10 @@
 				if(do_after(user, 2 SECONDS, H, (DO_DEFAULT | DO_USER_UNIQUE_ACT | DO_PUBLIC_PROGRESS) & ~DO_BOTH_CAN_TURN))
 					user.visible_message("<span class='notice'>[user] wipes [H]'s lipstick off with \the [src].</span>", \
 										 "<span class='notice'>You wipe off [H]'s lipstick.</span>")
-					H.lip_style = null
+					H.makeup_style = null
 					H.update_body()
 
-/obj/item/paper/proc/addtofield(var/id, var/text, var/links = 0)
+/obj/item/paper/proc/addtofield(id, text, links = 0)
 	var/locid = 0
 	var/laststart = 1
 	var/textindex = 1
@@ -296,7 +296,7 @@
 	updateinfolinks()
 	update_icon()
 
-/obj/item/paper/proc/get_signature(var/obj/item/pen/P, mob/user as mob)
+/obj/item/paper/proc/get_signature(obj/item/pen/P, mob/user as mob)
 	if(P && istype(P, /obj/item/pen))
 		return P.get_signature(user)
 	return (user && user.real_name) ? user.real_name : "Anonymous"
@@ -548,7 +548,7 @@
 /obj/item/paper/proc/can_bundle()
 	return TRUE
 
-/obj/item/paper/proc/show_info(var/mob/user)
+/obj/item/paper/proc/show_info(mob/user)
 	return info
 
 

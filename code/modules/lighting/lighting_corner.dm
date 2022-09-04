@@ -29,7 +29,7 @@ var/global/list/LIGHTING_CORNER_DIAGONAL = list(NORTHEAST, SOUTHEAST, SOUTHWEST,
 
 	var/update_gen = 0
 
-/datum/lighting_corner/New(var/turf/new_turf, var/diagonal)
+/datum/lighting_corner/New(turf/new_turf, diagonal)
 	. = ..()
 
 	total_lighting_corners++
@@ -56,7 +56,7 @@ var/global/list/LIGHTING_CORNER_DIAGONAL = list(NORTHEAST, SOUTHEAST, SOUTHWEST,
 			T.corners = list(null, null, null, null)
 
 		masters[T]   = diagonal
-		i            = list_find(LIGHTING_CORNER_DIAGONAL, turn(diagonal, 180))
+		i            = LIGHTING_CORNER_DIAGONAL.Find(turn(diagonal, 180))
 		T.corners[i] = src
 
 	// Now the horizontal one.
@@ -66,7 +66,7 @@ var/global/list/LIGHTING_CORNER_DIAGONAL = list(NORTHEAST, SOUTHEAST, SOUTHWEST,
 			T.corners = list(null, null, null, null)
 
 		masters[T]   = ((T.x > x) ? EAST : WEST) | ((T.y > y) ? NORTH : SOUTH) // Get the dir based on coordinates.
-		i            = list_find(LIGHTING_CORNER_DIAGONAL, turn(masters[T], 180))
+		i            = LIGHTING_CORNER_DIAGONAL.Find(turn(masters[T], 180))
 		T.corners[i] = src
 
 	// And finally the vertical one.
@@ -76,7 +76,7 @@ var/global/list/LIGHTING_CORNER_DIAGONAL = list(NORTHEAST, SOUTHEAST, SOUTHWEST,
 			T.corners = list(null, null, null, null)
 
 		masters[T]   = ((T.x > x) ? EAST : WEST) | ((T.y > y) ? NORTH : SOUTH) // Get the dir based on coordinates.
-		i            = list_find(LIGHTING_CORNER_DIAGONAL, turn(masters[T], 180))
+		i            = LIGHTING_CORNER_DIAGONAL.Find(turn(masters[T], 180))
 		T.corners[i] = src
 
 	update_active()
@@ -88,7 +88,7 @@ var/global/list/LIGHTING_CORNER_DIAGONAL = list(NORTHEAST, SOUTHEAST, SOUTHWEST,
 			active = TRUE
 
 // God that was a mess, now to do the rest of the corner code! Hooray!
-/datum/lighting_corner/proc/update_lumcount(var/delta_r, var/delta_g, var/delta_b)
+/datum/lighting_corner/proc/update_lumcount(delta_r, delta_g, delta_b)
 	lum_r += delta_r
 	lum_g += delta_g
 	lum_b += delta_b

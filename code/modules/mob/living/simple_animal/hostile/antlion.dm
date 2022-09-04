@@ -96,7 +96,7 @@
 		if(old_health < maxHealth)
 			health = old_health + heal_amount
 
-/mob/living/simple_animal/hostile/retaliate/beast/antlion/proc/prep_burrow(var/new_bool)
+/mob/living/simple_animal/hostile/retaliate/beast/antlion/proc/prep_burrow(new_bool)
 	set_AI_busy(new_bool)
 	healing = new_bool
 
@@ -129,9 +129,7 @@
 
 /mob/living/simple_animal/hostile/retaliate/beast/antlion/mega/Initialize()
 	. = ..()
-	var/matrix/M = new
-	M.Scale(1.5)
-	transform = M
+	SetTransform(scale = 1.5)
 	update_icon()
 
 /datum/say_list/antlion

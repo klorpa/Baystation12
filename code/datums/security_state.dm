@@ -64,8 +64,8 @@
 		comm_console_security_levels += security_level
 
 	// Now we ensure the high security level is not above the severe one (but we allow them to be equal)
-	var/severe_index = list_find(all_security_levels, severe_security_level)
-	var/high_index = list_find(all_security_levels, high_security_level)
+	var/severe_index = all_security_levels.Find(severe_security_level)
+	var/high_index = all_security_levels.Find(high_security_level)
 	if(high_index > severe_index)
 		high_security_level = severe_security_level
 
@@ -77,30 +77,30 @@
 /decl/security_state/proc/can_change_security_level()
 	return current_security_level in standard_security_levels
 
-/decl/security_state/proc/can_switch_to(var/given_security_level)
+/decl/security_state/proc/can_switch_to(given_security_level)
 	if(!can_change_security_level())
 		return FALSE
 	return given_security_level in standard_security_levels
 
-/decl/security_state/proc/current_security_level_is_lower_than(var/given_security_level)
-	var/current_index = list_find(all_security_levels, current_security_level)
-	var/given_index   = list_find(all_security_levels, given_security_level)
+/decl/security_state/proc/current_security_level_is_lower_than(given_security_level)
+	var/current_index = all_security_levels.Find(current_security_level)
+	var/given_index   = all_security_levels.Find(given_security_level)
 
 	return given_index && current_index < given_index
 
-/decl/security_state/proc/current_security_level_is_same_or_higher_than(var/given_security_level)
-	var/current_index = list_find(all_security_levels, current_security_level)
-	var/given_index   = list_find(all_security_levels, given_security_level)
+/decl/security_state/proc/current_security_level_is_same_or_higher_than(given_security_level)
+	var/current_index = all_security_levels.Find(current_security_level)
+	var/given_index   = all_security_levels.Find(given_security_level)
 
 	return given_index && current_index >= given_index
 
-/decl/security_state/proc/current_security_level_is_higher_than(var/given_security_level)
-	var/current_index = list_find(all_security_levels, current_security_level)
-	var/given_index   = list_find(all_security_levels, given_security_level)
+/decl/security_state/proc/current_security_level_is_higher_than(given_security_level)
+	var/current_index = all_security_levels.Find(current_security_level)
+	var/given_index   = all_security_levels.Find(given_security_level)
 
 	return given_index && current_index > given_index
 
-/decl/security_state/proc/set_security_level(var/decl/security_level/new_security_level, var/force_change = FALSE)
+/decl/security_state/proc/set_security_level(decl/security_level/new_security_level, force_change = FALSE)
 	if(new_security_level == current_security_level)
 		return FALSE
 	if(!(new_security_level in all_security_levels))
@@ -111,8 +111,8 @@
 	var/decl/security_level/previous_security_level = current_security_level
 	current_security_level = new_security_level
 
-	var/previous_index = list_find(all_security_levels, previous_security_level)
-	var/new_index      = list_find(all_security_levels, new_security_level)
+	var/previous_index = all_security_levels.Find(previous_security_level)
+	var/new_index      = all_security_levels.Find(new_security_level)
 
 	if(new_index > previous_index)
 		previous_security_level.switching_up_from()
@@ -129,8 +129,8 @@
 	return TRUE
 
 // This proc decreases the current security level, if possible
-/decl/security_state/proc/decrease_security_level(var/force_change = FALSE)
-	var/current_index = list_find(all_security_levels, current_security_level)
+/decl/security_state/proc/decrease_security_level(force_change = FALSE)
+	var/current_index = all_security_levels.Find(current_security_level)
 	if(current_index == 1)
 		return FALSE
 	return set_security_level(all_security_levels[current_index - 1], force_change)

@@ -8,7 +8,7 @@
 	initial_flooring = null
 	footstep_type = /decl/footsteps/plating
 
-/turf/simulated/floor/fixed/attackby(var/obj/item/C, var/mob/user)
+/turf/simulated/floor/fixed/attackby(obj/item/C, mob/user)
 	if(istype(C, /obj/item/stack) && !isCoil(C))
 		return
 	return ..()
@@ -28,7 +28,7 @@
 	icon = 'icons/turf/flooring/alium.dmi'
 	icon_state = "jaggy"
 
-/turf/simulated/floor/fixed/alium/attackby(var/obj/item/C, var/mob/user)
+/turf/simulated/floor/fixed/alium/attackby(obj/item/C, mob/user)
 	if(isCrowbar(C))
 		to_chat(user, "<span class='notice'>There aren't any openings big enough to pry it away...</span>")
 		return
@@ -51,5 +51,5 @@
 	var/material/A = SSmaterials.get_material_by_name(MATERIAL_ALIENALLOY)
 	if(prob(A.explosion_resistance))
 		return
-	if(severity == 1)
+	if(severity == EX_ACT_DEVASTATING)
 		ChangeTurf(get_base_turf_by_area(src))

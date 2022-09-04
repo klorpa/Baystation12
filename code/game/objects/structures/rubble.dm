@@ -39,9 +39,7 @@
 		I.appearance_flags = DEFAULT_APPEARANCE_FLAGS | PIXEL_SCALE
 		I.pixel_x = rand(-16,16)
 		I.pixel_y = rand(-16,16)
-		var/matrix/M = matrix()
-		M.Turn(rand(0,360))
-		I.transform = M
+		I.SetTransform(rotation = rand(0,360))
 		parts += I
 	overlays = parts
 	if(lootleft)
@@ -64,7 +62,7 @@
 	else
 		to_chat(user, "<span class='warning'>Someone is already rummaging here!</span>")
 
-/obj/structure/rubble/attackby(var/obj/item/I, var/mob/user)
+/obj/structure/rubble/attackby(obj/item/I, mob/user)
 	if (user.a_intent == I_HURT)
 		..()
 		return
@@ -81,6 +79,10 @@
 		return
 
 	..()
+
+/obj/structure/rubble/on_death()
+	visible_message(SPAN_WARNING("\The [src] breaks apart!"))
+	qdel(src)
 
 /obj/structure/rubble/house
 	loot = list(/obj/item/archaeological_find/bowl,

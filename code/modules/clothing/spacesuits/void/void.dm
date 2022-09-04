@@ -87,6 +87,7 @@ else if(##equipment_var) {\
 
 /obj/item/clothing/suit/space/void/Initialize()
 	. = ..()
+	slowdown_per_slot[slot_wear_suit] = 1
 	VOIDSUIT_INIT_EQUIPMENT(boots,  /obj/item/clothing/shoes/magboots)
 	VOIDSUIT_INIT_EQUIPMENT(helmet, /obj/item/clothing/head/helmet)
 	VOIDSUIT_INIT_EQUIPMENT(tank,   /obj/item/tank)
@@ -108,7 +109,7 @@ else if(##equipment_var) {\
 	if(tank && distance <= 1)
 		to_chat(user, "<span class='notice'>The wrist-mounted pressure gauge reads [max(round(tank.air_contents.return_pressure()),0)] kPa remaining in \the [tank].</span>")
 
-/obj/item/clothing/suit/space/void/refit_for_species(var/target_species)
+/obj/item/clothing/suit/space/void/refit_for_species(target_species)
 	..()
 	if(istype(helmet))
 		helmet.refit_for_species(target_species)

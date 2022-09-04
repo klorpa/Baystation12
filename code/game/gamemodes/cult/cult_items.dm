@@ -12,7 +12,7 @@
 	hitsound = 'sound/weapons/bladeslice.ogg'
 	attack_verb = list("attacked", "slashed", "stabbed", "sliced", "torn", "ripped", "diced", "cut")
 
-/obj/item/melee/cultblade/attack(mob/living/M, mob/living/user, var/target_zone)
+/obj/item/melee/cultblade/attack(mob/living/M, mob/living/user, target_zone)
 	if(iscultist(user))
 		return ..()
 
@@ -109,10 +109,6 @@
 		bomb = ARMOR_BOMB_PADDED
 	)
 
-/obj/item/clothing/suit/cultrobes/magusred/Initialize()
-	. = ..()
-	slowdown_per_slot[slot_wear_suit] = 1
-
 /obj/item/clothing/head/helmet/space/cult
 	name = "cult helmet"
 	desc = "A space worthy helmet used by the followers of Nar-Sie."
@@ -144,7 +140,3 @@
 	)
 	siemens_coefficient = 0.2
 	body_parts_covered = UPPER_TORSO|LOWER_TORSO|LEGS|ARMS|HANDS
-
-/obj/item/clothing/suit/space/cult/Initialize()
-	. = ..()
-	slowdown_per_slot[slot_wear_suit] = 1

@@ -58,7 +58,7 @@ var/global/list/department_radio_keys = list(
 
 
 var/global/list/channel_to_radio_key = new
-/proc/get_radio_key_from_channel(var/channel)
+/proc/get_radio_key_from_channel(channel)
 	var/key = channel_to_radio_key[channel]
 	if(!key)
 		for(var/radio_key in department_radio_keys)
@@ -97,7 +97,7 @@ var/global/list/channel_to_radio_key = new
 
 //Takes a list of the form list(message, verb, whispering) and modifies it as needed
 //Returns 1 if a speech problem was applied, 0 otherwise
-/mob/living/proc/handle_speech_problems(var/list/message_data)
+/mob/living/proc/handle_speech_problems(list/message_data)
 	var/message = message_data[1]
 	var/verb = message_data[2]
 
@@ -137,14 +137,14 @@ var/global/list/channel_to_radio_key = new
 	returns[2] = null
 	return returns
 
-/mob/living/proc/get_speech_ending(verb, var/ending)
+/mob/living/proc/get_speech_ending(verb, ending)
 	if(ending=="!")
 		return pick("exclaims","shouts","yells")
 	if(ending=="?")
 		return "asks"
 	return verb
 
-/mob/living/proc/format_say_message(var/message = null)
+/mob/living/proc/format_say_message(message = null)
 	if(!message)
 		return
 
@@ -156,7 +156,7 @@ var/global/list/channel_to_radio_key = new
 
 	return html_encode(message)
 
-/mob/living/say(var/message, var/datum/language/speaking = null, var/verb="says", var/alt_name="", whispering)
+/mob/living/say(message, datum/language/speaking = null, verb="says", alt_name="", whispering)
 	if(client)
 		if(client.prefs.muted & MUTE_IC)
 			to_chat(src, "<span class='warning'>You cannot speak in IC (Muted).</span>")
@@ -277,22 +277,6 @@ var/global/list/channel_to_radio_key = new
 
 		get_mobs_and_objs_in_view_fast(T, message_range, listening, listening_obj, /datum/client_preference/ghost_ears)
 
-
-	var/speech_bubble_test = say_test(message)
-	var/image/speech_bubble = image('icons/mob/talk.dmi',src,"h[speech_bubble_test]")
-	speech_bubble.layer = layer
-	speech_bubble.plane = plane
-	speech_bubble.alpha = 0
-	// VOREStation Port - Attempt Multi-Z Talking
-	// for (var/atom/movable/AM in get_above_oo())
-	// 	var/turf/ST = get_turf(AM)
-	// 	if(ST)
-	// 		get_mobs_and_objs_in_view_fast(ST, world.view, listening, listening_obj, /datum/client_preference/ghost_ears)
-	// 		var/image/z_speech_bubble = image('icons/mob/talk.dmi', AM, "h[speech_bubble_test]")
-	// 		QDEL_IN(z_speech_bubble, 30)
-
-	// VOREStation Port End
-
 	var/list/speech_bubble_recipients = list()
 	for(var/mob/M in listening)
 		if(M)
@@ -329,14 +313,21 @@ var/global/list/channel_to_radio_key = new
 	else
 		log_say("[name]/[key] : [message]")
 
-	flick_overlay(speech_bubble, speech_bubble_recipients, 50)
-	animate(speech_bubble, alpha = 255, time = 10, easing = CIRCULAR_EASING)
-	animate(time = 20)
-	animate(alpha = 0, pixel_y = 12, time = 20, easing = CIRCULAR_EASING)
-
+	if (length(speech_bubble_recipients))
+		var/speech_intent = say_test(message)
+		var/image/speech_bubble = image('icons/mob/talk.dmi', src, "h[speech_intent]")
+		speech_bubble.blend_mode = BLEND_OVERLAY
+		speech_bubble.layer = SPEECH_INDICATOR_LAYER
+		speech_bubble.plane = EFFECTS_ABOVE_LIGHTING_PLANE
+		speech_bubble.alpha = 0
+		flick_overlay(speech_bubble, speech_bubble_recipients, 3 SECONDS)
+		animate(speech_bubble, alpha = 255, time = 1 SECOND, easing = QUAD_EASING)
+		animate(time = 1 SECOND)
+		animate(alpha = 0, pixel_y = 8, time = 1 SECOND, easing = QUAD_EASING)
 	return 1
 
-/mob/living/proc/say_signlang(var/message, var/verb="gestures", var/datum/language/language)
+
+/mob/living/proc/say_signlang(message, verb="gestures", datum/language/language)
 	for (var/mob/O in viewers(src, null))
 		O.hear_signlang(message, verb, language, src)
 	return 1

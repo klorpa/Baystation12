@@ -17,10 +17,10 @@
 	var/screen = 0 // 0 - No Access Denied, 1 - Access allowed
 
 
-/obj/machinery/computer/prisoner/attack_ai(var/mob/user as mob)
+/obj/machinery/computer/prisoner/attack_ai(mob/user as mob)
 	return src.attack_hand(user)
 
-/obj/machinery/computer/prisoner/attack_hand(var/mob/user as mob)
+/obj/machinery/computer/prisoner/attack_hand(mob/user as mob)
 	if(..())
 		return
 	user.set_machine(src)
@@ -71,7 +71,7 @@
 /obj/machinery/computer/prisoner/Topic(href, href_list)
 	if(..())
 		return
-	if((list_find(usr.contents, src) || (in_range(src, usr) && istype(src.loc, /turf))) || (istype(usr, /mob/living/silicon)))
+	if((usr.contents.Find(src) || (in_range(src, usr) && istype(src.loc, /turf))) || (istype(usr, /mob/living/silicon)))
 		usr.set_machine(src)
 
 		if(href_list["inject1"])

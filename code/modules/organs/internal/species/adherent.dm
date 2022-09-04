@@ -15,12 +15,12 @@
 		action.button_icon_state = "adherent-brain"
 		if(action.button) action.button.UpdateIcon()
 
-/obj/item/organ/internal/brain/adherent/attack_self(var/mob/user)
+/obj/item/organ/internal/brain/adherent/attack_self(mob/user)
 	. = ..()
 	if(.)
 
 		var/regex/name_regex = regex("\[A-Z\]{2}-\[A-Z\]{1} \[0-9\]{4}")
-		regex_find(name_regex, owner.real_name)
+		name_regex.Find_char(owner.real_name)
 
 		if(world.time < next_rename)
 			to_chat(owner, "<span class='warning'>[PROTOCOL_ARTICLE] forbids changing your ident again so soon.</span>")
@@ -64,7 +64,7 @@
 		action.button_icon_state = "[base_action_state]-[active ? "on" : "off"]"
 		if(action.button) action.button.UpdateIcon()
 
-/obj/item/organ/internal/powered/attack_self(var/mob/user)
+/obj/item/organ/internal/powered/attack_self(mob/user)
 	. = ..()
 	if(.)
 		sound_to(user, sound('sound/effects/ding2.ogg'))
@@ -125,6 +125,7 @@
 	name = "piezoelectric core"
 	icon = 'icons/mob/human_races/species/adherent/organs.dmi'
 	icon_state = "cell"
+	cell = /obj/item/cell/hyper
 
 /obj/item/organ/internal/powered/cooling_fins
 	name = "cooling fins"

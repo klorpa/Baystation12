@@ -11,18 +11,15 @@
 
 /obj/lighting_general/Initialize()
 	. = ..()
-	var/matrix/M = matrix()
-	M.Scale(world.view*2.2)
+	SetTransform(scale = world.view * 2.2)
 
-	transform = M
-
-/obj/lighting_general/proc/sync(var/new_colour)
+/obj/lighting_general/proc/sync(new_colour)
 	color = new_colour
 
 /mob
 	var/obj/lighting_general/l_general
 
 
-/mob/proc/change_light_colour(var/new_colour)
+/mob/proc/change_light_colour(new_colour)
 	if(l_general)
 		l_general.sync(new_colour)

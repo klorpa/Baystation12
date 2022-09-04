@@ -69,7 +69,7 @@
 
 	return total_draw
 
-/mob/living/exosuit/handle_environment(var/datum/gas_mixture/environment)
+/mob/living/exosuit/handle_environment(datum/gas_mixture/environment)
 	if(!environment) return
 	//Mechs and vehicles in general can be assumed to just tend to whatever ambient temperature
 	if(abs(environment.temperature - bodytemperature) > 0 )
@@ -88,7 +88,7 @@
 
 	hud_heat.Update()
 
-/mob/living/exosuit/death(var/gibbed)
+/mob/living/exosuit/death(gibbed)
 	// Eject the pilot.
 	if(LAZYLEN(pilots))
 		hatch_locked = 0 // So they can get out.
@@ -98,6 +98,10 @@
 	// Salvage moves into the wreck unless we're exploding violently.
 	var/obj/wreck = new wreckage_path(get_turf(src), src, gibbed)
 	wreck.name = "wreckage of \the [name]"
+
+	// Handle the rest of things.
+	..(gibbed, (gibbed ? "explodes!" : "grinds to a halt before collapsing!"))
+
 	if(!gibbed)
 		if(arms.loc != src)
 			arms = null
@@ -107,10 +111,7 @@
 			head = null
 		if(body.loc != src)
 			body = null
-
-	// Handle the rest of things.
-	..(gibbed, (gibbed ? "explodes!" : "grinds to a halt before collapsing!"))
-	if(!gibbed) qdel(src)
+		qdel(src)
 
 /mob/living/exosuit/gib()
 	death(1)

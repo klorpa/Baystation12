@@ -67,11 +67,11 @@ var/global/list/meteors_cataclysm = list(\
 //Meteor spawning global procs
 ///////////////////////////////
 
-/proc/spawn_meteors(var/number = 10, var/list/meteortypes, var/startSide, var/zlevel)
+/proc/spawn_meteors(number = 10, list/meteortypes, startSide, zlevel)
 	for(var/i = 0; i < number; i++)
 		spawn_meteor(meteortypes, startSide, zlevel)
 
-/proc/spawn_meteor(var/list/meteortypes, var/startSide, var/zlevel)
+/proc/spawn_meteor(list/meteortypes, startSide, zlevel)
 	var/turf/pickedstart = spaceDebrisStartLoc(startSide, zlevel)
 	var/turf/pickedgoal = spaceDebrisFinishLoc(startSide, zlevel)
 
@@ -132,7 +132,7 @@ var/global/list/meteors_cataclysm = list(\
 	density = TRUE
 	anchored = TRUE
 	var/hits = 4
-	var/hitpwr = 2 //Level of ex_act to be called on hit.
+	var/hitpwr = EX_ACT_HEAVY //Level of ex_act to be called on hit.
 	var/dest
 	pass_flags = PASS_FLAG_TABLE
 	var/heavy = 0
@@ -169,9 +169,9 @@ var/global/list/meteors_cataclysm = list(\
 	GLOB.meteor_list -= src
 	return ..()
 
-/obj/effect/meteor/New()
-	..()
-	if(!ismissile)
+/obj/effect/meteor/Initialize()
+	. = ..()
+	if (!ismissile)
 		SpinAnimation()
 
 /obj/effect/meteor/Bump(atom/A)
@@ -183,7 +183,7 @@ var/global/list/meteors_cataclysm = list(\
 /obj/effect/meteor/CanPass(atom/movable/mover, turf/target, height=0, air_group=0)
 	return istype(mover, /obj/effect/meteor) ? 1 : ..()
 
-/obj/effect/meteor/proc/ram_turf(var/turf/T)
+/obj/effect/meteor/proc/ram_turf(turf/T)
 	//first bust whatever is in the turf
 	for(var/atom/A in T)
 		if(A != src && !A.CanPass(src, src.loc, 0.5, 0)) //only ram stuff that would actually block us
@@ -236,7 +236,7 @@ var/global/list/meteors_cataclysm = list(\
 	icon_state = "dust"
 	pass_flags = PASS_FLAG_TABLE | PASS_FLAG_GRILLE
 	hits = 1
-	hitpwr = 3
+	hitpwr = EX_ACT_LIGHT
 	dropamt = 1
 	meteordrop = /obj/item/ore/glass
 
@@ -320,7 +320,7 @@ var/global/list/meteors_cataclysm = list(\
 	icon_state = "flaming"
 	desc = "Your life briefly passes before your eyes the moment you lay them on this monstrosity."
 	hits = 10
-	hitpwr = 1
+	hitpwr = EX_ACT_DEVASTATING
 	heavy = 1
 	meteordrop = /obj/item/ore/diamond	// Probably means why it penetrates the hull so easily before exploding.
 
@@ -389,3 +389,47 @@ var/global/list/meteors_cataclysm = list(\
 	meteordrop = null
 	ismissile = TRUE
 	dropamt = 0
+
+/obj/effect/meteor/supermatter/missile/admin_missile
+	name = "Hull Buster"
+	desc = "A highly advanced warhead capable of destroying even the most well-armoured space installations."
+	icon = 'icons/obj/missile.dmi'
+	icon_state = "photon"
+	meteordrop = null
+	ismissile = TRUE
+	hitpwr = EX_ACT_DEVASTATING
+	hits = 6
+
+/obj/effect/meteor/supermatter/missile/admin_missile/meteor_effect()
+	explosion(loc, 1, 2, 4, 0, 0, shaped = get_dir(src, dest), turf_breaker = TRUE)
+
+
+/obj/effect/meteor/supermatter/missile/sabot_round
+	name = "Sabot Round"
+	desc = "A warhead that penetrates the hull and detonates to send a secondary warhead further in before exploding for massive damage."
+	icon = 'icons/obj/missile.dmi'
+	icon_state = "sabot"
+	meteordrop = null
+	ismissile = TRUE
+	hitpwr = EX_ACT_HEAVY
+	hits = 6
+
+/obj/effect/meteor/supermatter/missile/sabot_round/meteor_effect()
+	explosion(loc, 0, 1, 4, 0, 0, shaped = TRUE, turf_breaker = TRUE)
+	var/obj/effect/meteor/supermatter/missile/sabot_secondary_round/M = new(get_turf(src))
+	M.dest = dest
+	spawn(0)
+		walk_towards(M, dest, 3)
+
+/obj/effect/meteor/supermatter/missile/sabot_secondary_round
+	name = "Sabot Round Secondary"
+	desc = "Secondary warhead of the Sabot Round, causes extreme damage."
+	icon = 'icons/obj/missile.dmi'
+	icon_state = "sabot_2"
+	meteordrop = null
+	ismissile = TRUE
+	hitpwr = EX_ACT_DEVASTATING
+	hits = 4
+
+/obj/effect/meteor/supermatter/missile/sabot_secondary_round/meteor_effect()
+	explosion(loc, 0.5, 2, 3, 0, shaped = get_dir(src, dest), turf_breaker = TRUE)

@@ -75,7 +75,7 @@
 				for(var/obj/machinery/atmospherics/pipe/item in result)
 					if(item.in_stasis)
 						continue
-					if(!list_find(members, item))
+					if(!members.Find(item))
 						members += item
 						possible_expansions += item
 
@@ -101,7 +101,7 @@
 
 /datum/pipeline/proc/network_expand(datum/pipe_network/new_network, obj/machinery/atmospherics/pipe/reference)
 
-	if(list_find(new_network.line_members, src))
+	if(new_network.line_members.Find(src))
 		return 0
 
 	new_network.line_members += src
@@ -230,7 +230,7 @@
 //surface - the surface area in m^2
 //exposed_surface_ratio - the proportion of the surface that is exposed to sunlight
 //thermal_conductivity - a multiplier on the heat transfer rate. See OPEN_HEAT_TRANSFER_COEFFICIENT and friends
-/proc/get_thermal_radiation(var/surface_temperature, var/surface, var/exposed_surface_ratio, var/thermal_conductivity)
+/proc/get_thermal_radiation(surface_temperature, surface, exposed_surface_ratio, thermal_conductivity)
 	//*** Gain heat from sunlight, then lose heat from radiation.
 
 	// We only get heat from the star on the exposed surface area.

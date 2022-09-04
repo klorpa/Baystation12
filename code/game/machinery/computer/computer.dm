@@ -39,10 +39,10 @@
 
 /obj/machinery/computer/ex_act(severity)
 	switch(severity)
-		if(1.0)
+		if(EX_ACT_DEVASTATING)
 			qdel(src)
 			return
-		if(2.0)
+		if(EX_ACT_HEAVY)
 			if (prob(25))
 				qdel(src)
 				return
@@ -50,13 +50,13 @@
 				for(var/x in verbs)
 					verbs -= x
 				take_damage(max_health)
-		if(3.0)
+		if(EX_ACT_LIGHT)
 			if (prob(25))
 				for(var/x in verbs)
 					verbs -= x
 				take_damage(max_health)
 
-/obj/machinery/computer/bullet_act(var/obj/item/projectile/Proj)
+/obj/machinery/computer/bullet_act(obj/item/projectile/Proj)
 	take_damage(Proj.get_structure_damage())
 	..()
 
@@ -72,7 +72,7 @@
 	take_damage(I.force)
 	..()
 
-/obj/machinery/computer/proc/take_damage(var/damage)
+/obj/machinery/computer/proc/take_damage(damage)
 	if (health <= 0 || !can_use_tools)
 		return
 

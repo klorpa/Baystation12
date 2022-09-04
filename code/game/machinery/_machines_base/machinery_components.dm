@@ -274,6 +274,7 @@ Standard helpers for users interacting with machinery parts.
 			if(istype(new_component_part, component_part.base_type) && new_component_part.rating > component_part.rating)
 				replace_part(user, part_replacer, component_part, new_component_part)
 				. = TRUE
+				playsound(loc, 'sound/items/rped.ogg', 70)
 				break
 
 	for(var/path in uncreated_component_parts)
@@ -288,6 +289,7 @@ Standard helpers for users interacting with machinery parts.
 					if(istype(new_component_part, base_type) && new_component_part.rating > initial(component_part.rating))
 						replace_part(user, part_replacer, component_part, new_component_part)
 						. = TRUE
+						playsound(loc, 'sound/items/rped.ogg', 70)
 						break
 
 
@@ -300,6 +302,9 @@ Standard helpers for users interacting with machinery parts.
 		return istype(part) // If it's not a stock part, we don't block further interactions; presumably the user meant to do something else.
 	if(isstack(part))
 		var/obj/item/stack/stack = part
+		if (!stack.can_use(number))
+			to_chat(user, SPAN_WARNING("You need at least [number] [stack.plural_name] to install into \the [src]."))
+			return FALSE
 		install_component(stack.split(number, TRUE))
 	else
 		user.unEquip(part, src)

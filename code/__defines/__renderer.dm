@@ -34,11 +34,16 @@
 	#define DUST_LAYER                   2
 
 // Openspace uses planes -80 through -70.
+#define OPENTURF_MAX_PLANE -70
+#define OPENTURF_MAX_DEPTH 10		// The maxiumum number of planes deep we'll go before we just dump everything on the same plane.
 
 #define OVER_OPENSPACE_PLANE        -4
 
 #define BLACKNESS_PLANE                 0 //Blackness plane as per DM documentation.
 
+#define HEAT_EFFECT_PLANE -4
+#define HEAT_EFFECT_TARGET    "*heat"
+#define HEAT_COMPOSITE_TARGET "*heatc"
 #define WARP_EFFECT_PLANE -3
 
 #define DEFAULT_PLANE                   1
@@ -140,6 +145,7 @@
 	#define EYE_GLOW_LAYER         1
 	#define BEAM_PROJECTILE_LAYER  2
 	#define SUPERMATTER_WALL_LAYER 3
+	#define SPEECH_INDICATOR_LAYER 4
 
 #define FULLSCREEN_PLANE                5 // for fullscreen overlays that do not cover the hud.
 

@@ -23,7 +23,6 @@
 	fore_dir = NORTH
 	vessel_size = SHIP_SIZE_SMALL
 	vessel_mass = 1000
-	multiz = 1
 	known = FALSE
 	initial_generic_waypoints = list(
 		"nav_icgnv_hound_1",
@@ -32,6 +31,10 @@
 		"nav_icgnv_hound_4",
 		"nav_icgnv_hound_antag"
 	)
+
+/obj/effect/shuttle_landmark/icgnv_hound/dock
+	name = "4th Deck, Port Airlock (ICGNV Hound)"
+	landmark_tag = "nav_hound_dock"
 
 //Areas
 

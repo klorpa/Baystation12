@@ -36,7 +36,7 @@ var/global/list/floor_light_cache = list()
 	use_power = POWER_USE_ACTIVE
 
 
-/obj/machinery/floor_light/attackby(var/obj/item/W, var/mob/user)
+/obj/machinery/floor_light/attackby(obj/item/W, mob/user)
 	if(isScrewdriver(W))
 		anchored = !anchored
 		if(use_power)
@@ -49,7 +49,7 @@ var/global/list/floor_light_cache = list()
 			to_chat(user, "<span class='warning'>\The [src] must be on to complete this task.</span>")
 			return
 		playsound(src.loc, 'sound/items/Welder.ogg', 50, 1)
-		if(!do_after(user, 2 SECONDS, src, DO_PUBLIC_UNIQUE))
+		if(!do_after(user, 2 SECONDS, src, DO_REPAIR_CONSTRUCT))
 			return
 		if(!src || !WT.isOn())
 			return
@@ -66,7 +66,7 @@ var/global/list/floor_light_cache = list()
 		attack_hand(user)
 	return
 
-/obj/machinery/floor_light/physical_attack_hand(var/mob/user)
+/obj/machinery/floor_light/physical_attack_hand(mob/user)
 	if(user.a_intent == I_HURT && !issmall(user))
 		if(!isnull(damaged) && !(stat & BROKEN))
 			visible_message("<span class='danger'>\The [user] smashes \the [src]!</span>")
@@ -78,7 +78,7 @@ var/global/list/floor_light_cache = list()
 			if(isnull(damaged)) damaged = 0
 		return TRUE
 
-/obj/machinery/floor_light/interface_interact(var/mob/user)
+/obj/machinery/floor_light/interface_interact(mob/user)
 	if(!CanInteract(user, DefaultTopicState()))
 		return FALSE
 	if(!anchored)
@@ -139,9 +139,9 @@ var/global/list/floor_light_cache = list()
 
 /obj/machinery/floor_light/ex_act(severity)
 	switch(severity)
-		if(1)
+		if(EX_ACT_DEVASTATING)
 			qdel(src)
-		if(2)
+		if(EX_ACT_HEAVY)
 			if (prob(50))
 				qdel(src)
 			else if(prob(20))
@@ -149,7 +149,7 @@ var/global/list/floor_light_cache = list()
 			else
 				if(isnull(damaged))
 					damaged = 0
-		if(3)
+		if(EX_ACT_LIGHT)
 			if (prob(5))
 				qdel(src)
 			else if(isnull(damaged))

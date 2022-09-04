@@ -58,7 +58,7 @@ var/global/list/mining_floors = list()
 /turf/simulated/mineral/is_plating()
 	return 1
 
-/turf/simulated/mineral/on_update_icon(var/update_neighbors)
+/turf/simulated/mineral/on_update_icon(update_neighbors)
 	if(!istype(mineral))
 		SetName(initial(name))
 		icon_state = "rock"
@@ -97,15 +97,15 @@ var/global/list/mining_floors = list()
 
 /turf/simulated/mineral/ex_act(severity)
 	switch(severity)
-		if(2.0)
+		if(EX_ACT_HEAVY)
 			if (prob(70))
 				mined_ore = 1 //some of the stuff gets blown up
 				GetDrilled()
-		if(1.0)
+		if(EX_ACT_DEVASTATING)
 			mined_ore = 2 //some of the stuff gets blown up
 			GetDrilled()
 
-/turf/simulated/mineral/bullet_act(var/obj/item/projectile/Proj)
+/turf/simulated/mineral/bullet_act(obj/item/projectile/Proj)
 
 	// Emitter blasts
 	if(istype(Proj, /obj/item/projectile/beam/emitter))
@@ -145,9 +145,7 @@ var/global/list/mining_floors = list()
 	ore_overlay = image('icons/turf/mining_decals.dmi', "[mineral.ore_icon_overlay]")
 	ore_overlay.appearance_flags = RESET_COLOR
 	if(prob(50))
-		var/matrix/M = matrix()
-		M.Scale(-1,1)
-		ore_overlay.transform = M
+		ore_overlay.SetTransform(scale_x = -1)
 	ore_overlay.color = mineral.icon_colour
 	ore_overlay.turf_decal_layerise()
 	update_icon()
@@ -205,7 +203,7 @@ var/global/list/mining_floors = list()
 				if(prob(50))
 					artifact_debris()
 
-		if(do_after(user, P.digspeed, src, DO_PUBLIC_UNIQUE))
+		if(do_after(user, P.digspeed, src,  DO_DEFAULT | DO_PUBLIC_PROGRESS))
 			if(finds && finds.len)
 				var/datum/find/F = finds[1]
 				if(newDepth == F.excavation_required) // When the pick hits that edge just right, you extract your find perfectly, it's never confined in a rock
@@ -296,7 +294,7 @@ var/global/list/mining_floors = list()
 		O.geologic_data = geologic_data
 	return O
 
-/turf/simulated/mineral/proc/GetDrilled(var/artifact_fail = 0)
+/turf/simulated/mineral/proc/GetDrilled(artifact_fail = 0)
 	//var/destroyed = 0 //used for breaking strange rocks
 	if (mineral && mineral.ore_result_amount)
 
@@ -333,7 +331,7 @@ var/global/list/mining_floors = list()
 		N.overlay_detail = "asteroid[rand(0,9)]"
 		N.updateMineralOverlays(1)
 
-/turf/simulated/mineral/proc/excavate_find(var/prob_clean = 0, var/datum/find/F)
+/turf/simulated/mineral/proc/excavate_find(prob_clean = 0, datum/find/F)
 
 	//many finds are ancient and thus very delicate - luckily there is a specialized energy suspension field which protects them when they're being extracted
 	if(prob(F.prob_delicate))
@@ -356,7 +354,7 @@ var/global/list/mining_floors = list()
 	finds.Remove(F)
 
 
-/turf/simulated/mineral/proc/artifact_debris(var/severity = 0)
+/turf/simulated/mineral/proc/artifact_debris(severity = 0)
 	//cael's patented random limited drop componentized loot system!
 	//sky's patented not-fucking-retarded overhaul!
 
@@ -396,7 +394,7 @@ var/global/list/mining_floors = list()
 /turf/simulated/mineral/random
 	name = "mineral deposit"
 
-/turf/simulated/mineral/random/New(var/newloc, var/mineral_name, var/default_mineral_list = GLOB.weighted_minerals_sparse)
+/turf/simulated/mineral/random/New(newloc, mineral_name, default_mineral_list = GLOB.weighted_minerals_sparse)
 	if(!mineral_name && LAZYLEN(default_mineral_list))
 		mineral_name = pickweight(default_mineral_list)
 
@@ -406,7 +404,7 @@ var/global/list/mining_floors = list()
 		UpdateMineral()
 	..(newloc)
 
-/turf/simulated/mineral/random/high_chance/New(var/newloc, var/mineral_name, var/default_mineral_list)
+/turf/simulated/mineral/random/high_chance/New(newloc, mineral_name, default_mineral_list)
 	..(newloc, mineral_name, GLOB.weighted_minerals_rich)
 
 /**********************Asteroid**************************/
@@ -445,12 +443,12 @@ var/global/list/mining_floors = list()
 
 /turf/simulated/floor/asteroid/ex_act(severity)
 	switch(severity)
-		if(3.0)
+		if(EX_ACT_LIGHT)
 			return
-		if(2.0)
+		if(EX_ACT_HEAVY)
 			if (prob(70))
 				gets_dug()
-		if(1.0)
+		if(EX_ACT_DEVASTATING)
 			gets_dug()
 	return
 
@@ -486,7 +484,7 @@ var/global/list/mining_floors = list()
 		to_chat(user, "<span class='warning'>You start digging.</span>")
 		playsound(user.loc, 'sound/effects/rustle1.ogg', 50, 1)
 
-		if(!do_after(user, 4 SECONDS, src, DO_PUBLIC_UNIQUE)) return
+		if(!do_after(user, 4 SECONDS, src,  DO_DEFAULT | DO_PUBLIC_PROGRESS)) return
 
 		to_chat(user, "<span class='notice'>You dug a hole.</span>")
 		gets_dug()
@@ -520,7 +518,7 @@ var/global/list/mining_floors = list()
 	icon_state = "asteroid_dug"
 	return
 
-/turf/simulated/floor/asteroid/proc/updateMineralOverlays(var/update_neighbors)
+/turf/simulated/floor/asteroid/proc/updateMineralOverlays(update_neighbors)
 
 	overlays.Cut()
 

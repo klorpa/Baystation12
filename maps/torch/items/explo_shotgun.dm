@@ -34,7 +34,7 @@
 
 /obj/item/gun/projectile/shotgun/pump/exploration/free_fire()
 	var/my_z = get_z(src)
-	if(!list_find(GLOB.using_map.station_levels, my_z))
+	if(!GLOB.using_map.station_levels.Find(my_z))
 		return TRUE
 	return ..()
 
@@ -100,7 +100,7 @@
 	damage = 5
 	agony = 10
 
-/obj/item/projectile/bullet/shotgun/beanbag/net/on_hit(var/atom/target, var/blocked = 0, var/def_zone = null)
+/obj/item/projectile/bullet/shotgun/beanbag/net/on_hit(atom/target, blocked = 0, def_zone = null)
 	var/obj/item/energy_net/safari/net = new(loc)
 	net.try_capture_mob(target)
 	return TRUE

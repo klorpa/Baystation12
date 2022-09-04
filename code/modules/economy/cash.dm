@@ -76,10 +76,11 @@
 
 	for(var/A in images)
 		var/image/banknote = image('icons/obj/items.dmi', A)
-		var/matrix/M = matrix()
-		M.Translate(rand(-6, 6), rand(-4, 8))
-		M.Turn(pick(-45, -27.5, 0, 0, 0, 0, 0, 0, 0, 27.5, 45))
-		banknote.transform = M
+		banknote.SetTransform(
+			rotation = pick(-45, -27.5, 0, 0, 0, 0, 0, 0, 0, 27.5, 45),
+			offset_x = rand(-6, 6),
+			offset_y = rand(-4, 8)
+		)
 		src.overlays += banknote
 
 	src.desc = "They are worth [worth] [GLOB.using_map.local_currency_name]."
@@ -163,10 +164,10 @@
 	desc = "It's worth 1000 Thalers."
 	worth = 1000
 
-/proc/spawn_money(var/sum, spawnloc, mob/living/carbon/human/human_user as mob)
+/proc/spawn_money(sum, spawnloc, mob/living/carbon/human/human_user as mob)
 	if(sum in list(1000,500,200,100,50,20,10,1))
 		var/cash_type = text2path("/obj/item/spacecash/bundle/c[sum]")
-		var/obj/cash = new cash_type (usr.loc)
+		var/obj/cash = new cash_type (spawnloc)
 		if(ishuman(human_user) && !human_user.get_active_hand())
 			human_user.put_in_hands(cash)
 	else

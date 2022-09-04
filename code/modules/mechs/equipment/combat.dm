@@ -6,7 +6,7 @@
 	restricted_hardpoints = list(HARDPOINT_LEFT_HAND, HARDPOINT_RIGHT_HAND)
 	restricted_software = list(MECH_SOFTWARE_WEAPONS)
 
-/obj/item/mech_equipment/mounted_system/taser/MouseDragInteraction(src_object, over_object, src_location, over_location, src_control, over_control, params, var/mob/user)
+/obj/item/mech_equipment/mounted_system/taser/MouseDragInteraction(src_object, over_object, src_location, over_location, src_control, over_control, params, mob/user)
 	. = ..()
 
 	if(over_object)
@@ -48,6 +48,8 @@
 	accuracy = 2
 
 /obj/item/gun/energy/get_hardpoint_maptext()
+	if (charge_cost <= 0)
+		return "INF"
 	return "[round(power_supply.charge / charge_cost)]/[max_shots]"
 
 /obj/item/gun/energy/get_hardpoint_status_value()
@@ -69,7 +71,7 @@
 	restricted_hardpoints = list(HARDPOINT_BACK)
 	restricted_software = list(MECH_SOFTWARE_WEAPONS)
 
-/obj/item/mech_equipment/shields/installed(var/mob/living/exosuit/_owner)
+/obj/item/mech_equipment/shields/installed(mob/living/exosuit/_owner)
 	. = ..()
 	aura = new(owner, src)
 
@@ -77,12 +79,12 @@
 	QDEL_NULL(aura)
 	. = ..()
 
-/obj/item/mech_equipment/shields/attack_self(var/mob/user)
+/obj/item/mech_equipment/shields/attack_self(mob/user)
 	. = ..()
 	if(.)
 		toggle()
 
-/obj/item/mech_equipment/shields/proc/stop_damage(var/damage)
+/obj/item/mech_equipment/shields/proc/stop_damage(damage)
 	var/difference = damage - charge
 	charge = clamp(charge - damage, 0, max_charge)
 
@@ -154,17 +156,17 @@
 	pixel_y = 4
 	mouse_opacity = 0
 
-/obj/aura/mechshield/Initialize(var/maploading, var/obj/item/mech_equipment/shields/holder)
+/obj/aura/mechshield/Initialize(maploading, obj/item/mech_equipment/shields/holder)
 	. = ..()
 	shields = holder
 
-/obj/aura/mechshield/added_to(var/mob/living/target)
+/obj/aura/mechshield/added_to(mob/living/target)
 	. = ..()
 	target.vis_contents += src
 	set_dir()
 	GLOB.dir_set_event.register(user, src, /obj/aura/mechshield/proc/update_dir)
 
-/obj/aura/mechshield/proc/update_dir(var/user, var/old_dir, var/dir)
+/obj/aura/mechshield/proc/update_dir(user, old_dir, dir)
 	set_dir(dir)
 
 /obj/aura/mechshield/set_dir(new_dir)
@@ -198,7 +200,7 @@
 	else
 		icon_state = "shield_null"
 
-/obj/aura/mechshield/bullet_act(var/obj/item/projectile/P, var/def_zone)
+/obj/aura/mechshield/bullet_act(obj/item/projectile/P, def_zone)
 	if(!active)
 		return
 	if(shields)
@@ -217,7 +219,7 @@
 			spark_system.start()
 			playsound(loc, "sparks", 25, 1)
 
-/obj/aura/mechshield/hitby(atom/movable/M, var/datum/thrownthing/TT)
+/obj/aura/mechshield/hitby(atom/movable/M, datum/thrownthing/TT)
 	. = ..()
 	if(!active)
 		return
@@ -278,7 +280,7 @@
 				for (var/mob/living/M in orange(1, E))
 					attack(M, E, E.zone_sel.selecting, FALSE)
 				E.spin(0.65 SECONDS, 0.125 SECONDS)
-				playsound(E, 'sound/mecha/mechturn.ogg', 40, 1)
+				playsound(E, 'sound/weapons/blade1.ogg', 40, 1)
 
 /obj/item/mech_equipment/mounted_system/melee/mechete
 	icon_state = "mech_blade"
@@ -545,3 +547,63 @@
 					O.drop_r_hand()
 				if(flash_time > 5)
 					O.Weaken(3)
+
+/obj/item/flamethrower/full/mech
+	max_beaker = ITEM_SIZE_NORMAL
+	range = 5
+	desc = "A Hephaestus brand 'Prometheus' flamethrower. Bigger and better."
+
+/obj/item/flamethrower/full/mech/Initialize()
+	. = ..()
+	beaker = new /obj/item/reagent_containers/chem_disp_cartridge(src)
+
+/obj/item/flamethrower/full/mech/get_hardpoint_maptext()
+	return beaker ? "[lit ? "ON" : "OFF"]-:-[beaker.reagents.total_volume]/[beaker.reagents.maximum_volume]" : "NO TANK"
+
+/obj/item/flamethrower/full/mech/get_hardpoint_status_value()
+	return beaker ? beaker.reagents.total_volume/beaker.reagents.maximum_volume : 0
+
+/obj/item/mech_equipment/mounted_system/flamethrower
+	icon_state = "mech_flamer"
+	holding_type = /obj/item/flamethrower/full/mech
+	restricted_hardpoints = list(HARDPOINT_LEFT_HAND, HARDPOINT_RIGHT_HAND)
+	restricted_software = list(MECH_SOFTWARE_WEAPONS)
+
+/obj/item/mech_equipment/mounted_system/flamethrower/attack_self(mob/user)
+	. = ..()
+	if(owner && holding)
+		update_icon()
+
+/obj/item/mech_equipment/mounted_system/flamethrower/attackby(obj/item/W as obj, mob/user as mob)
+	if(!CanPhysicallyInteract(user))	return
+
+	var/obj/item/flamethrower/full/mech/FM = holding
+	if(istype(FM))
+		if(isCrowbar(W) && FM.beaker)
+			if(FM.beaker)
+				user.visible_message(SPAN_NOTICE("\The [user] pries out \the [FM.beaker] using \the [W]."))
+				FM.beaker.dropInto(get_turf(user))
+				FM.beaker = null
+			return
+
+		if (istype(W, /obj/item/reagent_containers) && W.is_open_container() && (W.w_class <= FM.max_beaker))
+			if(FM.beaker)
+				to_chat(user, SPAN_NOTICE("There is already a tank inserted!"))
+				return
+			if(user.unEquip(W, FM))
+				user.visible_message(SPAN_NOTICE("\The [user] inserts \the [W] inside \the [src]."))
+				FM.beaker = W
+			return
+	..()
+
+/obj/item/mech_equipment/mounted_system/flamethrower/on_update_icon()
+	. = ..()
+	if(owner && holding)
+		var/obj/item/flamethrower/full/mech/FM = holding
+		if(istype(FM))
+			if(FM.lit)
+				icon_state = "mech_flamer_lit"
+			else icon_state = "mech_flamer"
+
+			if(owner)
+				owner.update_icon()

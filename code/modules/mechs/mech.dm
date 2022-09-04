@@ -28,8 +28,6 @@
 	var/obj/item/device/radio/exosuit/radio
 
 	var/wreckage_path = /obj/structure/mech_wreckage
-	var/mech_turn_sound = 'sound/mecha/mechturn.ogg'
-	var/mech_step_sound = 'sound/mecha/mechstep.ogg'
 
 	// Access updating/container.
 	var/obj/item/card/id/access_card
@@ -75,8 +73,11 @@
 	var/obj/screen/exosuit/heat/hud_heat
 	var/obj/screen/exosuit/toggle/power_control/hud_power_control
 	var/obj/screen/exosuit/toggle/camera/hud_camera
+
 	//POWER
 	var/power = MECH_POWER_OFF
+
+	// Sounds for mech_movement.dm and mech_interaction.dm are stored on legs.dm and arms.dm, respectively
 
 /mob/living/exosuit/MayZoom()
 	if(head?.vision_flags)
@@ -86,7 +87,7 @@
 /mob/living/exosuit/is_flooded(lying_mob, absolute)
 	. = (body && body.pilot_coverage >= 100 && hatch_closed) ? FALSE : ..()
 
-/mob/living/exosuit/Initialize(mapload, var/obj/structure/heavy_vehicle_frame/source_frame)
+/mob/living/exosuit/Initialize(mapload, obj/structure/heavy_vehicle_frame/source_frame)
 	. = ..()
 
 	if(!access_card) access_card = new (src)
@@ -215,7 +216,7 @@
 	if(.)
 		update_pilots()
 
-/mob/living/exosuit/proc/toggle_power(var/mob/user)
+/mob/living/exosuit/proc/toggle_power(mob/user)
 	if(power == MECH_POWER_TRANSITION)
 		to_chat(user, SPAN_NOTICE("Power transition in progress. Please wait."))
 	else if(power == MECH_POWER_ON) //Turning it off is instant

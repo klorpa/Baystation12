@@ -27,7 +27,7 @@
 		overlays |= image('icons/obj/objects.dmi',"ashtray_half")
 
 /obj/item/material/ashtray/attackby(obj/item/W as obj, mob/user as mob)
-	if (!is_alive())
+	if (health_dead)
 		return
 
 	if (user.a_intent == I_HURT)
@@ -66,11 +66,11 @@
 		update_icon()
 	return ..()
 
-/obj/item/material/ashtray/plastic/New(var/newloc)
+/obj/item/material/ashtray/plastic/New(newloc)
 	..(newloc, MATERIAL_PLASTIC)
 
-/obj/item/material/ashtray/bronze/New(var/newloc)
+/obj/item/material/ashtray/bronze/New(newloc)
 	..(newloc, MATERIAL_BRONZE)
 
-/obj/item/material/ashtray/glass/New(var/newloc)
+/obj/item/material/ashtray/glass/New(newloc)
 	..(newloc, MATERIAL_GLASS)

@@ -24,7 +24,7 @@
 	wires = null
 	return ..()
 
-/obj/item/plastique/attackby(var/obj/item/I, var/mob/user)
+/obj/item/plastique/attackby(obj/item/I, mob/user)
 	if(isScrewdriver(I))
 		open_panel = !open_panel
 		to_chat(user, "<span class='notice'>You [open_panel ? "open" : "close"] the wire panel.</span>")
@@ -66,7 +66,7 @@
 		to_chat(user, "Bomb has been planted. Timer counting down from [timer].")
 		run_timer()
 
-/obj/item/plastique/proc/explode(var/location)
+/obj/item/plastique/proc/explode(location)
 	if(!target)
 		target = get_atom_on_turf(src)
 	if(!target)
@@ -79,9 +79,9 @@
 			var/turf/simulated/wall/W = target
 			W.kill_health()
 		else if(istype(target, /mob/living))
-			target.ex_act(2) // c4 can't gib mobs anymore.
+			target.ex_act(EX_ACT_HEAVY) // c4 can't gib mobs anymore.
 		else
-			target.ex_act(1)
+			target.ex_act(EX_ACT_DEVASTATING)
 	if(target)
 		target.overlays -= image_overlay
 	qdel(src)

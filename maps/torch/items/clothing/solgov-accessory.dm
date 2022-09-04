@@ -86,7 +86,7 @@ patches
 	name = "\improper Torch mission patch"
 	desc = "A fire resistant shoulder patch, worn by the personnel involved in the Torch Project."
 	icon_state = "torchpatch"
-	on_rolled = list("down" = "none")
+	on_rolled_down = ACCESSORY_ROLLED_NONE
 	slot = ACCESSORY_SLOT_INSIGNIA
 	sprite_sheets = list(
 		SPECIES_UNATHI = 'icons/mob/species/unathi/onmob_accessories_sol_unathi.dmi'
@@ -96,7 +96,7 @@ patches
 	name = "\improper Observatory patch"
 	desc = "A laminated shoulder patch, carrying the symbol of the Sol Central Government Expeditionary Corpss Observatory, or SCGEO for short, the eyes and ears of the Expeditionary Corps' missions."
 	icon_state = "ecpatch1"
-	on_rolled = list("down" = "none")
+	on_rolled_down = ACCESSORY_ROLLED_NONE
 	slot = ACCESSORY_SLOT_INSIGNIA
 	check_codex_val = FACTION_EXPEDITIONARY
 
@@ -109,6 +109,7 @@ patches
 	name = "\improper Cultural Exchange patch"
 	desc = "A radiation-shielded shoulder patch, denoting service in the the Sol Central Government Expeditionary Corps Cultural Exchange program."
 	icon_state = "ecpatch3"
+	on_rolled_down = ACCESSORY_ROLLED_NONE
 	slot = ACCESSORY_SLOT_INSIGNIA
 	check_codex_val = FACTION_EXPEDITIONARY
 
@@ -116,7 +117,7 @@ patches
 	name = "\improper First Fleet patch"
 	desc = "A fancy shoulder patch carrying insignia of First Fleet, the Sol Guard, stationed in Sol."
 	icon_state = "fleetpatch1"
-	on_rolled = list("down" = "none")
+	on_rolled_down = ACCESSORY_ROLLED_NONE
 	slot = ACCESSORY_SLOT_INSIGNIA
 
 /obj/item/clothing/accessory/solgov/fleet_patch/second
@@ -148,7 +149,7 @@ scarves
 	icon = 'icons/obj/clothing/obj_accessories.dmi'
 	accessory_icons = list(slot_w_uniform_str = 'icons/mob/onmob/onmob_accessories.dmi', slot_wear_suit_str = 'icons/mob/onmob/onmob_accessories.dmi')
 	icon_state = "whitescarf"
-	on_rolled = list("down" = "none")
+	on_rolled_down = ACCESSORY_ROLLED_NONE
 	color = "#68a0ce"
 	check_codex_val = FACTION_EXPEDITIONARY
 
@@ -165,11 +166,14 @@ scarves
 /******
 ribbons
 ******/
+/obj/item/clothing/accessory/ribbon
+	on_rolled_down = ACCESSORY_ROLLED_NONE
+
 /obj/item/clothing/accessory/ribbon/solgov
 	name = "ribbon"
 	desc = "A simple military decoration."
 	icon_state = "ribbon_marksman"
-	on_rolled = list("down" = "none")
+	on_rolled_down = ACCESSORY_ROLLED_NONE
 	slot = ACCESSORY_SLOT_MEDAL
 	icon = 'maps/torch/icons/obj/obj_accessories_solgov.dmi'
 	accessory_icons = list(slot_w_uniform_str = 'maps/torch/icons/mob/onmob_accessories_solgov.dmi', slot_wear_suit_str = 'maps/torch/icons/mob/onmob_accessories_solgov.dmi')
@@ -277,6 +281,7 @@ specialty pins
 	icon_state = "marinerank_command"
 	slot = ACCESSORY_SLOT_INSIGNIA
 	icon_state = "fleetspec"
+	on_rolled_down = ACCESSORY_ROLLED_NONE
 
 /obj/item/clothing/accessory/solgov/specialty/janitor
 	name = "custodial blazes"
@@ -448,7 +453,8 @@ department tags
 	name = "department insignia"
 	desc = "Insignia denoting assignment to a department. These appear blank."
 	icon_state = "dept_exped"
-	on_rolled = list("down" = "none", "rolled" = "dept_exped_sleeves")
+	on_rolled_down = ACCESSORY_ROLLED_NONE
+	on_rolled_sleeves = "dept_exped_sleeves"
 	slot = ACCESSORY_SLOT_DEPT
 	accessory_flags = EMPTY_BITFIELD
 	sprite_sheets = list(
@@ -466,12 +472,11 @@ department tags
 /obj/item/clothing/accessory/solgov/department/command/fleet
 	icon_state = "dept_fleet"
 	desc = "Insignia denoting assignment to the command department. These fit Fleet uniforms."
-	on_rolled = list("rolled" = "dept_fleet_sleeves", "down" = "none")
+	on_rolled_sleeves = "dept_fleet_sleeves"
 
 /obj/item/clothing/accessory/solgov/department/command/army
 	icon_state = "dept_army"
 	desc = "Insignia denoting assignment to the command department. These fit Army uniforms."
-	on_rolled = list("down" = "none")
 
 /obj/item/clothing/accessory/solgov/department/engineering
 	name = "engineering insignia"
@@ -484,12 +489,11 @@ department tags
 /obj/item/clothing/accessory/solgov/department/engineering/fleet
 	icon_state = "dept_fleet"
 	desc = "Insignia denoting assignment to the engineering department. These fit Fleet uniforms."
-	on_rolled = list("rolled" = "dept_fleet_sleeves", "down" = "none")
+	on_rolled_sleeves = "dept_fleet_sleeves"
 
 /obj/item/clothing/accessory/solgov/department/engineering/army
 	icon_state = "dept_army"
 	desc = "Insignia denoting assignment to the engineering department. These fit Army uniforms."
-	on_rolled = list("down" = "none")
 
 /obj/item/clothing/accessory/solgov/department/security
 	name = "security insignia"
@@ -502,12 +506,11 @@ department tags
 /obj/item/clothing/accessory/solgov/department/security/fleet
 	icon_state = "dept_fleet"
 	desc = "Insignia denoting assignment to the security department. These fit Fleet uniforms."
-	on_rolled = list("rolled" = "dept_fleet_sleeves", "down" = "none")
+	on_rolled_sleeves = "dept_fleet_sleeves"
 
 /obj/item/clothing/accessory/solgov/department/security/army
 	icon_state = "dept_army"
 	desc = "Insignia denoting assignment to the security department. These fit Army uniforms."
-	on_rolled = list("down" = "none")
 
 /obj/item/clothing/accessory/solgov/department/medical
 	name = "medical insignia"
@@ -521,12 +524,11 @@ department tags
 /obj/item/clothing/accessory/solgov/department/medical/fleet
 	icon_state = "dept_fleet"
 	desc = "Insignia denoting assignment to the medical department. These fit Fleet uniforms."
-	on_rolled = list("rolled" = "dept_fleet_sleeves", "down" = "none")
+	on_rolled_sleeves = "dept_fleet_sleeves"
 
 /obj/item/clothing/accessory/solgov/department/medical/army
 	icon_state = "dept_army"
 	desc = "Insignia denoting assignment to the medical department. These fit Army uniforms."
-	on_rolled = list("down" = "none")
 
 /obj/item/clothing/accessory/solgov/department/supply
 	name = "supply insignia"
@@ -539,12 +541,11 @@ department tags
 /obj/item/clothing/accessory/solgov/department/supply/fleet
 	icon_state = "dept_fleet"
 	desc = "Insignia denoting assignment to the supply department. These fit Fleet uniforms."
-	on_rolled = list("rolled" = "dept_fleet_sleeves", "down" = "none")
+	on_rolled_sleeves = "dept_fleet_sleeves"
 
 /obj/item/clothing/accessory/solgov/department/supply/army
 	icon_state = "dept_army"
 	desc = "Insignia denoting assignment to the supply department. These fit Army uniforms."
-	on_rolled = list("down" = "none")
 
 /obj/item/clothing/accessory/solgov/department/service
 	name = "service insignia"
@@ -557,12 +558,11 @@ department tags
 /obj/item/clothing/accessory/solgov/department/service/fleet
 	icon_state = "dept_fleet"
 	desc = "Insignia denoting assignment to the service department. These fit Fleet uniforms."
-	on_rolled = list("rolled" = "dept_fleet_sleeves", "down" = "none")
+	on_rolled_sleeves = "dept_fleet_sleeves"
 
 /obj/item/clothing/accessory/solgov/department/service/army
 	icon_state = "dept_army"
 	desc = "Insignia denoting assignment to the service department. These fit Army uniforms."
-	on_rolled = list("down" = "none")
 
 /obj/item/clothing/accessory/solgov/department/exploration
 	name = "exploration insignia"
@@ -575,12 +575,11 @@ department tags
 /obj/item/clothing/accessory/solgov/department/exploration/fleet
 	icon_state = "dept_fleet"
 	desc = "Insignia denoting assignment to the exploration department. These fit Fleet uniforms."
-	on_rolled = list("rolled" = "dept_fleet_sleeves", "down" = "none")
+	on_rolled_sleeves = "dept_fleet_sleeves"
 
 /obj/item/clothing/accessory/solgov/department/exploration/army
 	icon_state = "dept_army"
 	desc = "Insignia denoting assignment to the exploration department. These fit Army uniforms."
-	on_rolled = list("down" = "none")
 
 /obj/item/clothing/accessory/solgov/department/research
 	name = "research insignia"
@@ -598,7 +597,7 @@ ranks - ec
 	name = "ranks"
 	desc = "Insignia denoting rank of some kind. These appear blank."
 	icon_state = "fleetrank"
-	on_rolled = list("down" = "none")
+	on_rolled_down = ACCESSORY_ROLLED_NONE
 	slot = ACCESSORY_SLOT_RANK
 	gender = PLURAL
 	accessory_flags = ACCESSORY_REMOVABLE | ACCESSORY_HIGH_VISIBILITY
@@ -610,7 +609,6 @@ ranks - ec
 	name = "explorer ranks"
 	desc = "Insignia denoting rank of some kind. These appear blank."
 	icon_state = "ecrank_e1"
-	on_rolled = list("down" = "none")
 
 /obj/item/clothing/accessory/solgov/rank/ec/enlisted
 	name = "ranks (E-1 apprentice explorer)"
@@ -657,6 +655,11 @@ ranks - ec
 	desc = "Insignia denoting the rank of Admiral."
 	icon_state = "ecrank_o8"
 
+/obj/item/clothing/accessory/solgov/rank/ec/officer/o8_alt
+	name = "ranks (O-8 commandant of the expeditionary corps)"
+	desc = "Insignia denoting the rank of Commandant of the Expeditonary Corps."
+	icon_state = "ecrank_o8_alt"
+
 /************
 ranks - fleet
 ************/
@@ -664,111 +667,131 @@ ranks - fleet
 	name = "naval ranks"
 	desc = "Insignia denoting naval rank of some kind. These appear blank."
 	icon_state = "fleetrank"
-	on_rolled = list("down" = "none")
 
 /obj/item/clothing/accessory/solgov/rank/fleet/enlisted
 	name = "ranks (E-1 crewman recruit)"
 	desc = "Insignia denoting the rank of Crewman Recruit."
-	icon_state = "fleetrank_enlisted"
+	icon_state = "fleetrank_e1"
 
 /obj/item/clothing/accessory/solgov/rank/fleet/enlisted/e2
 	name = "ranks (E-2 crewman apprentice)"
 	desc = "Insignia denoting the rank of Crewman Apprentice."
+	icon_state = "fleetrank_e2"
 
 /obj/item/clothing/accessory/solgov/rank/fleet/enlisted/e3
 	name = "ranks (E-3 crewman)"
 	desc = "Insignia denoting the rank of Crewman."
+	icon_state = "fleetrank_e3"
 
 /obj/item/clothing/accessory/solgov/rank/fleet/enlisted/e4
 	name = "ranks (E-4 petty officer third class)"
 	desc = "Insignia denoting the rank of Petty Officer Third Class."
+	icon_state = "fleetrank_e4"
 
 /obj/item/clothing/accessory/solgov/rank/fleet/enlisted/e5
 	name = "ranks (E-5 petty officer second class)"
 	desc = "Insignia denoting the rank of Petty Officer Second Class."
+	icon_state = "fleetrank_e5"
 
 /obj/item/clothing/accessory/solgov/rank/fleet/enlisted/e6
 	name = "ranks (E-6 petty officer first class)"
 	desc = "Insignia denoting the rank of Petty Officer First Class."
+	icon_state = "fleetrank_e6"
 
 /obj/item/clothing/accessory/solgov/rank/fleet/enlisted/e7
 	name = "ranks (E-7 chief petty officer)"
 	desc = "Insignia denoting the rank of Chief Petty Officer."
+	icon_state = "fleetrank_e7"
 
 /obj/item/clothing/accessory/solgov/rank/fleet/enlisted/e8
 	name = "ranks (E-8 senior chief petty officer)"
 	desc = "Insignia denoting the rank of Senior Chief Petty Officer."
+	icon_state = "fleetrank_e8"
 
 /obj/item/clothing/accessory/solgov/rank/fleet/enlisted/e9
 	name = "ranks (E-9 master chief petty officer)"
 	desc = "Insignia denoting the rank of Master Chief Petty Officer."
+	icon_state = "fleetrank_e9"
 
 /obj/item/clothing/accessory/solgov/rank/fleet/enlisted/e9_alt1
 	name = "ranks (E-9 command master chief petty officer)"
 	desc = "Insignia denoting the rank of Command Master Chief Petty Officer."
+	icon_state = "fleetrank_e9"
 
 /obj/item/clothing/accessory/solgov/rank/fleet/enlisted/e9_alt2
 	name = "ranks (E-9 fleet master chief petty officer)"
 	desc = "Insignia denoting the rank of Fleet Master Chief Petty Officer."
+	icon_state = "fleetrank_e9"
 
 /obj/item/clothing/accessory/solgov/rank/fleet/enlisted/e9_alt3
 	name = "ranks (E-9 force master chief petty officer)"
 	desc = "Insignia denoting the rank of Force Master Chief Petty Officer."
+	icon_state = "fleetrank_e9"
 
 /obj/item/clothing/accessory/solgov/rank/fleet/enlisted/e9_alt4
 	name = "ranks (E-9 master chief petty officer of the Fleet)"
 	desc = "Insignia denoting the rank of Master Chief Petty Officer of the Fleet."
+	icon_state = "fleetrank_e9"
 
 /obj/item/clothing/accessory/solgov/rank/fleet/officer
 	name = "ranks (O-1 ensign)"
 	desc = "Insignia denoting the rank of Ensign."
-	icon_state = "fleetrank_officer"
+	icon_state = "fleetrank_o1"
 
 /obj/item/clothing/accessory/solgov/rank/fleet/officer/wo1_monkey
 	name = "makeshift ranks (WO-1 warrant officer 1)"
 	desc = "Insignia denoting the mythical rank of Warrant Officer. Too bad it's obviously fake."
+	icon_state = "fleetrank_o1"
 
 /obj/item/clothing/accessory/solgov/rank/fleet/officer/o2
 	name = "ranks (O-2 sub-lieutenant)"
 	desc = "Insignia denoting the rank of Sub-lieutenant."
+	icon_state = "fleetrank_o2"
 
 /obj/item/clothing/accessory/solgov/rank/fleet/officer/o3
 	name = "ranks (O-3 lieutenant)"
 	desc = "Insignia denoting the rank of Lieutenant."
+	icon_state = "fleetrank_o3"
 
 /obj/item/clothing/accessory/solgov/rank/fleet/officer/o4
 	name = "ranks (O-4 lieutenant commander)"
 	desc = "Insignia denoting the rank of Lieutenant Commander."
+	icon_state = "fleetrank_o4"
 
 /obj/item/clothing/accessory/solgov/rank/fleet/officer/o5
 	name = "ranks (O-5 commander)"
 	desc = "Insignia denoting the rank of Commander."
+	icon_state = "fleetrank_o5"
 
 /obj/item/clothing/accessory/solgov/rank/fleet/officer/o6
 	name = "ranks (O-6 captain)"
 	desc = "Insignia denoting the rank of Captain."
-	icon_state = "fleetrank_command"
+	icon_state = "fleetrank_o6"
 
 /obj/item/clothing/accessory/solgov/rank/fleet/flag
 	name = "ranks (O-7 commodore)"
 	desc = "Insignia denoting the rank of Commodore."
-	icon_state = "fleetrank_command"
+	icon_state = "fleetrank_o7"
 
 /obj/item/clothing/accessory/solgov/rank/fleet/flag/o8
 	name = "ranks (O-8 rear admiral)"
 	desc = "Insignia denoting the rank of Rear Admiral."
+	icon_state = "fleetrank_o8"
 
 /obj/item/clothing/accessory/solgov/rank/fleet/flag/o9
 	name = "ranks (O-9 vice admiral)"
 	desc = "Insignia denoting the rank of Vice Admiral."
+	icon_state = "fleetrank_o9"
 
 /obj/item/clothing/accessory/solgov/rank/fleet/flag/o10
 	name = "ranks (O-10 admiral)"
 	desc = "Insignia denoting the rank of Admiral."
+	icon_state = "fleetrank_o10"
 
 /obj/item/clothing/accessory/solgov/rank/fleet/flag/o10_alt
 	name = "ranks (O-10 fleet admiral)"
 	desc = "Insignia denoting the rank of Fleet Admiral."
+	icon_state = "fleetrank_o10"
 
 /**************
 ranks - marines
@@ -777,7 +800,6 @@ ranks - marines
 	name = "army ranks"
 	desc = "Insignia denoting marine rank of some kind. These appear blank."
 	icon_state = "armyrank_enlisted"
-	on_rolled = list("down" = "none")
 
 /obj/item/clothing/accessory/solgov/rank/army/enlisted
 	name = "ranks (E-1 private)"

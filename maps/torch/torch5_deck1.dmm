@@ -16508,6 +16508,10 @@
 /obj/item/sticky_pad/random,
 /turf/simulated/floor/tiled/monotile,
 /area/security/locker)
+"eim" = (
+/obj/structure/sign/poster/torch,
+/turf/simulated/wall/prepainted,
+/area/security/wing)
 "ejb" = (
 /obj/structure/curtain/open/shower,
 /obj/structure/hygiene/shower{
@@ -17662,6 +17666,7 @@
 /obj/effect/floor_decal/corner/paleblue/mono,
 /obj/effect/floor_decal/industrial/outline/yellow,
 /obj/machinery/light,
+/obj/item/storage/firstaid/radiation,
 /turf/simulated/floor/tiled/white/monotile,
 /area/medical/equipstorage)
 "gvC" = (
@@ -29008,6 +29013,7 @@
 	dir = 8;
 	pixel_x = 24
 	},
+/obj/item/storage/box/autoinjectors,
 /turf/simulated/floor/tiled/white/monotile,
 /area/medical/chemistry)
 "uVf" = (
@@ -40873,7 +40879,7 @@ aiu
 aiu
 aiu
 aiu
-aNH
+eim
 vJO
 oIb
 avI

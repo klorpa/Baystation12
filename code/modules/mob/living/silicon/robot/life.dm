@@ -17,7 +17,6 @@
 		update_items()
 	if (src.stat != DEAD) //still using power
 		use_power()
-		process_queued_alarms()
 	UpdateLyingBuckledAndVerbStatus()
 
 /mob/living/silicon/robot/proc/clamp_values()
@@ -66,20 +65,14 @@
 
 /mob/living/silicon/robot/handle_regular_status_updates()
 
-	if(src.camera && !scrambledcodes)
-		if(src.stat == 2 || wires.IsIndexCut(BORG_WIRE_CAMERA))
-			src.camera.set_status(0)
-		else
-			src.camera.set_status(1)
-
 	updatehealth()
 
 	if(src.sleeping)
 		Paralyse(3)
 		src.sleeping--
 
-	if(src.resting)
-		Weaken(5)
+	if (resting) // Just in case. This breaks things so never allow robots to rest.
+		resting = FALSE
 
 	if(health < config.health_threshold_dead && src.stat != 2) //die only once
 		death()

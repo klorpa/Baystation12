@@ -155,7 +155,7 @@
 	. = ..()
 	slowdown_per_slot[slot_shoes]  = 1
 
-/obj/item/clothing/shoes/clown_shoes/handle_movement(var/turf/walking, var/running)
+/obj/item/clothing/shoes/clown_shoes/handle_movement(turf/walking, running)
 	if(running)
 		if(footstep >= 2)
 			footstep = 0
@@ -259,3 +259,10 @@
 /obj/item/clothing/shoes/foamclog/random/New()
 	..()
 	color = get_random_colour()
+
+/obj/item/clothing/shoes/flipflobster
+	name = "flip flobsters"
+	desc = "Made from durable foam resin that retains its spongy feel. These are shaped as lobsters."
+	icon_state = "flipflobster"
+	can_add_hidden_item = FALSE
+	can_add_cuffs = FALSE

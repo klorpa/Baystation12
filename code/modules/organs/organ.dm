@@ -40,7 +40,7 @@ var/global/list/organ_cache = list()
 /obj/item/organ/proc/refresh_action_button()
 	return action
 
-/obj/item/organ/attack_self(var/mob/user)
+/obj/item/organ/attack_self(mob/user)
 	return (owner && loc == owner && owner == user)
 
 /obj/item/organ/proc/update_health()
@@ -50,7 +50,7 @@ var/global/list/organ_cache = list()
 	return (damage >= min_broken_damage || (status & ORGAN_CUT_AWAY) || (status & ORGAN_BROKEN))
 
 //Second argument may be a dna datum; if null will be set to holder's dna.
-/obj/item/organ/New(var/mob/living/carbon/holder, var/datum/dna/given_dna)
+/obj/item/organ/New(mob/living/carbon/holder, datum/dna/given_dna)
 	..(holder)
 	if(!istype(given_dna))
 		given_dna = null
@@ -78,7 +78,7 @@ var/global/list/organ_cache = list()
 
 	update_icon()
 
-/obj/item/organ/proc/set_dna(var/datum/dna/new_dna)
+/obj/item/organ/proc/set_dna(datum/dna/new_dna)
 	if(new_dna)
 		dna = new_dna.Clone()
 		if(!blood_DNA)
@@ -214,7 +214,7 @@ var/global/list/organ_cache = list()
 /obj/item/organ/proc/remove_rejuv()
 	qdel(src)
 
-/obj/item/organ/proc/rejuvenate(var/ignore_prosthetic_prefs)
+/obj/item/organ/proc/rejuvenate(ignore_prosthetic_prefs)
 	damage = 0
 	status = initial(status)
 	if(!ignore_prosthetic_prefs && owner && owner.client && owner.client.prefs && owner.client.prefs.real_name == owner.real_name)
@@ -245,7 +245,7 @@ var/global/list/organ_cache = list()
 		germ_level -= 2
 	germ_level = max(0, germ_level)
 
-/obj/item/organ/proc/take_general_damage(var/amount, var/silent = FALSE)
+/obj/item/organ/proc/take_general_damage(amount, silent = FALSE)
 	CRASH("Not Implemented")
 
 /obj/item/organ/proc/heal_damage(amount)
@@ -266,7 +266,7 @@ var/global/list/organ_cache = list()
  *
  *  Also, Observer Pattern Implementation: Dismembered Handling occurs here.
  */
-/obj/item/organ/proc/removed(var/mob/living/user, var/drop_organ=1)
+/obj/item/organ/proc/removed(mob/living/user, drop_organ=1)
 
 	if(!istype(owner))
 		return
@@ -291,7 +291,7 @@ var/global/list/organ_cache = list()
 
 	owner = null
 
-/obj/item/organ/proc/replaced(var/mob/living/carbon/human/target, var/obj/item/organ/external/affected)
+/obj/item/organ/proc/replaced(mob/living/carbon/human/target, obj/item/organ/external/affected)
 	owner = target
 	action_button_name = initial(action_button_name)
 	forceMove(owner) //just in case
@@ -299,7 +299,7 @@ var/global/list/organ_cache = list()
 		set_dna(owner.dna)
 	return 1
 
-/obj/item/organ/attack(var/mob/target, var/mob/user)
+/obj/item/organ/attack(mob/target, mob/user)
 
 	if(status & ORGAN_ROBOTIC || !istype(target) || !istype(user) || (user != target && user.a_intent == I_HELP))
 		return ..()
@@ -328,58 +328,47 @@ var/global/list/organ_cache = list()
 /obj/item/organ/proc/can_recover()
 	return (max_damage > 0) && !(status & ORGAN_DEAD) || death_time >= world.time - ORGAN_RECOVERY_THRESHOLD
 
-/obj/item/organ/proc/get_scan_results(var/tag = FALSE)
+/obj/item/organ/proc/get_scan_results(tag = FALSE)
 	. = list()
 	if(BP_IS_CRYSTAL(src))
-		. += tag ? "<span class='average'>Crystalline</span>" : "Crystalline"
+		. += tag ? "<span style='font-weight: bold; color: [COLOR_MEDICAL_CRYSTAL]'>Crystalline</span>" : "Crystalline"
 	else if(BP_IS_ASSISTED(src))
-		. += tag ? "<span class='average'>Assisted</span>" : "Assisted"
+		. += tag ? "<span style='font-weight: bold; color: [COLOR_MEDICAL_ROBOTIC]'>Assisted</span>" : "Assisted"
 	else if(BP_IS_ROBOTIC(src))
-		. += tag ? "<span class='average'>Mechanical</span>" : "Mechanical"
+		. += tag ? "<span style='font-weight: bold; color: [COLOR_MEDICAL_ROBOTIC]'>Mechanical</span>" : "Mechanical"
 	if(status & ORGAN_CUT_AWAY)
-		. += tag ? "<span class='bad'>Severed</span>" : "Severed"
+		. += tag ? "<span style='font-weight: bold; color: [COLOR_MEDICAL_INTERNAL]'>Severed</span>" : "Severed"
 	if(status & ORGAN_MUTATED)
-		. += tag ? "<span class='bad'>Genetic Deformation</span>" : "Genetic Deformation"
+		. += tag ? "<span style='font-weight: bold; color: [COLOR_MEDICAL_RADIATION]'>Genetic Deformation</span>" : "Genetic Deformation"
 	if(status & ORGAN_DEAD)
 		if(can_recover())
-			. += tag ? "<span class='bad'>Decaying</span>" : "Decaying"
+			. += tag ? "<span style='font-weight: bold; color: [COLOR_MEDICAL_INTERNAL_DANGER]'>Decaying</span>" : "Decaying"
 		else
-			. += tag ? "<span style='color:#999999'>Necrotic</span>" : "Necrotic"
+			. += tag ? "<span style='font-weight: bold; color: [COLOR_MEDICAL_NECROTIC]'>Necrotic</span>" : "Necrotic"
 	if(BP_IS_BRITTLE(src))
-		. += tag ? "<span class='bad'>Brittle</span>" : "Brittle"
+		. += tag ? "<span style='font-weight: bold; color: [COLOR_MEDICAL_CRYSTAL]'>Brittle</span>" : "Brittle"
 
+	var/germ_message
 	switch (germ_level)
 		if (INFECTION_LEVEL_ONE to INFECTION_LEVEL_ONE + ((INFECTION_LEVEL_TWO - INFECTION_LEVEL_ONE) / 3))
-			. +=  "Mild Infection"
+			germ_message =  "Mild Infection"
 		if (INFECTION_LEVEL_ONE + ((INFECTION_LEVEL_TWO - INFECTION_LEVEL_ONE) / 3) to INFECTION_LEVEL_ONE + (2 * (INFECTION_LEVEL_TWO - INFECTION_LEVEL_ONE) / 3))
-			. +=  "Mild Infection+"
+			germ_message =  "Mild Infection+"
 		if (INFECTION_LEVEL_ONE + (2 * (INFECTION_LEVEL_TWO - INFECTION_LEVEL_ONE) / 3) to INFECTION_LEVEL_TWO)
-			. +=  "Mild Infection++"
+			germ_message =  "Mild Infection++"
 		if (INFECTION_LEVEL_TWO to INFECTION_LEVEL_TWO + ((INFECTION_LEVEL_THREE - INFECTION_LEVEL_THREE) / 3))
-			if(tag)
-				. += "<span class='average'>Acute Infection</span>"
-			else
-				. +=  "Acute Infection"
+			germ_message =  "Acute Infection"
 		if (INFECTION_LEVEL_TWO + ((INFECTION_LEVEL_THREE - INFECTION_LEVEL_THREE) / 3) to INFECTION_LEVEL_TWO + (2 * (INFECTION_LEVEL_THREE - INFECTION_LEVEL_TWO) / 3))
-			if(tag)
-				. += "<span class='average'>Acute Infection+</span>"
-			else
-				. +=  "Acute Infection+"
+			germ_message =  "Acute Infection+"
 		if (INFECTION_LEVEL_TWO + (2 * (INFECTION_LEVEL_THREE - INFECTION_LEVEL_TWO) / 3) to INFECTION_LEVEL_THREE)
-			if(tag)
-				. += "<span class='average'>Acute Infection++</span>"
-			else
-				. +=  "Acute Infection++"
+			germ_message =  "Acute Infection++"
 		if (INFECTION_LEVEL_THREE to INFINITY)
-			if(tag)
-				. += "<span class='bad'>Septic</span>"
-			else
-				. +=  "Septic"
+			germ_message =  "Septic"
+	if (germ_message)
+		. += tag ? "<span style='font-weight: bold; color: [COLOR_MEDICAL_TOXIN]'>[germ_message]</span>" : germ_message
 	if(rejecting)
 		if(tag)
-			. += "<span class='bad'>Genetic Rejection</span>"
-		else
-			. += "Genetic Rejection"
+			. += tag ? "<span style='font-weight: bold; color: [COLOR_MEDICAL_INTERNAL]'>Genetic Rejection</span>" : "Genetic Rejection"
 
 //used by stethoscope
 /obj/item/organ/proc/listen()

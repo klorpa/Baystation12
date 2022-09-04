@@ -145,6 +145,11 @@
 			qdel(src)
 			return
 
+	for (var/datum/ticket/T in tickets)
+		if (T.status == TICKET_OPEN && T.owner.ckey == ckey)
+			message_staff("[key_name_admin(src)] has joined the game with an open ticket. Status: [length(T.assigned_admins) ? "Assigned to: [english_list(T.assigned_admin_ckeys())]" : SPAN_DANGER("Unassigned.")]")
+			break
+
 	// Change the way they should download resources.
 	if(config.resource_urls && config.resource_urls.len)
 		src.preload_rsc = pick(config.resource_urls)
@@ -219,6 +224,10 @@
 
 
 /client/Destroy()
+	for (var/datum/ticket/T in tickets)
+		if (T.status == TICKET_OPEN && T.owner.ckey == ckey)
+			message_staff("[key_name_admin(src)] has left the game with an open ticket. Status: [length(T.assigned_admins) ? "Assigned to: [english_list(T.assigned_admin_ckeys())]" : SPAN_DANGER("Unassigned.")]")
+			break
 	if (holder)
 		holder.owner = null
 		GLOB.admins -= src
@@ -394,7 +403,7 @@
 	if(prefs)
 		prefs.open_setup_window(usr)
 
-/client/proc/apply_fps(var/client_fps)
+/client/proc/apply_fps(client_fps)
 	if(world.byond_version >= 511 && byond_version >= 511 && client_fps >= CLIENT_MIN_FPS && client_fps <= CLIENT_MAX_FPS)
 		vars["fps"] = prefs.clientfps
 

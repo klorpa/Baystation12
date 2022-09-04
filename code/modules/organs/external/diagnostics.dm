@@ -78,20 +78,20 @@
 
 	return english_list(flavor_text)
 
-/obj/item/organ/external/get_scan_results()
+/obj/item/organ/external/get_scan_results(tag = FALSE)
 	. = ..()
 	if(status & ORGAN_ARTERY_CUT)
-		. += "[capitalize(artery_name)] ruptured"
+		. += tag ? "<span style='font-weight: bold; color: [COLOR_MEDICAL_INTERNAL_DANGER]'>[capitalize(artery_name)] ruptured</span>" : "[capitalize(artery_name)] ruptured"
 	if(status & ORGAN_TENDON_CUT)
-		. += "Severed [tendon_name]"
+		. += tag ? "<span style='font-weight: bold; color: [COLOR_MEDICAL_INTERNAL]'>Severed [tendon_name]</span>" : "Severed [tendon_name]"
 	if(dislocated >= 1) // non-magical constants when
-		. += "Dislocated"
+		. += tag ? "<span style='font-weight: bold; color: [COLOR_MEDICAL_DISLOCATED]'>Dislocated</span>" : "Dislocated"
 	if(splinted)
-		. += "Splinted"
+		. += tag ? "<span style='font-weight: bold; color: [COLOR_MEDICAL_SPLINTED]'>Splinted</span>" : "Splinted"
 	if(status & ORGAN_BLEEDING)
-		. += "Bleeding"
+		. += tag ? "<span style='font-weight: bold; color: [COLOR_MEDICAL_BRUTE]'>Bleeding</span>" : "Bleeding"
 	if(status & ORGAN_BROKEN)
-		. += capitalize(broken_description)
+		. += tag ? "<span style='font-weight: bold; color: [COLOR_MEDICAL_BROKEN]'>[capitalize(broken_description)]</span>" : capitalize(broken_description)
 	if (implants && implants.len)
 		var/unknown_body = 0
 		for(var/I in implants)
@@ -100,14 +100,14 @@
 				if(imp.hidden)
 					continue
 				if (imp.known)
-					. += "[capitalize(imp.name)] implanted"
+					. += tag ? "<span style='font-weight: bold; color: [COLOR_MEDICAL_IMPLANT]'>[capitalize(imp.name)] implanted</span>" : "[capitalize(imp.name)] implanted"
 					continue
 			unknown_body++
 		if(unknown_body)
-			. += "Unknown body present"
+			. += tag ? "<span style='font-weight: bold; color: [COLOR_MEDICAL_UNKNOWN_IMPLANT]'>Unknown body present</span>" : "Unknown body present"
 	for (var/obj/item/organ/internal/augment/aug in internal_organs)
 		if (aug.augment_flags & AUGMENT_SCANNABLE)
-			. += "[capitalize(aug.name)] implanted"
+			. += tag ? "<span style='font-weight: bold; color: [COLOR_MEDICAL_IMPLANT]'>[capitalize(aug.name)] implanted</span>" : "[capitalize(aug.name)] implanted"
 
 /obj/item/organ/external/proc/inspect(mob/user)
 	if(is_stump())
@@ -187,7 +187,7 @@
 	if(user && user.skill_check(SKILL_MEDICAL, hint_min_skill))
 		. += "<small><a href='?src=\ref[src];show_diagnostic_hint=1'>(?)</a></small>"
 
-/decl/diagnostic_sign/Topic(var/href, var/list/href_list)
+/decl/diagnostic_sign/Topic(href, list/href_list)
 	. = ..()
 	if(.)
 		return

@@ -75,14 +75,13 @@
 		return !density
 	return TRUE
 
-/obj/structure/railing/handle_death_change(new_death_state)
-	if (new_death_state)
-		visible_message("<span class='danger'>\The [src] [material.destruction_desc]!</span>")
-		playsound(loc, 'sound/effects/grillehit.ogg', 50, 1)
-		material.place_shard(get_turf(usr))
-		qdel(src)
+/obj/structure/railing/on_death()
+	visible_message("<span class='danger'>\The [src] [material.destruction_desc]!</span>")
+	playsound(loc, 'sound/effects/grillehit.ogg', 50, 1)
+	material.place_shard(get_turf(usr))
+	qdel(src)
 
-/obj/structure/railing/proc/NeighborsCheck(var/UpdateNeighbors = 1)
+/obj/structure/railing/proc/NeighborsCheck(UpdateNeighbors = 1)
 	neighbor_status = 0
 	var/Rturn = turn(src.dir, -90)
 	var/Lturn = turn(src.dir, 90)
@@ -127,7 +126,7 @@
 			if (UpdateNeighbors)
 				R.update_icon(0)
 
-/obj/structure/railing/on_update_icon(var/update_neighbors = TRUE)
+/obj/structure/railing/on_update_icon(update_neighbors = TRUE)
 	NeighborsCheck(update_neighbors)
 	overlays.Cut()
 	if (!neighbor_status || !anchored)
@@ -184,7 +183,7 @@
 	set_dir(turn(dir, 180))
 	update_icon()
 
-/obj/structure/railing/CheckExit(var/atom/movable/O, var/turf/target)
+/obj/structure/railing/CheckExit(atom/movable/O, turf/target)
 	if(istype(O) && O.checkpass(PASS_FLAG_TABLE))
 		return 1
 	if(get_dir(O.loc, target) == dir)
@@ -193,7 +192,7 @@
 		return 0
 	return 1
 
-/obj/structure/railing/attackby(var/obj/item/W, var/mob/user)
+/obj/structure/railing/attackby(obj/item/W, mob/user)
 	if (user.a_intent == I_HURT)
 		..()
 		return
@@ -230,7 +229,7 @@
 	if(isWrench(W))
 		if(!anchored)
 			playsound(src.loc, 'sound/items/Ratchet.ogg', 50, 1)
-			if(do_after(user, 2 SECONDS, src, DO_PUBLIC_UNIQUE))
+			if(do_after(user, 2 SECONDS, src, DO_REPAIR_CONSTRUCT))
 				if(anchored)
 					return
 				user.visible_message("<span class='notice'>\The [user] dismantles \the [src].</span>", "<span class='notice'>You dismantle \the [src].</span>")
@@ -256,7 +255,7 @@
 				to_chat(user, "<span class='warning'>\The [src] does not need repairs.</span>")
 				return
 			playsound(src.loc, 'sound/items/Welder.ogg', 50, 1)
-			if(do_after(user, 2 SECONDS, src, DO_PUBLIC_UNIQUE))
+			if(do_after(user, 2 SECONDS, src, DO_REPAIR_CONSTRUCT))
 				if(!health_damaged())
 					return
 				user.visible_message("<span class='notice'>\The [user] repairs some damage to \the [src].</span>", "<span class='notice'>You repair some damage to \the [src].</span>")
@@ -270,7 +269,7 @@
 			return
 		user.visible_message(anchored ? "<span class='notice'>\The [user] begins unscrew \the [src].</span>" : "<span class='notice'>\The [user] begins fasten \the [src].</span>" )
 		playsound(loc, 'sound/items/Screwdriver.ogg', 75, 1)
-		if(do_after(user, 1 SECOND, src, DO_PUBLIC_UNIQUE) && density)
+		if(do_after(user, 1 SECOND, src, DO_REPAIR_CONSTRUCT) && density)
 			to_chat(user, (anchored ? "<span class='notice'>You have unfastened \the [src] from the floor.</span>" : "<span class='notice'>You have fastened \the [src] to the floor.</span>"))
 			anchored = !anchored
 			update_icon()
@@ -278,7 +277,7 @@
 
 	..()
 
-/obj/structure/railing/can_climb(var/mob/living/user, post_climb_check=FALSE, check_silicon=TRUE)
+/obj/structure/railing/can_climb(mob/living/user, post_climb_check=FALSE, check_silicon=TRUE)
 	. = ..()
 	if (. && get_turf(user) == get_turf(src))
 		var/turf/T = get_step(src, src.dir)
@@ -286,7 +285,7 @@
 			to_chat(user, "<span class='warning'>You can't climb there, the way is blocked.</span>")
 			return 0
 
-/obj/structure/railing/do_climb(var/mob/living/user)
+/obj/structure/railing/do_climb(mob/living/user)
 	. = ..()
 	if(.)
 		if(!anchored || material.is_brittle())

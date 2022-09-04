@@ -62,7 +62,7 @@
 		var/stamina = mymob.get_stamina()
 		if(stamina < 100)
 			stamina_bar.invisibility = 0
-			stamina_bar.icon_state = "prog_bar_[Floor(stamina/5)*5]"
+			stamina_bar.icon_state = "priv_prog_bar_[Floor(stamina/5)*5]"
 
 /datum/hud/proc/hidden_inventory_update()
 	if(!mymob) return
@@ -160,11 +160,11 @@
 
 	FinalizeInstantiation(ui_style, ui_color, ui_alpha)
 
-/datum/hud/proc/FinalizeInstantiation(var/ui_style, var/ui_color, var/ui_alpha)
+/datum/hud/proc/FinalizeInstantiation(ui_style, ui_color, ui_alpha)
 	return
 
 //Triggered when F12 is pressed (Unless someone changed something in the DMF)
-/mob/verb/button_pressed_F12(var/full = 0 as null)
+/mob/verb/button_pressed_F12(full = 0 as null)
 	set name = "F12"
 	set hidden = 1
 

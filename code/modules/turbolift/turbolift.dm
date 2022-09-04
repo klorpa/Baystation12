@@ -19,18 +19,18 @@
 	target_floor = null
 	open_doors()
 
-/datum/turbolift/proc/doors_are_open(var/datum/turbolift_floor/use_floor = current_floor)
+/datum/turbolift/proc/doors_are_open(datum/turbolift_floor/use_floor = current_floor)
 	for(var/obj/machinery/door/airlock/door in (use_floor ? (doors + use_floor.doors) : doors))
 		if(!door.density)
 			return 1
 	return 0
 
-/datum/turbolift/proc/open_doors(var/datum/turbolift_floor/use_floor = current_floor)
+/datum/turbolift/proc/open_doors(datum/turbolift_floor/use_floor = current_floor)
 	for(var/obj/machinery/door/airlock/door in (use_floor ? (doors + use_floor.doors) : doors))
 		door.command("open")
 	return
 
-/datum/turbolift/proc/close_doors(var/datum/turbolift_floor/use_floor = current_floor)
+/datum/turbolift/proc/close_doors(datum/turbolift_floor/use_floor = current_floor)
 	for(var/obj/machinery/door/airlock/door in (use_floor ? (doors + use_floor.doors) : doors))
 		door.command("close")
 	return
@@ -64,14 +64,14 @@
 /datum/turbolift/proc/do_move()
 	next_process = null
 
-	var/current_floor_index = list_find(floors, current_floor)
+	var/current_floor_index = floors.Find(current_floor)
 
 	if(!target_floor)
 		if(!queued_floors || !queued_floors.len)
 			return 0
 		target_floor = queued_floors[1]
 		queued_floors -= target_floor
-		if(current_floor_index < list_find(floors, target_floor))
+		if(current_floor_index < floors.Find(target_floor))
 			moving_upwards = 1
 		else
 			moving_upwards = 0
@@ -132,7 +132,7 @@
 
 	return 1
 
-/datum/turbolift/proc/queue_move_to(var/datum/turbolift_floor/floor)
+/datum/turbolift/proc/queue_move_to(datum/turbolift_floor/floor)
 	if(!floor || !(floor in floors) || (floor in queued_floors))
 		return // STOP PRESSING THE BUTTON.
 	floor.pending_move(src)

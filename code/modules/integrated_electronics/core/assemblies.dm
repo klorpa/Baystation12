@@ -62,27 +62,25 @@
 	if((isobserver(user) && ckeys_allowed_to_scan[user.ckey]) || check_rights(R_ADMIN, 0, user))
 		to_chat(user, "You can <a href='?src=\ref[src];ghostscan=1'>scan</a> this circuit.");
 
-/obj/item/device/electronic_assembly/handle_death_change(new_death_state)
-	. = ..()
-	if (new_death_state)
-		visible_message(SPAN_WARNING("\The [src] falls to pieces!"))
-		if(w_class == ITEM_SIZE_HUGE)
-			if(adrone)
-				new /obj/effect/decal/cleanable/blood/gibs/robot(loc)
-			new /obj/item/stack/material/steel(loc, rand(7, 10))
-		else if(w_class == ITEM_SIZE_LARGE)
-			if(adrone)
-				new /obj/effect/decal/cleanable/blood/gibs/robot(loc)
-			new /obj/item/stack/material/steel(loc, rand(3, 6))
-		else if(w_class == ITEM_SIZE_NORMAL)
-			new /obj/item/stack/material/steel(loc, rand(1, 3))
-		else
-			new /obj/item/stack/material/steel(loc)
-		if(battery && battery.charge > 0)
-			spark_system.start()
-		playsound(loc, 'sound/items/electronic_assembly_empty.ogg', 100, 1)
-		icon = 0
-		addtimer(CALLBACK(src, .proc/fall_apart), 5.1)
+/obj/item/device/electronic_assembly/on_death()
+	visible_message(SPAN_WARNING("\The [src] falls to pieces!"))
+	if(w_class == ITEM_SIZE_HUGE)
+		if(adrone)
+			new /obj/effect/decal/cleanable/blood/gibs/robot(loc)
+		new /obj/item/stack/material/steel(loc, rand(7, 10))
+	else if(w_class == ITEM_SIZE_LARGE)
+		if(adrone)
+			new /obj/effect/decal/cleanable/blood/gibs/robot(loc)
+		new /obj/item/stack/material/steel(loc, rand(3, 6))
+	else if(w_class == ITEM_SIZE_NORMAL)
+		new /obj/item/stack/material/steel(loc, rand(1, 3))
+	else
+		new /obj/item/stack/material/steel(loc)
+	if(battery && battery.charge > 0)
+		spark_system.start()
+	playsound(loc, 'sound/items/electronic_assembly_empty.ogg', 100, 1)
+	icon = 0
+	addtimer(CALLBACK(src, .proc/fall_apart), 5.1)
 
 /obj/item/device/electronic_assembly/post_health_change(health_mod, damage_type)
 	..()
@@ -272,7 +270,7 @@
 
 			add_allowed_scanner(usr.ckey)
 
-			var/current_pos = list_find(assembly_components, component)
+			var/current_pos = assembly_components.Find(component)
 
 			if(href_list["remove"])
 				try_remove_component(component, usr)
@@ -443,7 +441,7 @@
 		if(istype(loc, /turf) && (IC_FLAG_ANCHORABLE & circuit_flags))
 			user.visible_message(SPAN_NOTICE("\The [user] wrenches \the [src]'s anchoring bolts [anchored ? "back" : "into position"]."))
 			playsound(get_turf(user), 'sound/items/Ratchet.ogg',50)
-			if(user.do_skilled(5 SECONDS, SKILL_CONSTRUCTION, src))
+			if(user.do_skilled(5 SECONDS, SKILL_CONSTRUCTION, src, do_flags = DO_REPAIR_CONSTRUCT))
 				anchored = !anchored
 		return
 
@@ -745,7 +743,7 @@
 	max_complexity = IC_COMPLEXITY_BASE * 2
 	health_max = 40
 
-/obj/item/device/electronic_assembly/wallmount/afterattack(var/atom/a, var/mob/user, var/proximity)
+/obj/item/device/electronic_assembly/wallmount/afterattack(atom/a, mob/user, proximity)
 	if(proximity && istype(a ,/turf) && a.density)
 		mount_assembly(a,user)
 
@@ -767,7 +765,7 @@
 	max_complexity = IC_COMPLEXITY_BASE
 
 /obj/item/device/electronic_assembly/pickup()
-	transform = matrix() //Reset the matrix.
+	ClearTransform()
 
 /obj/item/device/electronic_assembly/wallmount/proc/mount_assembly(turf/on_wall, mob/user) //Yeah, this is admittedly just an abridged and kitbashed version of the wallframe attach procs.
 	var/ndir = get_dir(on_wall, user)
@@ -785,24 +783,24 @@
 		"<span class='notice'>You attach [src] to the wall.</span>",
 		"<span class='italics'>You hear clicking.</span>")
 	if(user.unEquip(src,T))
-		var/matrix/M = matrix()
+		var/rotation = 0
 		switch(ndir)
 			if(NORTH)
+				rotation = 180
 				pixel_y = -32
 				pixel_x = 0
-				M.Turn(180)
 			if(SOUTH)
 				pixel_y = 21
 				pixel_x = 0
 			if(EAST)
+				rotation = 90
 				pixel_x = -27
 				pixel_y = 0
-				M.Turn(270)
 			if(WEST)
+				rotation = 270
 				pixel_x = 27
 				pixel_y = 0
-				M.Turn(90)
-		transform = M
+		SetTransform(rotation = rotation)
 
 #undef IC_MAX_SIZE_BASE
 #undef IC_COMPLEXITY_BASE

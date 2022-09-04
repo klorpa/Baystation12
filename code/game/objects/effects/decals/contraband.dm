@@ -14,7 +14,7 @@
 	icon_state = "rolled_poster"
 	var/poster_type
 
-/obj/item/contraband/poster/New(var/maploading, var/given_poster_type)
+/obj/item/contraband/poster/New(maploading, given_poster_type)
 	if(given_poster_type && !ispath(given_poster_type, /decl/poster))
 		CRASH("Invalid poster type: [log_info_line(given_poster_type)]")
 
@@ -25,13 +25,13 @@
 
 /obj/item/contraband/poster/Initialize()
 	var/list/posters = subtypesof(/decl/poster)
-	var/serial_number = list_find(posters, poster_type)
+	var/serial_number = posters.Find(poster_type)
 	name += " - No. [serial_number]"
 
 	return ..()
 
 //Places the poster on a wall
-/obj/item/contraband/poster/afterattack(var/atom/A, var/mob/user, var/adjacent, var/clickparams)
+/obj/item/contraband/poster/afterattack(atom/A, mob/user, adjacent, clickparams)
 	if (!adjacent)
 		return
 
@@ -65,7 +65,7 @@
 		// We cannot rely on user being on the appropriate turf when placement fails
 		P.roll_and_drop(get_step(W, turn(placement_dir, 180)))
 
-/obj/item/contraband/poster/proc/ArePostersOnWall(var/turf/W, var/placed_poster)
+/obj/item/contraband/poster/proc/ArePostersOnWall(turf/W, placed_poster)
 	//just check if there is a poster on or adjacent to the wall
 	if (locate(/obj/structure/sign/poster) in W)
 		return TRUE
@@ -88,6 +88,7 @@
 	anchored = TRUE
 	var/poster_type
 	var/ruined = 0
+	var/torch_poster = FALSE //for torch-specific content
 
 /obj/structure/sign/poster/bay_9
 	poster_type = /decl/poster/bay_9
@@ -95,14 +96,20 @@
 /obj/structure/sign/poster/bay_50
 	poster_type = /decl/poster/bay_50
 
-/obj/structure/sign/poster/New(var/newloc, var/placement_dir = null, var/give_poster_type = null)
+/obj/structure/sign/poster/torch
+	poster_type = /decl/poster/torch
+	torch_poster = TRUE
+
+/obj/structure/sign/poster/New(newloc, placement_dir = null, give_poster_type = null)
 	..(newloc)
 
 	if(!poster_type)
 		if(give_poster_type)
 			poster_type = give_poster_type
 		else
-			poster_type = pick(subtypesof(/decl/poster))
+			poster_type = pick(subtypesof(/decl/poster) - typesof(/decl/poster/torch))
+	if(torch_poster)
+		poster_type = pick(subtypesof(/decl/poster/torch))
 	set_poster(poster_type)
 
 	switch (placement_dir)
@@ -119,7 +126,7 @@
 			pixel_x = -32
 			pixel_y = 0
 
-/obj/structure/sign/poster/proc/set_poster(var/poster_type)
+/obj/structure/sign/poster/proc/set_poster(poster_type)
 	var/decl/poster/design = decls_repository.get_decl(poster_type)
 	SetName("[initial(name)] - [design.name]")
 	desc = "[initial(desc)] [design.desc]"

@@ -12,7 +12,7 @@
 	icon = 'icons/obj/objects.dmi'
 	icon_state = "ash"
 
-/obj/effect/decal/cleanable/ash/attack_hand(var/mob/user)
+/obj/effect/decal/cleanable/ash/attack_hand(mob/user)
 	to_chat(user, "<span class='notice'>[src] sifts through your fingers.</span>")
 	var/turf/simulated/floor/F = get_turf(src)
 	if (istype(F))
@@ -88,9 +88,7 @@
 	atom_flags |= ATOM_FLAG_OPEN_CONTAINER
 	create_reagents(30, src)
 	if(prob(75))
-		var/matrix/M = matrix()
-		M.Turn(pick(90, 180, 270))
-		transform = M
+		SetTransform(rotation = pick(90, 180, 270))
 
 /obj/effect/decal/cleanable/vomit/on_update_icon()
 	. = ..()

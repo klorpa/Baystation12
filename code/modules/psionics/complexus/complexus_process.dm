@@ -1,4 +1,4 @@
-/datum/psi_complexus/proc/update(var/force)
+/datum/psi_complexus/proc/update(force)
 
 	set waitfor = FALSE
 
@@ -115,10 +115,13 @@
 		last_aura_size =  next_aura_size
 		last_aura_alpha = next_aura_alpha
 		last_aura_color = aura_color
-		var/matrix/M = matrix()
-		if(next_aura_size != 1)
-			M.Scale(next_aura_size)
-		animate(get_aura_image(), alpha = next_aura_alpha, transform = M, color = aura_color, time = 3)
+		animate(
+			get_aura_image(),
+			alpha = next_aura_alpha,
+			transform = matrix().Update(scale_x = next_aura_size, scale_y = next_aura_size),
+			color = aura_color,
+			time = 3
+		)
 
 	if(update_hud)
 		ui.update_icon()

@@ -59,11 +59,11 @@
 	coolant_reagents_purity[/datum/reagent/coolant] = 1
 	coolant_reagents_purity[/datum/reagent/adminordrazine] = 2
 
-/obj/machinery/radiocarbon_spectrometer/interface_interact(var/mob/user)
+/obj/machinery/radiocarbon_spectrometer/interface_interact(mob/user)
 	ui_interact(user)
 	return TRUE
 
-/obj/machinery/radiocarbon_spectrometer/attackby(var/obj/I as obj, var/mob/user as mob)
+/obj/machinery/radiocarbon_spectrometer/attackby(obj/I as obj, mob/user as mob)
 	if(scanning)
 		to_chat(user, "<span class='warning'>You can't do that while [src] is scanning!</span>")
 	else
@@ -118,7 +118,7 @@
 	if(total_purity && fresh_coolant)
 		coolant_purity = total_purity / fresh_coolant
 
-/obj/machinery/radiocarbon_spectrometer/ui_interact(mob/user, ui_key = "main", var/datum/nanoui/ui = null, var/force_open = 1)
+/obj/machinery/radiocarbon_spectrometer/ui_interact(mob/user, ui_key = "main", datum/nanoui/ui = null, force_open = 1)
 
 	if(user.stat)
 		return
@@ -293,7 +293,7 @@
 
 		var/anom_found = 0
 		if(G)
-			data = " - Spectometric analysis on mineral sample has determined type [finds_as_strings[list_find(responsive_carriers, G.source_mineral)]]<br>"
+			data = " - Spectometric analysis on mineral sample has determined type [finds_as_strings[responsive_carriers.Find(G.source_mineral)]]<br>"
 			if(G.age_billion > 0)
 				data += " - Radiometric dating shows age of [G.age_billion].[G.age_million] billion years<br>"
 			else if(G.age_million > 0)
@@ -303,7 +303,7 @@
 			data += " - Chromatographic analysis shows the following materials present:<br>"
 			for(var/carrier in G.find_presence)
 				if(G.find_presence[carrier])
-					var/index = list_find(responsive_carriers, carrier)
+					var/index = responsive_carriers.Find(carrier)
 					if(index > 0 && index <= finds_as_strings.len)
 						data += "	> [100 * G.find_presence[carrier]]% [finds_as_strings[index]]<br>"
 

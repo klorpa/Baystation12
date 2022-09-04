@@ -1,4 +1,4 @@
-/mob/living/carbon/human/proc/get_unarmed_attack(var/mob/target, var/hit_zone = null)
+/mob/living/carbon/human/proc/get_unarmed_attack(mob/target, hit_zone = null)
 	if(!hit_zone)
 		hit_zone = zone_sel.selecting
 
@@ -241,8 +241,6 @@
 
 			var/real_damage = rand_damage
 			real_damage += attack.get_unarmed_damage(H)
-			real_damage *= damage_multiplier
-			rand_damage *= damage_multiplier
 			if(MUTATION_HULK in H.mutations)
 				real_damage *= 2 // Hulks do twice the damage
 				rand_damage *= 2
@@ -258,9 +256,6 @@
 				admin_attack_log(M, src, "Disarmed their victim.", "Was disarmed.", "disarmed")
 				H.species.disarm_attackhand(H, src)
 
-	return
-
-/mob/living/carbon/human/proc/afterattack(atom/target as mob|obj|turf|area, mob/living/user as mob|obj, inrange, params)
 	return
 
 /mob/living/carbon/human/attack_generic(mob/user, damage, attack_message, environment_smash, damtype = DAMAGE_BRUTE, armorcheck = "melee", dam_flags = EMPTY_BITFIELD)
@@ -308,7 +303,7 @@
 	If you are applying pressure to another and attempt to apply pressure to yourself, you'll have to switch to an empty hand which will also stop do_after()
 	Changing targeted zones should also stop do_after(), preventing you from applying pressure to more than one body part at once.
 */
-/mob/living/carbon/human/proc/apply_pressure(mob/living/user, var/target_zone)
+/mob/living/carbon/human/proc/apply_pressure(mob/living/user, target_zone)
 	var/obj/item/organ/external/organ = get_organ(target_zone)
 	if(!organ || !(organ.status & ORGAN_BLEEDING) || BP_IS_ROBOTIC(organ))
 		return 0

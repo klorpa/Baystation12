@@ -51,7 +51,7 @@
 		..()
 	return
 
-/obj/structure/bookcase/attack_hand(var/mob/user as mob)
+/obj/structure/bookcase/attack_hand(mob/user as mob)
 	if(contents.len)
 		var/obj/item/book/choice = input("Which book would you like to remove from the shelf?") as null|obj in contents
 		if(choice)
@@ -66,18 +66,18 @@
 
 /obj/structure/bookcase/ex_act(severity)
 	switch(severity)
-		if(1.0)
+		if(EX_ACT_DEVASTATING)
 			for(var/obj/item/book/b in contents)
 				qdel(b)
 			qdel(src)
 			return
-		if(2.0)
+		if(EX_ACT_HEAVY)
 			for(var/obj/item/book/b in contents)
 				if (prob(50)) b.dropInto(loc)
 				else qdel(b)
 			qdel(src)
 			return
-		if(3.0)
+		if(EX_ACT_LIGHT)
 			if (prob(50))
 				for(var/obj/item/book/b in contents)
 					b.dropInto(loc)
@@ -149,7 +149,7 @@
 	var/carved = 0	 // Has the book been hollowed out for use as a secret storage item?
 	var/obj/item/store	//What's in the book?
 
-/obj/item/book/attack_self(var/mob/user as mob)
+/obj/item/book/attack_self(mob/user as mob)
 	if(carved)
 		if(store)
 			to_chat(user, "<span class='notice'>[store] falls out of [title]!</span>")

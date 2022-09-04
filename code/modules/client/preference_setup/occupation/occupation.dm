@@ -314,7 +314,7 @@
 			var/choice = input("Choose an title for [job.title].", "Choose Title", pref.GetPlayerAltTitle(job)) as anything in choices|null
 			if(choice && CanUseTopic(user))
 				SetPlayerAltTitle(job, choice)
-				return (pref.equip_preview_mob ? TOPIC_REFRESH_UPDATE_PREVIEW : TOPIC_REFRESH)
+				return ((pref.preview_job || pref.preview_gear) ? TOPIC_REFRESH_UPDATE_PREVIEW : TOPIC_REFRESH)
 
 	else if(href_list["set_job"])
 		var/set_job = href_list["set_job"]
@@ -328,7 +328,7 @@
 			else if(set_to > JOB_LEVEL_NEVER)
 				set_to = JOB_LEVEL_HIGH
 		if(SetJob(user, set_job, set_to))
-			return (pref.equip_preview_mob ? TOPIC_REFRESH_UPDATE_PREVIEW : TOPIC_REFRESH)
+			return ((pref.preview_job || pref.preview_gear) ? TOPIC_REFRESH_UPDATE_PREVIEW : TOPIC_REFRESH)
 
 	else if(href_list["char_branch"])
 		var/datum/job/job = locate(href_list["checking_job"])
@@ -341,7 +341,7 @@
 				pref.ranks -= job.title
 				pref.skills_allocated = pref.sanitize_skills(pref.skills_allocated)		// Check our skillset is still valid
 				validate_branch_and_rank()
-				return (pref.equip_preview_mob ? TOPIC_REFRESH_UPDATE_PREVIEW : TOPIC_REFRESH)
+				return ((pref.preview_job || pref.preview_gear) ? TOPIC_REFRESH_UPDATE_PREVIEW : TOPIC_REFRESH)
 			return TOPIC_REFRESH
 
 	else if(href_list["char_rank"])
@@ -356,7 +356,7 @@
 				pref.ranks[job.title] = choice
 				pref.skills_allocated = pref.sanitize_skills(pref.skills_allocated)		// Check our skillset is still valid
 				validate_branch_and_rank()
-				return (pref.equip_preview_mob ? TOPIC_REFRESH_UPDATE_PREVIEW : TOPIC_REFRESH)
+				return ((pref.preview_job || pref.preview_gear) ? TOPIC_REFRESH_UPDATE_PREVIEW : TOPIC_REFRESH)
 			return TOPIC_REFRESH
 	else if(href_list["set_skills"])
 		var/rank = href_list["set_skills"]
@@ -461,7 +461,7 @@
 
 	return 1
 
-/datum/category_item/player_setup_item/occupation/proc/GetCurrentJobLevel(var/job_title)
+/datum/category_item/player_setup_item/occupation/proc/GetCurrentJobLevel(job_title)
 	if(pref.job_high == job_title)
 		. = JOB_LEVEL_HIGH
 	else if(job_title in pref.job_medium)
@@ -471,7 +471,7 @@
 	else
 		. = JOB_LEVEL_NEVER
 
-/datum/category_item/player_setup_item/occupation/proc/SetJobDepartment(var/datum/job/job, var/level)
+/datum/category_item/player_setup_item/occupation/proc/SetJobDepartment(datum/job/job, level)
 	if(!job || !level)	return 0
 
 	var/current_level = GetCurrentJobLevel(job.title)
@@ -496,7 +496,7 @@
 
 	return 1
 
-/datum/preferences/proc/CorrectLevel(var/datum/job/job, var/level)
+/datum/preferences/proc/CorrectLevel(datum/job/job, level)
 	if(!job || !level)	return 0
 	switch(level)
 		if(1)

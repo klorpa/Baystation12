@@ -1,14 +1,9 @@
 /obj/item/clothing/accessory/chaplain
+	abstract_type = /obj/item/clothing/accessory/chaplain
 	name = "base chaplain insignia"
 	item_state = "chaplaininsignia"
-	on_rolled = list("down" = "none")
+	on_rolled_down = ACCESSORY_ROLLED_NONE
 	slot = ACCESSORY_SLOT_INSIGNIA
-
-
-/obj/item/clothing/accessory/chaplain/Initialize()
-	. = ..()
-	INIT_SKIP_QDELETED
-	INIT_DISALLOW_TYPE(/obj/item/clothing/accessory/chaplain)
 
 
 /obj/item/clothing/accessory/chaplain/christianity
@@ -16,7 +11,6 @@
 	desc = "An insignia worn by chaplains. The cross represents Christianity."
 	icon_state = "christianinsignia"
 	item_state = "chaplaininsignia"
-	on_rolled = list("down" = "none")
 	slot = ACCESSORY_SLOT_INSIGNIA
 
 

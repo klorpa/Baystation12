@@ -29,7 +29,7 @@
 
 	var/chained = 0//Adminbus chain-grab
 
-/obj/singularity/New(loc, var/starting_energy = 50, var/temp = 0)
+/obj/singularity/New(loc, starting_energy = 50, temp = 0)
 	//CARN: admin-alert for chuckle-fuckery.
 	admin_investigate_setup()
 	energy = starting_energy
@@ -56,14 +56,14 @@
 	if(current_size == STAGE_SUPER)//IT'S UNSTOPPABLE
 		return
 	switch(severity)
-		if(1.0)
+		if(EX_ACT_DEVASTATING)
 			if(prob(25))
 				investigate_log("has been destroyed by an explosion.", I_SINGULO)
 				qdel(src)
 				return
 			else
 				energy += 50
-		if(2.0 to 3.0)
+		if(EX_ACT_HEAVY to EX_ACT_LIGHT)
 			energy += round((rand(20,60)/2),1)
 			return
 
@@ -110,7 +110,7 @@
 	else
 		dissipate_track++
 
-/obj/singularity/proc/expand(var/force_size = 0, var/growing = 1)
+/obj/singularity/proc/expand(force_size = 0, growing = 1)
 	if(current_size == STAGE_SUPER)//if this is happening, this is an error
 		message_admins("expand() was called on a super singulo. This should not happen. Contact a coder immediately!")
 		return
@@ -285,7 +285,7 @@
 	src.energy += A.singularity_act(src, current_size)
 	return
 
-/obj/singularity/proc/move(var/force_move = 0)
+/obj/singularity/proc/move(force_move = 0)
 	if(!move_self)
 		return 0
 
@@ -312,7 +312,7 @@
 		last_failed_movement = movement_dir
 	return 0
 
-/obj/singularity/proc/check_turfs_in(var/direction = 0, var/step = 0)
+/obj/singularity/proc/check_turfs_in(direction = 0, step = 0)
 	if(!direction)
 		return 0
 	var/steps = 0

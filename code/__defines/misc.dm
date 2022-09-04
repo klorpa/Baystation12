@@ -62,7 +62,7 @@
 #define MAX_BOOK_MESSAGE_LEN  18432
 #define MAX_LNAME_LEN         64
 #define MAX_NAME_LEN          26
-#define MAX_DESC_LEN          128
+#define MAX_DESC_LEN          256
 #define MAX_TEXTFILE_LENGTH 128000		// 512GQ file
 
 // Event defines.
@@ -299,3 +299,9 @@
 // Severities for emp_act()
 #define EMP_ACT_HEAVY 1
 #define EMP_ACT_LIGHT 2
+
+
+// Severities for ex_act()
+#define EX_ACT_DEVASTATING 1 // Within devastation range - Destructive/deadly, unlikely to survive.
+#define EX_ACT_HEAVY 2 // Within heavy range - Heavy damage, very dangerous
+#define EX_ACT_LIGHT 3 // Within light range - Minor damage.

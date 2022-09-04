@@ -1,10 +1,11 @@
 /obj/item/clothing/accessory/storage
+	abstract_type = /obj/item/clothing/accessory/storage
 	name = "base storage accessory"
 	icon_state = "webbing"
 	slot = ACCESSORY_SLOT_UTILITY
 	w_class = ITEM_SIZE_NORMAL
 	accessory_flags = ACCESSORY_REMOVABLE | ACCESSORY_HIGH_VISIBILITY
-	on_rolled = list("down" = "none")
+	on_rolled_down = ACCESSORY_ROLLED_NONE
 
 	var/obj/item/storage/internal/container
 	var/max_w_class = ITEM_SIZE_SMALL
@@ -13,8 +14,8 @@
 
 /obj/item/clothing/accessory/storage/Initialize()
 	. = ..()
-	INIT_SKIP_QDELETED
-	INIT_DISALLOW_TYPE(/obj/item/clothing/accessory/storage)
+	if (. == INITIALIZE_HINT_QDEL)
+		return
 	if (!slots)
 		. = INITIALIZE_HINT_QDEL
 		crash_with("[type] created with no slots")
@@ -147,7 +148,6 @@
 
 /obj/item/clothing/accessory/storage/knifeharness/Initialize()
 	. = ..()
-	INIT_SKIP_QDELETED
 	if (container)
 		container.can_hold = list(
 			/obj/item/material/hatchet,
@@ -167,7 +167,6 @@
 
 /obj/item/clothing/accessory/storage/bandolier/Initialize()
 	. = ..()
-	INIT_SKIP_QDELETED
 	if (container)
 		container.can_hold = list(
 			/obj/item/ammo_casing,
@@ -177,7 +176,7 @@
 			/obj/item/rcd_ammo,
 			/obj/item/reagent_containers/syringe,
 			/obj/item/reagent_containers/hypospray,
-			/obj/item/reagent_containers/hypospray/autoinjector,
+			/obj/item/reagent_containers/hypospray/autoinjector/inaprovaline,
 			/obj/item/syringe_cartridge,
 			/obj/item/plastique,
 			/obj/item/clothing/mask/smokable,
@@ -198,7 +197,6 @@
 
 /obj/item/clothing/accessory/storage/bandolier/safari/Initialize()
 	. = ..()
-	INIT_SKIP_QDELETED
 	if (container)
 		for(var/i = 1 to abs(slots))
 			new /obj/item/net_shell (container)

@@ -18,7 +18,7 @@
 	natural_weapon = /obj/item/natural_weapon/bite/spider/webslinger
 
 	poison_per_bite = 2
-	poison_type = /datum/reagent/psilocybin
+	poison_type = /datum/reagent/drugs/psilocybin
 	ai_holder = /datum/ai_holder/simple_animal/ranged
 
 // Check if we should bola, or just shoot the pain ball
@@ -119,9 +119,10 @@
 	if (istype(P, /obj/item/projectile/webball))
 		add_stack()
 
-/obj/aura/web/hitby(obj/O, mob/living/M)
+/obj/aura/web/hitby(atom/movable/AM, datum/thrownthing/TT)
 	. = ..()
-	remove_webbing(M)
+	if (isliving(AM))
+		remove_webbing(AM)
 
 /obj/aura/web/proc/remove_webbing(mob/living/M)
 	if (!M)

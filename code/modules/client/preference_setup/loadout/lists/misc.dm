@@ -6,7 +6,7 @@
 	display_name = "union membership"
 	path = /obj/item/card/union
 
-/datum/gear/union_card/spawn_on_mob(var/mob/living/carbon/human/H, var/metadata)
+/datum/gear/union_card/spawn_on_mob(mob/living/carbon/human/H, metadata)
 	. = ..()
 	if(.)
 		var/obj/item/card/union/card = .
@@ -144,11 +144,6 @@
 	display_name = "plastic comb"
 	path = /obj/item/haircomb
 	flags = GEAR_HAS_COLOR_SELECTION
-
-/datum/gear/mask
-	display_name = "sterile mask"
-	path = /obj/item/clothing/mask/surgical
-	cost = 2
 
 /datum/gear/smokingpipe
 	display_name = "pipe, smoking"

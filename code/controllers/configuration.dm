@@ -1,4 +1,4 @@
-/configuration
+/datum/configuration
 	var/static/atom/movable/clickable_stat/statLine
 
 	/// server name (for world name / status)
@@ -89,6 +89,9 @@
 
 	/// Length of time before round start when autogamemode vote is called (in seconds, default 100).
 	var/static/vote_autogamemode_timeleft = 100
+
+	/// Length of time before round start (in seconds)
+	var/static/pre_game_time = 180
 
 	/// vote does not default to nochange/norestart (tbi)
 	var/static/vote_no_default = FALSE
@@ -295,11 +298,13 @@
 	/// Clients with these byond versions will be banned. "512.1234;513.2345" etc.
 	var/static/list/forbidden_versions = list()
 
-	var/static/minimum_byond_version = 512
+	var/static/minimum_byond_version = 514
 
-	var/static/minimum_byond_build = 1488
+	var/static/minimum_byond_build = 1568
 
 	var/static/login_export_addr
+
+	var/static/warn_if_staff_same_ip = FALSE
 
 	var/static/enter_allowed = TRUE
 
@@ -432,7 +437,7 @@
 	var/static/run_empty_levels = FALSE
 
 
-/configuration/New()
+/datum/configuration/New()
 	load_config()
 	load_options()
 	load_map()
@@ -443,7 +448,7 @@
 
 
 /// Read a text file, stripping lines starting with # and empties
-/configuration/proc/read_commentable(filename)
+/datum/configuration/proc/read_commentable(filename)
 	var/list/result = list()
 	var/list/lines = file2list(filename)
 	for (var/line in lines)
@@ -456,7 +461,7 @@
 	return result
 
 
-/configuration/proc/read_config(filename)
+/datum/configuration/proc/read_config(filename)
 	var/list/result = list()
 	var/lines = read_commentable(filename)
 	for (var/line in lines)
@@ -474,7 +479,7 @@
 	return result
 
 
-/configuration/proc/load_config()
+/datum/configuration/proc/load_config()
 	var/list/file = read_config("config/config.txt")
 	for (var/name in file)
 		var/value = file[name]
@@ -569,6 +574,8 @@
 					log_misc("Invalid vote_autotransfer_interval: [value]")
 			if ("vote_autogamemode_timeleft")
 				vote_autogamemode_timeleft = text2num(value)
+			if ("pre_game_time")
+				pre_game_time = text2num(value)
 			if ("ert_admin_only")
 				ert_admin_call_only = TRUE
 			if ("respawn_delay")
@@ -844,11 +851,13 @@
 				warn_autoban_duration = max(1, text2num(value))
 			if ("run_empty_levels")
 				run_empty_levels = TRUE
+			if ("warn_if_staff_same_ip")
+				warn_if_staff_same_ip = TRUE
 			else
 				log_misc("Unknown setting in config/config.txt: '[name]'")
 
 
-/configuration/proc/load_options()
+/datum/configuration/proc/load_options()
 	var/list/file = read_config("config/game_options.txt")
 	for (var/name in file)
 		var/value = file[name]
@@ -896,7 +905,7 @@
 				log_misc("Unknown setting in config/game_options.txt: '[name]'")
 
 
-/configuration/proc/load_map()
+/datum/configuration/proc/load_map()
 	if (!GLOB.using_map?.config_path)
 		return
 	var/list/file = read_config(GLOB.using_map.config_path)
@@ -905,7 +914,7 @@
 		GLOB.using_map.setup_config(name, value, GLOB.using_map.config_path)
 
 
-/configuration/proc/load_sql()
+/datum/configuration/proc/load_sql()
 	var/list/file = read_config("config/dbconfig.txt")
 	for (var/name in file)
 		var/value = file[name]
@@ -932,14 +941,14 @@
 				log_misc("Unknown setting in config/dbconfig.txt: '[name]'")
 
 
-/configuration/proc/load_hub_entry()
+/datum/configuration/proc/load_hub_entry()
 	var/list/file = read_commentable("config/hub.txt")
 	if (!length(file))
 		return
 	hub_entry = file.Join("<br>")
 
 
-/configuration/proc/generate_hub_entry()
+/datum/configuration/proc/generate_hub_entry()
 	var/static/regex/replace_server = new (@"\$SERVER", "g")
 	var/static/regex/replace_host = new (@"\$HOST", "g")
 	var/static/regex/replace_wiki = new (@"\$WIKI", "g")
@@ -980,7 +989,7 @@
 	return entry
 
 
-/configuration/proc/UpdateStat()
+/datum/configuration/proc/UpdateStat()
 	if (!statLine)
 		statLine = new (null, src)
 		statLine.name = "Edit"

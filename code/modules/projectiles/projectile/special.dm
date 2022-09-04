@@ -9,7 +9,7 @@
 	var/heavy_effect_range = 1
 	var/light_effect_range = 1
 
-/obj/item/projectile/ion/on_impact(var/atom/A)
+/obj/item/projectile/ion/on_impact(atom/A)
 	empulse(A, heavy_effect_range, light_effect_range)
 	return 1
 
@@ -28,7 +28,7 @@
 	damage = 50
 	damage_flags = DAMAGE_FLAG_BULLET | DAMAGE_FLAG_SHARP | DAMAGE_FLAG_EDGE
 
-/obj/item/projectile/bullet/gyro/on_hit(var/atom/target, var/blocked = 0)
+/obj/item/projectile/bullet/gyro/on_hit(atom/target, blocked = 0)
 	explosion(target, -1, 0, 2)
 	return 1
 
@@ -50,7 +50,7 @@
 	if(src)//Do not add to this if() statement, otherwise the meteor won't delete them
 		if(A)
 
-			A.ex_act(2)
+			A.ex_act(EX_ACT_HEAVY)
 			playsound(src.loc, 'sound/effects/meteorimpact.ogg', 40, 1)
 
 			for(var/mob/M in range(10, src))
@@ -69,7 +69,7 @@
 	damage_type = DAMAGE_TOXIN
 	nodamage = TRUE
 
-/obj/item/projectile/energy/floramut/on_hit(var/atom/target, var/blocked = 0)
+/obj/item/projectile/energy/floramut/on_hit(atom/target, blocked = 0)
 	var/mob/living/M = target
 	if(ishuman(target))
 		var/mob/living/carbon/human/H = M
@@ -111,7 +111,7 @@
 	damage_type = DAMAGE_TOXIN
 	nodamage = TRUE
 
-/obj/item/projectile/energy/florayield/on_hit(var/atom/target, var/blocked = 0)
+/obj/item/projectile/energy/florayield/on_hit(atom/target, blocked = 0)
 	var/mob/M = target
 	if(ishuman(target)) //These rays make plantmen fat.
 		var/mob/living/carbon/human/H = M
@@ -126,7 +126,7 @@
 /obj/item/projectile/beam/mindflayer
 	name = "flayer ray"
 
-/obj/item/projectile/beam/mindflayer/on_hit(var/atom/target, var/blocked = 0)
+/obj/item/projectile/beam/mindflayer/on_hit(atom/target, blocked = 0)
 	if(ishuman(target))
 		var/mob/living/carbon/human/M = target
 		M.confused += rand(5,8)

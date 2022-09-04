@@ -38,20 +38,20 @@
 
 /obj/structure/morgue/ex_act(severity)
 	switch(severity)
-		if(1.0)
+		if(EX_ACT_DEVASTATING)
 			for(var/atom/movable/A as mob|obj in src)
 				A.forceMove(src.loc)
 				ex_act(severity)
 			qdel(src)
 			return
-		if(2.0)
+		if(EX_ACT_HEAVY)
 			if (prob(50))
 				for(var/atom/movable/A as mob|obj in src)
 					A.forceMove(src.loc)
 					ex_act(severity)
 				qdel(src)
 				return
-		if(3.0)
+		if(EX_ACT_LIGHT)
 			if (prob(5))
 				for(var/atom/movable/A as mob|obj in src)
 					A.forceMove(src.loc)
@@ -73,7 +73,7 @@
 		src.connected = new /obj/structure/m_tray( src.loc )
 		step(src.connected, src.dir)
 		var/turf/T = get_step(src, src.dir)
-		if (list_find(T.contents, src.connected))
+		if (T.contents.Find(src.connected))
 			src.connected.connected = src
 			src.icon_state = "morgue0"
 			for(var/atom/movable/A as mob|obj in src)
@@ -87,7 +87,7 @@
 	update()
 	return
 
-/obj/structure/morgue/attack_robot(var/mob/user)
+/obj/structure/morgue/attack_robot(mob/user)
 	if(Adjacent(user))
 		return attack_hand(user)
 	else return ..()
@@ -113,7 +113,7 @@
 	src.connected = new /obj/structure/m_tray( src.loc )
 	step(src.connected, EAST)
 	var/turf/T = get_step(src, EAST)
-	if (list_find(T.contents, src.connected))
+	if (T.contents.Find(src.connected))
 		src.connected.connected = src
 		src.icon_state = "morgue0"
 		for(var/atom/movable/A as mob|obj in src)
@@ -159,7 +159,7 @@
 	return
 
 /obj/structure/m_tray/MouseDrop_T(atom/movable/O as mob|obj, mob/user as mob)
-	if ((!( istype(O, /atom/movable) ) || O.anchored || get_dist(user, src) > 1 || get_dist(user, O) > 1 || list_find(user.contents, src) || list_find(user.contents, O)))
+	if ((!( istype(O, /atom/movable) ) || O.anchored || get_dist(user, src) > 1 || get_dist(user, O) > 1 || user.contents.Find(src) || user.contents.Find(O)))
 		return
 	if (!ismob(O) && !istype(O, /obj/structure/closet/body_bag))
 		return
@@ -208,20 +208,20 @@
 
 /obj/structure/crematorium/ex_act(severity)
 	switch(severity)
-		if(1)
+		if(EX_ACT_DEVASTATING)
 			for(var/atom/movable/A as mob|obj in src)
 				A.forceMove(src.loc)
 				ex_act(severity)
 			qdel(src)
 			return
-		if(2)
+		if(EX_ACT_HEAVY)
 			if (prob(50))
 				for(var/atom/movable/A as mob|obj in src)
 					A.forceMove(src.loc)
 					ex_act(severity)
 				qdel(src)
 				return
-		if(3)
+		if(EX_ACT_LIGHT)
 			if (prob(5))
 				for(var/atom/movable/A as mob|obj in src)
 					A.forceMove(src.loc)
@@ -246,7 +246,7 @@
 		src.connected = new /obj/structure/c_tray(src.loc)
 		step(src.connected, dir)
 		var/turf/T = get_step(src, dir)
-		if (list_find(T.contents, src.connected))
+		if (T.contents.Find(src.connected))
 			src.connected.connected = src
 			src.icon_state = "crema0"
 			for(var/atom/movable/A as mob|obj in src)
@@ -279,7 +279,7 @@
 	src.connected = new /obj/structure/c_tray( src.loc )
 	step(src.connected, SOUTH)
 	var/turf/T = get_step(src, SOUTH)
-	if (list_find(T.contents, src.connected))
+	if (T.contents.Find(src.connected))
 		src.connected.connected = src
 		src.icon_state = "crema0"
 		for(var/atom/movable/A as mob|obj in src)
@@ -359,7 +359,7 @@
 					else
 						playsound(src, 'sound/effects/ghost2.ogg', 10, 5)
 
-				admin_attack_log(M, A, "Cremated their victim.", "Was cremated.", "cremated alive")
+				admin_attack_log(A, M, "Cremated their victim.", "Was cremated.", "cremated alive")
 				M.audible_message("[M]'s screams cease, as does any movement within the [src]. All that remains is a dull, empty silence.")
 				M.dust()
 
@@ -408,7 +408,7 @@
 	return
 
 /obj/structure/c_tray/MouseDrop_T(atom/movable/O as mob|obj, mob/user as mob)
-	if ((!( istype(O, /atom/movable) ) || O.anchored || get_dist(user, src) > 1 || get_dist(user, O) > 1 || list_find(user.contents, src) || list_find(user.contents, O)))
+	if ((!( istype(O, /atom/movable) ) || O.anchored || get_dist(user, src) > 1 || get_dist(user, O) > 1 || user.contents.Find(src) || user.contents.Find(O)))
 		return
 	if (!ismob(O) && !istype(O, /obj/structure/closet/body_bag))
 		return

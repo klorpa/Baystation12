@@ -1,4 +1,4 @@
-/datum/psi_complexus/proc/check_latency_trigger(var/trigger_strength = 0, var/source, var/redactive = FALSE)
+/datum/psi_complexus/proc/check_latency_trigger(trigger_strength = 0, source, redactive = FALSE)
 
 	if(!LAZYLEN(latencies) || world.time < next_latency_trigger)
 		return FALSE
@@ -14,4 +14,5 @@
 	to_chat(owner, SPAN_DANGER("You scream internally as your [faculty_decl.name] faculty is forced into operancy by [source]!"))
 	next_latency_trigger = world.time + rand(600, 1800) * new_rank
 	if(!redactive) owner.adjustBrainLoss(rand(trigger_strength * 2, trigger_strength * 4))
+	log_and_message_admins("gained the [faculty_decl.name] psionic faculty by: [source].", owner)
 	return TRUE

@@ -46,13 +46,13 @@ var/global/photo_count = 0
 	overlays.Cut()
 	var/scale = 8/(photo_size*32)
 	var/image/small_img = image(img)
-	small_img.transform *= scale
+	small_img.SetTransform(scale = scale)
 	small_img.pixel_x = -32*(photo_size-1)/2 - 3
 	small_img.pixel_y = -32*(photo_size-1)/2
 	overlays |= small_img
 
 	tiny = image(img)
-	tiny.transform *= 0.5*scale
+	tiny.SetTransform(scale = 0.5 * scale)
 	tiny.underlays += image('icons/obj/bureaucracy.dmi',"photo")
 	tiny.pixel_x = -32*(photo_size-1)/2 - 3
 	tiny.pixel_y = -32*(photo_size-1)/2 + 3
@@ -128,7 +128,7 @@ var/global/photo_count = 0
 						M.put_in_l_hand(src)
 			add_fingerprint(usr)
 			return
-		if(over_object == usr && in_range(src, usr) || list_find(usr.contents, src))
+		if(over_object == usr && in_range(src, usr) || usr.contents.Find(src))
 			if(usr.s_active)
 				usr.s_active.close(usr)
 			show_to(usr)
@@ -272,7 +272,7 @@ var/global/photo_count = 0
 	if(!user.put_in_inactive_hand(p))
 		p.dropInto(loc)
 
-/obj/item/photo/proc/copy(var/copy_id = 0)
+/obj/item/photo/proc/copy(copy_id = 0)
 	var/obj/item/photo/p = new/obj/item/photo()
 
 	p.SetName(name) // Do this first, manually, to make sure listeners are alerted properly.

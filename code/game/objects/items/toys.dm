@@ -367,14 +367,14 @@
 /obj/item/toy/prize/attack_self(mob/user as mob)
 	if(cooldown < world.time - 8)
 		to_chat(user, "<span class='notice'>You play with [src].</span>")
-		playsound(user, 'sound/mecha/mechstep.ogg', 20, 1)
+		playsound(user, 'sound/mecha/mechstep01.ogg', 20, 1)
 		cooldown = world.time
 
 /obj/item/toy/prize/attack_hand(mob/user as mob)
 	if(loc == user)
 		if(cooldown < world.time - 8)
 			to_chat(user, "<span class='notice'>You play with [src].</span>")
-			playsound(user, 'sound/mecha/mechturn.ogg', 20, 1)
+			playsound(user, 'sound/mecha/mechmove01.ogg', 20, 1)
 			cooldown = world.time
 			return
 	..()
@@ -682,6 +682,7 @@
  */
 
 /obj/structure/plushie
+	abstract_type = /obj/structure/plushie
 	name = "generic plush"
 	desc = "A very generic plushie. It seems to not want to exist."
 	icon = 'icons/obj/toy.dmi'
@@ -690,11 +691,6 @@
 	anchored = FALSE
 	density = TRUE
 	var/phrase = "I don't want to exist anymore!"
-
-
-/obj/structure/plushie/Initialize()
-	. = ..()
-	INIT_DISALLOW_TYPE(/obj/structure/plushie)
 
 
 /obj/structure/plushie/attack_hand(mob/living/user)
@@ -745,16 +741,12 @@
 
 
 /obj/item/toy/plushie
+	abstract_type = /obj/item/toy/plushie
 	name = "generic small plush"
 	desc = "A very generic small plushie. It seems to not want to exist."
 	icon = 'icons/obj/toy.dmi'
 	icon_state = "nymphplushie"
 	w_class = ITEM_SIZE_SMALL
-
-
-/obj/item/toy/plushie/Initialize()
-	. = ..()
-	INIT_DISALLOW_TYPE(/obj/item/toy/plushie)
 
 
 /obj/item/toy/plushie/attack_self(mob/living/user)
@@ -808,6 +800,10 @@
 	desc = "A farwa plush doll. It's soft and comforting!"
 	icon_state = "farwaplushie"
 
+/obj/item/toy/plushie/thoom
+	name = "th'oom plush"
+	desc = "A plush Th'oom with big, button eyes. It smells like mushrooms."
+	icon_state = "thoomplushie"
 
 //Toy cult sword
 /obj/item/toy/cultsword
@@ -964,7 +960,7 @@
 /obj/item/toy/eightball/attack_self(mob/user)
 	user.visible_message("<span class='notice'>\The [user] shakes \the [src] for a moment, and it says, \"[pick(possible_answers) ].\"</span>")
 
-/obj/item/toy/eightball/afterattack(obj/O, mob/user, var/proximity)
+/obj/item/toy/eightball/afterattack(obj/O, mob/user, proximity)
 	. = ..()
 	if (proximity)
 		visible_message("<span class='warning'>\The [src] says, \"[pick(possible_answers) ]\" as it hits \the [O]!</span>")

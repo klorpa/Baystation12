@@ -14,7 +14,7 @@ PROCESSING_SUBSYSTEM_DEF(psi)
 	var/list/armour_faculty_by_type = list()
 	var/list/faculties_by_intent  = list()
 
-/datum/controller/subsystem/processing/psi/proc/get_faculty(var/faculty)
+/datum/controller/subsystem/processing/psi/proc/get_faculty(faculty)
 	return faculties_by_name[faculty] || faculties_by_id[faculty]
 
 /datum/controller/subsystem/processing/psi/Initialize(start_uptime)
@@ -28,7 +28,7 @@ PROCESSING_SUBSYSTEM_DEF(psi)
 	var/list/powers = decls_repository.get_decls_of_subtype(/decl/psionic_power)
 	for(var/ptype in powers)
 		var/decl/psionic_power/power = powers[ptype]
-		if(power.faculty)
+		if(!is_abstract(power) && power.faculty)
 			var/decl/psionic_faculty/faculty = get_faculty(power.faculty)
 			if(faculty)
 				faculty.powers |= power

@@ -104,6 +104,8 @@ GLOBAL_VAR(planet_repopulation_disabled)
 
 	for (var/T in subtypesof(/datum/map_template/ruin/exoplanet))
 		var/datum/map_template/ruin/exoplanet/ruin = T
+		if (initial(ruin.template_flags) & TEMPLATE_FLAG_RUIN_STARTS_DISALLOWED)
+			continue
 		if (ruin_tags_whitelist && !(ruin_tags_whitelist & initial(ruin.ruin_tags)))
 			continue
 		if (ruin_tags_blacklist & initial(ruin.ruin_tags))
@@ -116,6 +118,19 @@ GLOBAL_VAR(planet_repopulation_disabled)
 	generate_atmosphere()
 	for (var/datum/exoplanet_theme/T in themes)
 		T.adjust_atmosphere(src)
+	if (atmosphere)
+		//Set up gases for living things
+		if (!length(breathgas))
+			var/list/goodgases = gas_data.gases.Copy()
+			var/gasnum = min(rand(1,3), goodgases.len)
+			for (var/i = 1 to gasnum)
+				var/gas = pick(goodgases)
+				breathgas[gas] = round(0.4*goodgases[gas], 0.1)
+				goodgases -= gas
+		if (!badgas)
+			var/list/badgases = gas_data.gases.Copy()
+			badgases -= atmosphere.gas
+			badgas = pick(badgases)
 	generate_flora()
 	generate_map()
 	generate_features()
@@ -241,7 +256,7 @@ GLOBAL_VAR(planet_repopulation_disabled)
 	while(num)
 		attempts--
 		var/turf/T = locate(rand(TRANSITIONEDGE + LANDING_ZONE_RADIUS, maxx - TRANSITIONEDGE - LANDING_ZONE_RADIUS), rand(TRANSITIONEDGE + LANDING_ZONE_RADIUS, maxy - TRANSITIONEDGE - LANDING_ZONE_RADIUS),map_z[map_z.len])
-		if (!T || (T in places)) // Two landmarks on one turf is forbidden as the landmark code doesn't work with it.
+		if (!T || (T in places) || T.density) // Don't allow two landmarks on one turf, and don't use a dense turf.
 			continue
 		if (attempts >= 0) // While we have the patience, try to find better spawn points. If out of patience, put them down wherever, so long as there are no repeats.
 			var/valid = TRUE

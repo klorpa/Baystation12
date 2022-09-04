@@ -19,9 +19,7 @@
 		I.appearance_flags = DEFAULT_APPEARANCE_FLAGS | PIXEL_SCALE
 		I.pixel_x = rand(-16,16)
 		I.pixel_y = rand(-16,16)
-		var/matrix/M = matrix()
-		M.Turn(rand(0,360))
-		I.transform = M
+		I.SetTransform(rotation = rand(0, 360))
 		overlays += I
 
 /obj/structure/cargopile/attack_hand(mob/user)
@@ -80,7 +78,7 @@
 				carrying -= chosen_obj
 	. = ..()
 
-/obj/item/mech_equipment/clamp/afterattack(var/atom/target, var/mob/living/user, var/inrange, var/params)
+/obj/item/mech_equipment/clamp/afterattack(atom/target, mob/living/user, inrange, params)
 	. = ..()
 
 	if(.)
@@ -185,7 +183,7 @@
 				to_chat(user, "You push [target] out of the way.")
 				owner.visible_message("[owner] pushes [target] out of the way.")
 
-/obj/item/mech_equipment/clamp/attack_self(var/mob/user)
+/obj/item/mech_equipment/clamp/attack_self(mob/user)
 	. = ..()
 	if(.)
 		drop_carrying(user, TRUE)
@@ -196,7 +194,7 @@
 	else
 		..()
 
-/obj/item/mech_equipment/clamp/proc/drop_carrying(var/mob/user, var/choose_object)
+/obj/item/mech_equipment/clamp/proc/drop_carrying(mob/user, choose_object)
 	if(!length(carrying))
 		to_chat(user, SPAN_WARNING("You are not carrying anything in \the [src]."))
 		return
@@ -285,7 +283,7 @@
 	. = ..()
 	update_icon()
 
-/obj/item/mech_equipment/light/attack_self(var/mob/user)
+/obj/item/mech_equipment/light/attack_self(mob/user)
 	. = ..()
 	if(.)
 		toggle()
@@ -327,9 +325,46 @@
 	restricted_software = list(MECH_SOFTWARE_UTILITY)
 	var/mode = CATAPULT_SINGLE
 	var/atom/movable/locked
-	equipment_delay = 30 //Stunlocks are not ideal
+	equipment_delay = 2.2 SECONDS //Stunlocks are not ideal
 	origin_tech = list(TECH_MATERIAL = 4, TECH_ENGINEERING = 4, TECH_MAGNET = 4)
 	require_adjacent = FALSE
+
+	var/activated_passive_power = 1 KILOWATTS
+ 	///For when targetting a single object, will create a warp beam
+	var/datum/beam = null
+	var/max_dist = 6
+	var/obj/effect/effect/warp/small/warpeffect = null
+
+/obj/effect/ebeam/warp
+	plane = WARP_EFFECT_PLANE
+	no_z_overlay = TRUE
+
+/obj/effect/effect/warp/small
+	plane = WARP_EFFECT_PLANE
+	appearance_flags = PIXEL_SCALE
+	icon = 'icons/effects/96x96.dmi'
+	icon_state = "singularity_s3"
+	pixel_x = -32
+	pixel_y = -32
+	no_z_overlay = TRUE
+
+/obj/item/mech_equipment/catapult/proc/beamdestroyed()
+	if(beam)
+		GLOB.destroyed_event.unregister(beam, src, .proc/beamdestroyed)
+		beam = null
+	if(locked)
+		if(owner)
+			for(var/pilot in owner.pilots)
+				to_chat(pilot, SPAN_NOTICE("Lock on \the [locked] disengaged."))
+		endanimation()
+		locked = null
+	//It's possible beam self destroyed, match active
+	if(active)
+		deactivate()
+
+/obj/item/mech_equipment/catapult/proc/endanimation()
+	if(locked)
+		animate(locked,pixel_y= initial(locked.pixel_y), time = 0)
 
 /obj/item/mech_equipment/catapult/get_hardpoint_maptext()
 	var/string
@@ -340,43 +375,73 @@
 	else string += "Push"
 	return string
 
+/obj/item/mech_equipment/catapult/deactivate()
+	. = ..()
+	if(beam)
+		QDEL_NULL(beam)
+	passive_power_use = 0
 
-/obj/item/mech_equipment/catapult/attack_self(var/mob/user)
+/obj/item/mech_equipment/catapult/attack_self(mob/user)
 	. = ..()
 	if(.)
-		mode = mode == CATAPULT_SINGLE ? CATAPULT_AREA : CATAPULT_SINGLE
-		to_chat(user, SPAN_NOTICE("You set \the [src] to [mode == CATAPULT_SINGLE ? "single" : "multi"]-target mode."))
-		update_icon()
+		if(!locked)
+			mode = mode == CATAPULT_SINGLE ? CATAPULT_AREA : CATAPULT_SINGLE
+			to_chat(user, SPAN_NOTICE("You set \the [src] to [mode == CATAPULT_SINGLE ? "single" : "multi"]-target mode."))
+			update_icon()
+		else
+			to_chat(user, SPAN_NOTICE("You cannot change the mode \the [src] while it is locked on to a target."))
 
-
-/obj/item/mech_equipment/catapult/afterattack(var/atom/target, var/mob/living/user, var/inrange, var/params)
+/obj/item/mech_equipment/catapult/afterattack(atom/target, mob/living/user, inrange, params)
 	. = ..()
 	if(.)
-
 		switch(mode)
 			if(CATAPULT_SINGLE)
-				if(!locked)
+				if(!locked && (get_dist(owner, target) <= max_dist))
 					var/atom/movable/AM = target
 					if(!istype(AM) || AM.anchored || !AM.simulated)
 						to_chat(user, SPAN_NOTICE("Unable to lock on [target]."))
 						return
 					locked = AM
+					beam = owner.Beam(BeamTarget = target, icon_state = "r_beam", maxdistance = max_dist, beam_type = /obj/effect/ebeam/warp)
+					GLOB.destroyed_event.register(beam, src, .proc/beamdestroyed)
+
+					animate(target,pixel_y= initial(target.pixel_y) - 2,time=1 SECOND, easing = SINE_EASING, flags = ANIMATION_PARALLEL, loop = -1)
+					animate(pixel_y= initial(target.pixel_y) + 2,time=1 SECOND)
+
+					active = TRUE
+					passive_power_use = activated_passive_power
 					to_chat(user, SPAN_NOTICE("Locked on [AM]."))
 					return
 				else if(target != locked)
 					if(locked in view(owner))
-						locked.throw_at(target, 14, 1.5, owner)
 						log_and_message_admins("used [src] to throw [locked] at [target].", user, owner.loc)
+						endanimation() //End animation without waiting for delete, so throw won't be affected
+						locked.throw_at(target, 14, 1.5, owner)
 						locked = null
+						deactivate()
 
 						var/obj/item/cell/C = owner.get_cell()
 						if(istype(C))
 							C.use(active_power_use * CELLRATE)
 
 					else
-						locked = null
-						to_chat(user, SPAN_NOTICE("Lock on [locked] disengaged."))
+						deactivate()
 			if(CATAPULT_AREA)
+				if(!warpeffect)
+					warpeffect = new
+
+				//effect and sound
+				warpeffect.forceMove(get_turf(target))
+				warpeffect.SetTransform(scale = 0)
+				warpeffect.alpha = 255
+				animate(
+					warpeffect,
+					transform = matrix(),
+					alpha = 0,
+					time = 1.25 SECONDS
+				)
+				addtimer(CALLBACK(warpeffect, /atom/movable/proc/forceMove, null), 1.25 SECONDS)
+				playsound(warpeffect, 'sound/effects/heavy_cannon_blast.ogg', 50, 1)
 
 				var/list/atoms = list()
 				if(isturf(target))
@@ -388,13 +453,10 @@
 					var/dist = 5-get_dist(A,target)
 					A.throw_at(get_edge_target_turf(A,get_dir(target, A)),dist,0.7)
 
-
 				log_and_message_admins("used [src]'s area throw on [target].", user, owner.loc)
 				var/obj/item/cell/C = owner.get_cell()
 				if(istype(C))
 					C.use(active_power_use * CELLRATE * 2) //bit more expensive to throw all
-
-
 
 #undef CATAPULT_SINGLE
 #undef CATAPULT_AREA
@@ -456,7 +518,7 @@
 	if (ispath(drill_head))
 		drill_head = new drill_head(src)
 
-/obj/item/mech_equipment/drill/attack_self(var/mob/user)
+/obj/item/mech_equipment/drill/attack_self(mob/user)
 	. = ..()
 	if(.)
 		if(drill_head)
@@ -616,7 +678,7 @@
 	)
 	log_and_message_admins("used [src] on [target]", user, owner.loc)
 	drill_head.durability -= 1
-	target.ex_act(2)
+	target.ex_act(EX_ACT_HEAVY)
 
 
 /obj/item/mech_equipment/drill/steel

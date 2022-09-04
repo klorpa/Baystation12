@@ -52,6 +52,10 @@
 		crash_with("Warning: [src]([type]) initialized multiple times!")
 	atom_flags |= ATOM_FLAG_INITIALIZED
 
+	if (IsAbstract())
+		log_debug("Abstract atom [type] created!")
+		return INITIALIZE_HINT_QDEL
+
 	if(light_max_bright && light_outer_range)
 		update_light()
 
@@ -63,6 +67,7 @@
 
 	if (health_max)
 		health_current = health_max
+		health_dead = FALSE
 
 	return INITIALIZE_HINT_NORMAL
 
@@ -130,10 +135,10 @@
 /atom/proc/HasProximity(atom/movable/AM as mob|obj)
 	return
 
-/atom/proc/emp_act(var/severity)
+/atom/proc/emp_act(severity)
 	return
 
-/atom/proc/set_density(var/new_density)
+/atom/proc/set_density(new_density)
 	if(density != new_density)
 		density = !!new_density
 		if (isturf(loc))
@@ -180,78 +185,6 @@
 			found += A.search_contents_for(path,filter_path)
 	return found
 
-
-
-
-/*
-Beam code by Gunbuddy
-
-Beam() proc will only allow one beam to come from a source at a time.  Attempting to call it more than
-once at a time per source will cause graphical errors.
-Also, the icon used for the beam will have to be vertical and 32x32.
-The math involved assumes that the icon is vertical to begin with so unless you want to adjust the math,
-its easier to just keep the beam vertical.
-*/
-/atom/proc/Beam(atom/BeamTarget,icon_state="b_beam",icon='icons/effects/beam.dmi',time=50, maxdistance=10)
-	//BeamTarget represents the target for the beam, basically just means the other end.
-	//Time is the duration to draw the beam
-	//Icon is obviously which icon to use for the beam, default is beam.dmi
-	//Icon_state is what icon state is used. Default is b_beam which is a blue beam.
-	//Maxdistance is the longest range the beam will persist before it gives up.
-	var/EndTime=world.time+time
-	while(BeamTarget&&world.time<EndTime&&get_dist(src,BeamTarget)<maxdistance&&z==BeamTarget.z)
-	//If the BeamTarget gets deleted, the time expires, or the BeamTarget gets out
-	//of range or to another z-level, then the beam will stop.  Otherwise it will
-	//continue to draw.
-
-		set_dir(get_dir(src,BeamTarget))	//Causes the source of the beam to rotate to continuosly face the BeamTarget.
-
-		for(var/obj/effect/overlay/beam/O in orange(10,src))	//This section erases the previously drawn beam because I found it was easier to
-			if(O.BeamSource==src)				//just draw another instance of the beam instead of trying to manipulate all the
-				qdel(O)							//pieces to a new orientation.
-		var/Angle=round(Get_Angle(src,BeamTarget))
-		var/icon/I=new(icon,icon_state)
-		I.Turn(Angle)
-		var/DX=(32*BeamTarget.x+BeamTarget.pixel_x)-(32*x+pixel_x)
-		var/DY=(32*BeamTarget.y+BeamTarget.pixel_y)-(32*y+pixel_y)
-		var/N=0
-		var/length=round(sqrt((DX)**2+(DY)**2))
-		for(N,N<length,N+=32)
-			var/obj/effect/overlay/beam/X=new(loc)
-			X.BeamSource=src
-			if(N+32>length)
-				var/icon/II=new(icon,icon_state)
-				II.DrawBox(null,1,(length-N),32,32)
-				II.Turn(Angle)
-				X.icon=II
-			else X.icon=I
-			var/Pixel_x=round(sin(Angle)+32*sin(Angle)*(N+16)/32)
-			var/Pixel_y=round(cos(Angle)+32*cos(Angle)*(N+16)/32)
-			if(DX==0) Pixel_x=0
-			if(DY==0) Pixel_y=0
-			if(Pixel_x>32)
-				for(var/a=0, a<=Pixel_x,a+=32)
-					X.x++
-					Pixel_x-=32
-			if(Pixel_x<-32)
-				for(var/a=0, a>=Pixel_x,a-=32)
-					X.x--
-					Pixel_x+=32
-			if(Pixel_y>32)
-				for(var/a=0, a<=Pixel_y,a+=32)
-					X.y++
-					Pixel_y-=32
-			if(Pixel_y<-32)
-				for(var/a=0, a>=Pixel_y,a-=32)
-					X.y--
-					Pixel_y+=32
-			X.pixel_x=Pixel_x
-			X.pixel_y=Pixel_y
-		sleep(3)	//Changing this to a lower value will cause the beam to follow more smoothly with movement, but it will also be more laggy.
-					//I've found that 3 ticks provided a nice balance for my use.
-	for(var/obj/effect/overlay/beam/O in orange(10,src)) if(O.BeamSource==src) qdel(O)
-
-
 // A type overriding /examine() should either return the result of ..() or return TRUE if not calling ..()
 // Calls to ..() should generally not supply any arguments and instead rely on BYOND's automatic argument passing
 // There is no need to check the return value of ..(), this is only done by the calling /examinate() proc to validate the call chain
@@ -284,7 +217,7 @@ its easier to just keep the beam vertical.
 	dir = new_dir
 	return TRUE
 
-/atom/proc/set_icon_state(var/new_icon_state)
+/atom/proc/set_icon_state(new_icon_state)
 	if(has_extension(src, /datum/extension/base_icon_state))
 		var/datum/extension/base_icon_state/bis = get_extension(src, /datum/extension/base_icon_state)
 		bis.base_icon_state = new_icon_state
@@ -298,10 +231,11 @@ its easier to just keep the beam vertical.
 /atom/proc/on_update_icon()
 	return
 
-/atom/proc/ex_act()
+/// Handler for the atom to be affected by explosions. `severity` will be one of the `EX_ACT_*` defines.
+/atom/proc/ex_act(severity)
 	return
 
-/atom/proc/emag_act(var/remaining_charges, var/mob/user, var/emag_source)
+/atom/proc/emag_act(remaining_charges, mob/user, emag_source)
 	return NO_EMAG_ACT
 
 /atom/proc/fire_act(datum/gas_mixture/air, exposed_temperature, exposed_volume)
@@ -316,7 +250,7 @@ its easier to just keep the beam vertical.
 	qdel(src)
 	. = TRUE
 
-/atom/proc/hitby(atom/movable/AM, var/datum/thrownthing/TT)//already handled by throw impact
+/atom/proc/hitby(atom/movable/AM, datum/thrownthing/TT)//already handled by throw impact
 	if(isliving(AM))
 		var/mob/living/M = AM
 		M.apply_damage(TT.speed * 5, DAMAGE_BRUTE)
@@ -340,7 +274,7 @@ its easier to just keep the beam vertical.
 	. = 1
 	return 1
 
-/mob/living/proc/handle_additional_vomit_reagents(var/obj/effect/decal/cleanable/vomit/vomit)
+/mob/living/proc/handle_additional_vomit_reagents(obj/effect/decal/cleanable/vomit/vomit)
 	vomit.reagents.add_reagent(/datum/reagent/acid/stomach, 5)
 
 /atom/proc/clean_blood()
@@ -362,7 +296,7 @@ its easier to just keep the beam vertical.
 	var/list/y_arr = null
 	for(cur_x=1,cur_x<=GLOB.global_map.len,cur_x++)
 		y_arr = GLOB.global_map[cur_x]
-		cur_y = list_find(y_arr, src.z)
+		cur_y = y_arr.Find(src.z)
 		if(cur_y)
 			break
 //	log_debug("X = [cur_x]; Y = [cur_y]")
@@ -435,7 +369,7 @@ its easier to just keep the beam vertical.
 			continue
 		O.show_message(message,2,deaf_message,1)
 
-/atom/movable/proc/dropInto(var/atom/destination)
+/atom/movable/proc/dropInto(atom/destination)
 	while(istype(destination))
 		var/atom/drop_destination = destination.onDropInto(src)
 		if(!istype(drop_destination) || drop_destination == destination)
@@ -443,10 +377,10 @@ its easier to just keep the beam vertical.
 		destination = drop_destination
 	return forceMove(null)
 
-/atom/proc/onDropInto(var/atom/movable/AM)
+/atom/proc/onDropInto(atom/movable/AM)
 	return // If onDropInto returns null, then dropInto will forceMove AM into us.
 
-/atom/movable/onDropInto(var/atom/movable/AM)
+/atom/movable/onDropInto(atom/movable/AM)
 	return loc // If onDropInto returns something, then dropInto will attempt to drop AM there.
 
 /atom/proc/InsertedContents()
@@ -463,7 +397,7 @@ its easier to just keep the beam vertical.
 
 // Called when hitting the atom with a grab.
 // Will skip attackby() and afterattack() if returning TRUE.
-/atom/proc/grab_attack(var/obj/item/grab/G)
+/atom/proc/grab_attack(obj/item/grab/G)
 	return FALSE
 
 /atom/proc/climb_on()
@@ -475,7 +409,7 @@ its easier to just keep the beam vertical.
 
 	do_climb(usr)
 
-/atom/proc/can_climb(var/mob/living/user, post_climb_check=FALSE, check_silicon=TRUE)
+/atom/proc/can_climb(mob/living/user, post_climb_check=FALSE, check_silicon=TRUE)
 	if (!(atom_flags & ATOM_FLAG_CLIMBABLE) || !can_touch(user, check_silicon) || (!post_climb_check && climbers && (user in climbers)))
 		return 0
 
@@ -508,7 +442,7 @@ its easier to just keep the beam vertical.
 		return 0
 	return 1
 
-/atom/proc/can_touch(var/mob/user, check_silicon=TRUE)
+/atom/proc/can_touch(mob/user, check_silicon=TRUE)
 	if (!user)
 		return 0
 	if(!Adjacent(user))
@@ -523,7 +457,7 @@ its easier to just keep the beam vertical.
 		return 0
 	return 1
 
-/atom/proc/turf_is_crowded(var/atom/ignore)
+/atom/proc/turf_is_crowded(atom/ignore)
 	var/turf/T = get_turf(src)
 	if(!istype(T))
 		return 0
@@ -536,7 +470,7 @@ its easier to just keep the beam vertical.
 			return A
 	return 0
 
-/atom/proc/do_climb(var/mob/living/user, check_silicon=TRUE)
+/atom/proc/do_climb(mob/living/user, check_silicon=TRUE)
 	if (!can_climb(user, check_silicon=check_silicon))
 		return 0
 
@@ -544,7 +478,7 @@ its easier to just keep the beam vertical.
 	user.visible_message("<span class='warning'>\The [user] starts climbing onto \the [src]!</span>")
 	LAZYDISTINCTADD(climbers,user)
 
-	if(!do_after(user,(issmall(user) ? MOB_CLIMB_TIME_SMALL : MOB_CLIMB_TIME_MEDIUM) * climb_speed_mult, src, DO_DEFAULT | DO_USER_UNIQUE_ACT))
+	if(!do_after(user,(issmall(user) ? MOB_CLIMB_TIME_SMALL : MOB_CLIMB_TIME_MEDIUM) * climb_speed_mult, src, DO_DEFAULT | DO_USER_UNIQUE_ACT | DO_BAR_OVER_USER))
 		LAZYREMOVE(climbers,user)
 		return 0
 
@@ -614,7 +548,7 @@ its easier to just keep the beam vertical.
 /atom/proc/get_color()
 	return isnull(color) ? COLOR_WHITE : color
 
-/atom/proc/set_color(var/color)
+/atom/proc/set_color(color)
 	src.color = color
 
 /atom/proc/get_cell()

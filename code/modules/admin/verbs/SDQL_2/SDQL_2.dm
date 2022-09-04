@@ -3,7 +3,7 @@
 // Examples
 /*
 	-- Will call the proc for all computers in the world, thats dir is 2.
-	CALL ex_act(1) ON /obj/machinery/computer IN world WHERE dir == 2
+	CALL ex_act(EX_ACT_DEVASTATING) ON /obj/machinery/computer IN world WHERE dir == 2
 	-- Will open a window with a list of all the closets in the world, with a link to VV them.
 	SELECT /obj/structure/closet/secure_closet/security/cargo IN world WHERE icon_off == "secoff"
 	-- Will change all the tube lights to green, and flicker them. The semicolon is important to separate the consecutive querys, but is not required for standard one-query use.
@@ -18,11 +18,11 @@
 
 // Used by update statements, this is to handle shit like preventing editing the /datum/admins though SDQL but WITHOUT +PERMISSIONS.
 // Assumes the variable actually exists.
-/datum/proc/SDQL_update(var/const/var_name, var/new_value)
+/datum/proc/SDQL_update(const/var_name, new_value)
 	vars[var_name] = new_value
 	return 1
 
-/client/proc/SDQL2_query(var/query_text as message)
+/client/proc/SDQL2_query(query_text as message)
 	set category = "Debug"
 
 	if(!check_rights(R_DEBUG))  // Shouldn't happen... but just to be safe.
@@ -139,7 +139,7 @@
 										temp.SDQL_update(v, SDQL_expression(d, set_list[sets]))
 										break
 
-									if(list_find(temp.vars, v) && (istype(temp.vars[v], /datum) || istype(temp.vars[v], /client)))
+									if(temp.vars.Find(v) && (istype(temp.vars[v], /datum) || istype(temp.vars[v], /client)))
 										temp = temp.vars[v]
 
 									else
@@ -438,7 +438,7 @@
 	return v
 
 
-/proc/SDQL_function(var/datum/object, var/procname, var/list/arguments, source)
+/proc/SDQL_function(datum/object, procname, list/arguments, source)
 	set waitfor = FALSE
 
 	var/list/new_args = list()

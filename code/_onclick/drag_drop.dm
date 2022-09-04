@@ -6,7 +6,7 @@
 	almost anything into a trash can.
 */
 
-/atom/proc/CanMouseDrop(atom/over, var/mob/user = usr, var/incapacitation_flags)
+/atom/proc/CanMouseDrop(atom/over, mob/user = usr, incapacitation_flags)
 	if(!user || !over)
 		return FALSE
 	if(user.incapacitated(incapacitation_flags))
@@ -25,4 +25,7 @@
 
 // Receive a mouse drop
 /atom/proc/MouseDrop_T(atom/dropping, mob/user)
+	// Mitigation for some user's mouses click+dragging for a split second when clicking on moving sprites.
+	if (src == dropping && user.canClick())
+		user.ClickOn(src)
 	return

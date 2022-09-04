@@ -24,20 +24,34 @@
 	open_sound = 'sound/effects/storage/unzip.ogg'
 	allow_slow_dump = TRUE
 
-/obj/item/storage/backpack/equipped()
-	if(!has_extension(src, /datum/extension/appearance))
-		set_extension(src, /datum/extension/appearance/cardborg)
-	..()
+	/// Can this backpack be opened while worn on the back?
+	var/worn_access = TRUE
 
 /obj/item/storage/backpack/attackby(obj/item/W as obj, mob/user as mob)
 	if (src.use_sound)
 		playsound(src.loc, src.use_sound, 50, 1, -5)
 	return ..()
 
-/obj/item/storage/backpack/equipped(var/mob/user, var/slot)
+/obj/item/storage/backpack/equipped(mob/user, slot)
+	if (!has_extension(src, /datum/extension/appearance))
+		set_extension(src, /datum/extension/appearance/cardborg)
 	if (slot == slot_back && src.use_sound)
 		playsound(src.loc, src.use_sound, 50, 1, -5)
+	if (!worn_access && user.isEquipped(src, slot_back))
+		close_all()
 	..(user, slot)
+
+/obj/item/storage/backpack/handle_item_insertion(obj/item/W, prevent_warning = FALSE, NoUpdate = 0)
+	if (!worn_access && usr?.isEquipped(src, slot_back))
+		to_chat(usr, SPAN_WARNING("You can't insert \the [W] while \the [src] is on your back."))
+		return
+	..()
+
+/obj/item/storage/backpack/open(mob/user)
+	if (!worn_access && user.isEquipped(src, slot_back))
+		to_chat(user, SPAN_WARNING("You can't open \the [src] while it is on your back."))
+		return
+	..()
 
 /*
  * Backpack Types
@@ -236,23 +250,13 @@
 	item_state_slots = null
 	w_class = ITEM_SIZE_HUGE
 	max_storage_space = DEFAULT_BACKPACK_STORAGE + 10
-
-/obj/item/storage/backpack/dufflebag/Initialize()
-	. = ..()
-	slowdown_per_slot[slot_back] = 1
-	slowdown_per_slot[slot_r_hand] = 1
-	slowdown_per_slot[slot_l_hand] = 1
+	worn_access = FALSE
 
 /obj/item/storage/backpack/dufflebag/syndie
 	name = "black dufflebag"
 	desc = "A large dufflebag for holding extra tactical supplies."
 	icon_state = "duffle_syndie"
 	item_state_slots = list(slot_l_hand_str = "duffle_syndie", slot_r_hand_str = "duffle_syndie")
-
-/obj/item/storage/backpack/dufflebag/syndie/Initialize()
-	. = ..()
-	slowdown_per_slot[slot_r_hand] = 0
-	slowdown_per_slot[slot_l_hand] = 0
 
 /obj/item/storage/backpack/dufflebag/syndie/med
 	name = "medical dufflebag"
@@ -458,13 +462,13 @@
 		/obj/item/crowbar
 		)
 
-/obj/item/storage/backpack/satchel/flat/MouseDrop(var/obj/over_object)
+/obj/item/storage/backpack/satchel/flat/MouseDrop(obj/over_object)
 	var/turf/T = get_turf(src)
 	if(hides_under_flooring() && isturf(T) && !T.is_plating())
 		return
 	..()
 
-/obj/item/storage/backpack/satchel/flat/hide(var/i)
+/obj/item/storage/backpack/satchel/flat/hide(i)
 	set_invisibility(i ? 101 : 0)
 	anchored = i ? TRUE : FALSE
 	alpha = i ? 128 : initial(alpha)

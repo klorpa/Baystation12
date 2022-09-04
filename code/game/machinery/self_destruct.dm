@@ -13,7 +13,7 @@
 	if(isWelder(W))
 		if(damaged)
 			user.visible_message("[user] begins to repair [src].", "You begin repairing [src].")
-			if(do_after(usr, 10 SECONDS, src, DO_PUBLIC_UNIQUE))
+			if(do_after(usr, 10 SECONDS, src, DO_REPAIR_CONSTRUCT))
 				var/obj/item/weldingtool/w
 				if(w.burn_fuel(10))
 					damaged = 0
@@ -87,12 +87,12 @@
 
 /obj/machinery/self_destruct/ex_act(severity)
 	switch(severity)
-		if(1)
+		if(EX_ACT_DEVASTATING)
 			set_damaged()
-		if(2)
+		if(EX_ACT_HEAVY)
 			if(prob(50))
 				set_damaged()
-		if(3)
+		if(EX_ACT_LIGHT)
 			if(prob(25))
 				set_damaged()
 

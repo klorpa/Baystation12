@@ -41,7 +41,7 @@
 		return
 	..()
 
-/obj/item/clothing/attack_hand(var/mob/user)
+/obj/item/clothing/attack_hand(mob/user)
 	//only forward to the attached accessory if the clothing is equipped (not in a storage)
 	if(accessories.len && src.loc == user)
 		for(var/obj/item/clothing/accessory/A in accessories)
@@ -49,7 +49,7 @@
 		return
 	return ..()
 
-/obj/item/clothing/MouseDrop(var/obj/over_object)
+/obj/item/clothing/MouseDrop(obj/over_object)
 	if (!over_object || !(ishuman(usr) || issmall(usr)))
 		return
 
@@ -60,14 +60,13 @@
 	if (usr.incapacitated())
 		return
 
-	if (!usr.unEquip(src))
-		return
-
 	switch(over_object.name)
 		if("r_hand")
-			usr.put_in_r_hand(src)
+			if (usr.unEquip(src))
+				usr.put_in_r_hand(src)
 		if("l_hand")
-			usr.put_in_l_hand(src)
+			if (usr.unEquip(src))
+				usr.put_in_l_hand(src)
 	src.add_fingerprint(usr)
 
 /obj/item/clothing/examine(mob/user)

@@ -19,8 +19,8 @@
 	cell = /obj/item/cell/hyper
 	capacitor = /obj/item/stock_parts/capacitor/adv
 	gun_unreliable = 0
-	var/slowdown_held = 3
-	var/slowdown_worn = 2
+	var/slowdown_held = 2
+	var/slowdown_worn = 1
 
 /obj/item/gun/magnetic/railgun/Initialize()
 	slowdown_per_slot[slot_l_hand] =  slowdown_held
@@ -33,7 +33,7 @@
 
 // Not going to check type repeatedly, if you code or varedit
 // load_type and get runtime errors, don't come crying to me.
-/obj/item/gun/magnetic/railgun/show_ammo(var/mob/user)
+/obj/item/gun/magnetic/railgun/show_ammo(mob/user)
 	var/obj/item/rcd_ammo/ammo = loaded
 	if (ammo)
 		to_chat(user, "<span class='notice'>There are [ammo.remaining] shot\s remaining in \the [loaded].</span>")
@@ -80,7 +80,7 @@
 	origin_tech = list(TECH_COMBAT = 6, TECH_MATERIAL = 3, TECH_MAGNET = 5)
 	slowdown_worn = 3 // Little slower when worn
 
-/obj/item/gun/magnetic/railgun/tcc/show_ammo(var/mob/user)
+/obj/item/gun/magnetic/railgun/tcc/show_ammo(mob/user)
 	var/obj/item/stack/material/rods/ammo = loaded
 	if(istype(ammo))
 		to_chat(user, "<span class='notice'>It has [ammo.amount] shots loaded.</span>")
@@ -113,9 +113,6 @@
 	capacitor = /obj/item/stock_parts/capacitor/super
 
 	fire_delay =  8
-	slowdown_held = 4
-
-	slowdown_worn = 3
 
 	slot_flags = SLOT_BACK
 	w_class = ITEM_SIZE_NO_CONTAINER
@@ -173,7 +170,6 @@
 	one_hand_penalty = 3
 	fire_delay = 10
 	slowdown_held = 1
-	slowdown_worn = 1
 	removable_components = FALSE
 	cell = /obj/item/cell/hyper
 	capacitor = /obj/item/stock_parts/capacitor/adv

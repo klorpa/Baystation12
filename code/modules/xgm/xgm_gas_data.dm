@@ -93,7 +93,7 @@ var/global/datum/xgm_gas_data/gas_data
 	mouse_opacity = 0
 	var/gas_id
 
-/obj/effect/gas_overlay/proc/update_alpha_animation(var/new_alpha)
+/obj/effect/gas_overlay/proc/update_alpha_animation(new_alpha)
 	animate(src, alpha = new_alpha)
 	alpha = new_alpha
 	animate(src, alpha = 0.8 * new_alpha, time = 10, easing = SINE_EASING | EASE_OUT, loop = -1)
@@ -104,4 +104,16 @@ var/global/datum/xgm_gas_data/gas_data
 	gas_id = gas
 	if(gas_data.tile_overlay[gas_id])
 		icon_state = gas_data.tile_overlay[gas_id]
-	color = gas_data.tile_overlay_color[gas_id]
+		color = gas_data.tile_overlay_color[gas_id]
+
+/obj/effect/gas_overlay/heat
+	name = "gas"
+	desc = "You shouldn't be clicking this."
+	plane = HEAT_EFFECT_PLANE
+	gas_id = GAS_HEAT
+	render_source = HEAT_EFFECT_TARGET
+
+/obj/effect/gas_overlay/heat/Initialize(mapload, gas)
+	. = ..()
+	icon = null
+	icon_state = null

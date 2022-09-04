@@ -1,8 +1,8 @@
 /obj/machinery/suspension_gen
 	name = "suspension field generator"
-	desc = "It has stubby legs bolted up against it's body for stabilizing."
+	desc = "It has stubby bolts bolted up against its tracks for stabilizing."
 	icon = 'icons/obj/xenoarchaeology.dmi'
-	icon_state = "suspension2"
+	icon_state = "suspension"
 	density = TRUE
 	construct_state = /decl/machine_construction/default/panel_closed
 	uncreated_component_parts = null
@@ -35,7 +35,7 @@
 				suspension_field.overlays += "shield2"
 			I.forceMove(suspension_field)
 
-/obj/machinery/suspension_gen/interact(var/mob/user)
+/obj/machinery/suspension_gen/interact(mob/user)
 	user.set_machine(src)
 	var/dat = "<b>Multi-phase mobile suspension field generator MK II \"Steadfast\"</b><br>"
 	var/obj/item/cell/cell = get_cell()
@@ -59,7 +59,7 @@
 	popup.open()
 	onclose(user, "suspension")
 
-/obj/machinery/suspension_gen/OnTopic(var/mob/user, href_list)
+/obj/machinery/suspension_gen/OnTopic(mob/user, href_list)
 	if(href_list["toggle_field"])
 		if(!suspension_field)
 			var/obj/item/cell/cell = get_cell()
@@ -78,7 +78,7 @@
 	if(. == TOPIC_REFRESH)
 		interact(user)
 
-/obj/machinery/suspension_gen/interface_interact(var/mob/user)
+/obj/machinery/suspension_gen/interface_interact(mob/user)
 	interact(user)
 	return TRUE
 
@@ -96,11 +96,15 @@
 	else if(isWrench(W))
 		if(!suspension_field)
 			anchored = !anchored
-			to_chat(user, "<span class='info'>You wrench the stabilizing legs [anchored ? "into place" : "up against the body"].</span>")
+			to_chat(user, "<span class='info'>You wrench the stabilizing bolts [anchored ? "into place" : "loose"].</span>")
 			if(anchored)
-				desc = "It is resting securely on four stubby legs."
+				desc = "Its tracks are securely held in place with securing bolts."
+				icon_state = "suspension_wrenched"
 			else
-				desc = "It has stubby legs bolted up against it's body for stabilizing."
+				desc = "It has stubby bolts bolted up against its tracks for stabilizing."
+				icon_state = "suspension"
+			playsound(loc, 'sound/items/Ratchet.ogg', 40)
+			update_icon()
 		else
 			to_chat(user, "<span class='warning'>You are unable to secure [src] while it is active!</span>")
 
@@ -115,7 +119,10 @@
 
 	suspension_field = new(T)
 	src.visible_message("<span class='notice'>[icon2html(src, viewers(get_turf(src)))] [src] activates with a low hum.</span>")
-	icon_state = "suspension3"
+	icon_state = "suspension_on"
+	playsound(loc, 'sound/machines/quiet_beep.ogg', 40)
+	update_icon()
+
 
 	for(var/obj/item/I in T)
 		I.forceMove(suspension_field)
@@ -144,8 +151,10 @@
 	src.visible_message("<span class='notice'>[icon2html(src, viewers(get_turf(src)))] [src] deactivates with a gentle shudder.</span>")
 	qdel(suspension_field)
 	suspension_field = null
-	icon_state = "suspension2"
+	icon_state = "suspension_wrenched"
+	playsound(loc, 'sound/machines/quiet_beep.ogg', 40)
 	update_use_power(POWER_USE_IDLE)
+	update_icon()
 
 /obj/machinery/suspension_gen/Destroy()
 	deactivate()
@@ -170,6 +179,12 @@
 		to_chat(usr, "<span class='warning'>You cannot rotate [src], it has been firmly fixed to the floor.</span>")
 	else
 		set_dir(turn(dir, -90))
+
+/obj/machinery/suspension_gen/on_update_icon()
+	overlays.Cut()
+	if(panel_open)
+		overlays += "suspension_panel"
+	. = ..()
 
 /obj/effect/suspension_field
 	name = "energy field"

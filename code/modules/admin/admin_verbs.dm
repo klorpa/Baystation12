@@ -8,7 +8,6 @@ var/global/list/admin_verbs_default = list(
 	/client/proc/hide_most_verbs,		//hides all our hideable adminverbs,
 	/client/proc/debug_variables,		//allows us to -see- the variables of any instance in the game. +VAREDIT needed to modify,
 	/client/proc/watched_variables,
-	/client/proc/debug_global_variables,//as above but for global variables,
 //	/client/proc/check_antagonists,		//shows all antags,
 	/client/proc/cmd_check_new_players
 //	/client/proc/deadchat				//toggles deadchat on/off,
@@ -126,7 +125,9 @@ var/global/list/admin_verbs_fun = list(
 	/datum/admins/proc/call_drop_pod,
 	/client/proc/create_dungeon,
 	/client/proc/cmd_admin_simulate_distant_explosion,
-	/datum/admins/proc/ai_hologram_set
+	/datum/admins/proc/ai_hologram_set,
+	/client/proc/bombard_zlevel,
+	/client/proc/rename_shuttle
 	)
 
 var/global/list/admin_verbs_spawn = list(
@@ -165,6 +166,7 @@ var/global/list/admin_verbs_debug = list(
 	/client/proc/cmd_debug_make_powernets,
 	/client/proc/debug_controller,
 	/client/proc/debug_antagonist_template,
+	/client/proc/debug_global_variables,
 	/client/proc/cmd_debug_mob_lists,
 	/client/proc/cmd_admin_delete,
 	/client/proc/cmd_debug_del_all,
@@ -287,7 +289,6 @@ var/global/list/admin_verbs_mod = list(
 	/client/proc/cmd_admin_pm_panel,	// admin-pm list,
 	/client/proc/debug_variables,		// allows us to -see- the variables of any instance in the game.,
 	/client/proc/watched_variables,
-	/client/proc/debug_global_variables,// as above but for global variables,
 	/datum/admins/proc/PlayerNotes,
 	/client/proc/admin_ghost,			// allows us to ghost/reenter body at will,
 	/client/proc/cmd_mod_say,
@@ -501,7 +502,7 @@ var/global/list/admin_verbs_mod = list(
 		return
 	++D.warns
 	if (config.warn_autoban_threshold && D.warns >= config.warn_autoban_threshold)
-		var/mins_readable = minutes_to_readable(config.warn_autoban_duration)
+		var/mins_readable = time_to_readable(config.warn_autoban_duration MINUTES)
 		ban_unban_log_save("[ckey] warned [warned_ckey], resulting in a [mins_readable] autoban.")
 		if(C)
 			message_admins("[key_name_admin(src)] has warned [key_name_admin(C)] resulting in a [mins_readable] ban.")
@@ -561,7 +562,7 @@ var/global/list/admin_verbs_mod = list(
 	if(!usr.RemoveClickHandler(/datum/click_handler/build_mode))
 		usr.PushClickHandler(/datum/click_handler/build_mode)
 
-/client/proc/object_talk(var/msg as text) // -- TLE
+/client/proc/object_talk(msg as text) // -- TLE
 	set category = "Special Verbs"
 	set name = "oSay"
 	set desc = "Display a message to everyone who can hear the target"
@@ -618,7 +619,7 @@ var/global/list/admin_verbs_mod = list(
 
 	if(!check_rights(R_ADMIN)) return
 
-	var/mob/living/silicon/S = input("Select silicon.", "Rename Silicon.") as null|anything in GLOB.silicon_mob_list
+	var/mob/living/silicon/S = input("Select silicon.", "Rename Silicon.") as null|anything in GLOB.silicon_mobs
 	if(!S) return
 
 	var/new_name = sanitizeSafe(input(src, "Enter new name. Leave blank or as is to cancel.", "[S.real_name] - Enter new silicon name", S.real_name))
@@ -632,7 +633,7 @@ var/global/list/admin_verbs_mod = list(
 
 	if(!check_rights(R_ADMIN)) return
 
-	var/mob/living/silicon/S = input("Select silicon.", "Manage Silicon Laws") as null|anything in GLOB.silicon_mob_list
+	var/mob/living/silicon/S = input("Select silicon.", "Manage Silicon Laws") as null|anything in GLOB.silicon_mobs
 	if(!S) return
 
 	var/datum/nano_module/law_manager/L = new(S)
@@ -646,7 +647,7 @@ var/global/list/admin_verbs_mod = list(
 
 	if(!check_rights(R_FUN)) return
 
-	var/mob/living/carbon/human/H = input("Select mob.", "Change Mob Appearance - Admin") as null|anything in GLOB.human_mob_list
+	var/mob/living/carbon/human/H = input("Select mob.", "Change Mob Appearance - Admin") as null|anything in GLOB.human_mobs
 	if(!H) return
 
 	log_and_message_admins("is altering the appearance of [H].")
@@ -659,7 +660,7 @@ var/global/list/admin_verbs_mod = list(
 
 	if(!check_rights(R_FUN)) return
 
-	var/mob/living/carbon/human/H = input("Select mob.", "Change Mob Appearance - Self") as null|anything in GLOB.human_mob_list
+	var/mob/living/carbon/human/H = input("Select mob.", "Change Mob Appearance - Self") as null|anything in GLOB.human_mobs
 	if(!H) return
 
 	if(!H.client)
@@ -700,7 +701,7 @@ var/global/list/admin_verbs_mod = list(
 
 	if(!check_rights(R_FUN))	return
 
-	var/mob/living/carbon/human/M = input("Select mob.", "Edit Appearance") as null|anything in GLOB.human_mob_list
+	var/mob/living/carbon/human/M = input("Select mob.", "Edit Appearance") as null|anything in GLOB.human_mobs
 
 	if(!istype(M, /mob/living/carbon/human))
 		to_chat(usr, "<span class='warning'>You can only do this to humans!</span>")
@@ -710,44 +711,36 @@ var/global/list/admin_verbs_mod = list(
 			return
 	var/new_facial = input("Please select facial hair color.", "Character Generation") as color
 	if(new_facial)
-		M.r_facial = hex2num(copytext(new_facial, 2, 4))
-		M.g_facial = hex2num(copytext(new_facial, 4, 6))
-		M.b_facial = hex2num(copytext(new_facial, 6, 8))
+		M.facial_hair_color = new_facial
 
 	var/new_hair = input("Please select hair color.", "Character Generation") as color
-	if(new_facial)
-		M.r_hair = hex2num(copytext(new_hair, 2, 4))
-		M.g_hair = hex2num(copytext(new_hair, 4, 6))
-		M.b_hair = hex2num(copytext(new_hair, 6, 8))
+	if(new_hair)
+		M.head_hair_color = new_hair
 
 	var/new_eyes = input("Please select eye color.", "Character Generation") as color
 	if(new_eyes)
-		M.r_eyes = hex2num(copytext(new_eyes, 2, 4))
-		M.g_eyes = hex2num(copytext(new_eyes, 4, 6))
-		M.b_eyes = hex2num(copytext(new_eyes, 6, 8))
+		M.eye_color = new_eyes
 		M.update_eyes()
 
 	var/new_skin = input("Please select body color. This is for Unathi, and Skrell only!", "Character Generation") as color
 	if(new_skin)
-		M.r_skin = hex2num(copytext(new_skin, 2, 4))
-		M.g_skin = hex2num(copytext(new_skin, 4, 6))
-		M.b_skin = hex2num(copytext(new_skin, 6, 8))
+		M.skin_color = new_skin
 
 	var/new_tone = input("Please select skin tone level: 1-220 (1=albino, 35=caucasian, 150=black, 220='very' black)", "Character Generation")  as text
 
 	if (new_tone)
-		M.s_tone = max(min(round(text2num(new_tone)), 220), 1)
-		M.s_tone =  -M.s_tone + 35
+		M.skin_tone = max(min(round(text2num(new_tone)), 220), 1)
+		M.skin_tone =  -M.skin_tone + 35
 
 	// hair
 	var/new_hstyle = input(usr, "Select a hair style", "Grooming")  as null|anything in GLOB.hair_styles_list
 	if(new_hstyle)
-		M.h_style = new_hstyle
+		M.head_hair_style = new_hstyle
 
 	// facial hair
 	var/new_fstyle = input(usr, "Select a facial hair style", "Grooming")  as null|anything in GLOB.facial_hair_styles_list
 	if(new_fstyle)
-		M.f_style = new_fstyle
+		M.facial_hair_style = new_fstyle
 
 	var/new_gender = alert(usr, "Please select gender.", "Character Generation", "Male", "Female", "Neuter")
 	if (new_gender)

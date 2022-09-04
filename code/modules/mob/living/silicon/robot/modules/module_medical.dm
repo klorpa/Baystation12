@@ -83,7 +83,7 @@
 		var/obj/item/stack/medical/stack = locate(thing) in equipment
 		stack.synths = list(medicine)
 
-/obj/item/robot_module/medical/surgeon/respawn_consumable(var/mob/living/silicon/robot/R, var/amount)
+/obj/item/robot_module/medical/surgeon/respawn_consumable(mob/living/silicon/robot/R, amount)
 	if(emag)
 		var/obj/item/reagent_containers/spray/PS = emag
 		PS.reagents.add_reagent(/datum/reagent/acid/polyacid, 2 * amount)
@@ -106,6 +106,7 @@
 		/obj/item/device/scanner/reagent/adv,
 		/obj/item/robot_rack/body_bag,
 		/obj/item/reagent_containers/borghypo/crisis,
+		/obj/item/robot_rack/bottle,
 		/obj/item/shockpaddles/robot,
 		/obj/item/reagent_containers/dropper/industrial,
 		/obj/item/reagent_containers/syringe,
@@ -113,8 +114,8 @@
 		/obj/item/extinguisher/mini,
 		/obj/item/taperoll/medical,
 		/obj/item/inflatable_dispenser/robot,
-		/obj/item/stack/medical/ointment,
-		/obj/item/stack/medical/bruise_pack,
+		/obj/item/stack/medical/advanced/ointment,
+		/obj/item/stack/medical/advanced/bruise_pack,
 		/obj/item/stack/medical/splint
 	)
 	synths = list(
@@ -132,8 +133,8 @@
 /obj/item/robot_module/medical/crisis/finalize_equipment()
 	. = ..()
 	for(var/thing in list(
-		 /obj/item/stack/medical/ointment,
-		 /obj/item/stack/medical/bruise_pack,
+		 /obj/item/stack/medical/advanced/ointment,
+		 /obj/item/stack/medical/advanced/bruise_pack,
 		 /obj/item/stack/medical/splint
 		))
 		var/obj/item/stack/medical/stack = locate(thing) in equipment
@@ -149,14 +150,14 @@
 	. = ..()
 	var/datum/matter_synth/medicine/medicine = locate() in synths
 	for(var/thing in list(
-		 /obj/item/stack/medical/ointment,
-		 /obj/item/stack/medical/bruise_pack,
+		 /obj/item/stack/medical/advanced/ointment,
+		 /obj/item/stack/medical/advanced/bruise_pack,
 		 /obj/item/stack/medical/splint
 		))
 		var/obj/item/stack/medical/stack = locate(thing) in equipment
 		stack.synths = list(medicine)
 
-/obj/item/robot_module/medical/crisis/respawn_consumable(var/mob/living/silicon/robot/R, var/amount)
+/obj/item/robot_module/medical/crisis/respawn_consumable(mob/living/silicon/robot/R, amount)
 	var/obj/item/reagent_containers/syringe/S = locate() in equipment
 	if(S.mode == 2)
 		S.reagents.clear_reagents()

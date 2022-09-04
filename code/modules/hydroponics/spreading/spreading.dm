@@ -1,7 +1,7 @@
 #define DEFAULT_SEED "glowshroom"
 #define VINE_GROWTH_STAGES 5
 
-/proc/spacevine_infestation(var/potency_min=70, var/potency_max=100, var/maturation_min=5, var/maturation_max=15)
+/proc/spacevine_infestation(potency_min=70, potency_max=100, maturation_min=5, maturation_max=15)
 	spawn() //to stop the secrets panel hanging
 		var/turf/T = pick_subarea_turf(/area/hallway , list(/proc/is_station_turf, /proc/not_turf_contains_dense_objects))
 		if(T)
@@ -61,7 +61,7 @@
 /obj/effect/vine/single
 	spread_chance = 0
 
-/obj/effect/vine/New(var/newloc, var/datum/seed/newseed, var/obj/effect/vine/newparent, var/start_matured = 0)
+/obj/effect/vine/New(newloc, datum/seed/newseed, obj/effect/vine/newparent, start_matured = 0)
 	if(!newparent)
 		parent = src
 	else
@@ -143,18 +143,10 @@
 		set_density(0)
 
 	if(!growth_type && !floor)
-		src.transform = null
-		var/matrix/M = matrix()
-		// should make the plant flush against the wall it's meant to be growing from.
-		M.Translate(0,-(rand(12,14)))
-		switch(dir)
-			if(WEST)
-				M.Turn(90)
-			if(NORTH)
-				M.Turn(180)
-			if(EAST)
-				M.Turn(270)
-		src.transform = M
+		SetTransform(
+			rotation = dir == WEST ? 90 : dir == NORTH ? 180 : dir == EAST ? 270 : 0,
+			offset_y = -rand(12, 14)
+		)
 
 	// Apply colour and light from seed datum.
 	if(seed.get_trait(TRAIT_BIOLUM))
@@ -198,7 +190,7 @@
 	floor = 1
 	return 1
 
-/obj/effect/vine/attackby(var/obj/item/W, var/mob/user)
+/obj/effect/vine/attackby(obj/item/W, mob/user)
 	START_PROCESSING(SSvines, src)
 
 	if(W.edge && W.w_class < ITEM_SIZE_NORMAL && user.a_intent != I_HURT)
@@ -222,7 +214,7 @@
 		adjust_health(-damage)
 		playsound(get_turf(src), W.hitsound, 100, 1)
 
-/obj/effect/vine/AltClick(var/mob/user)
+/obj/effect/vine/AltClick(mob/user)
 	if(!CanPhysicallyInteract(user) || user.incapacitated())
 		return ..()
 	var/obj/item/W = user.get_active_hand()
@@ -264,14 +256,14 @@
 
 /obj/effect/vine/ex_act(severity)
 	switch(severity)
-		if(1.0)
+		if(EX_ACT_DEVASTATING)
 			die_off()
 			return
-		if(2.0)
+		if(EX_ACT_HEAVY)
 			if (prob(50))
 				die_off()
 				return
-		if(3.0)
+		if(EX_ACT_LIGHT)
 			if (prob(5))
 				die_off()
 				return

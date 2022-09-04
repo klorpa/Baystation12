@@ -473,7 +473,7 @@ var/global/list/obj/machinery/newscaster/allCasters = list() //Global list that 
 /obj/machinery/newscaster/Topic(href, href_list)
 	if(..())
 		return
-	if ((list_find(usr.contents, src) || ((get_dist(src, usr) <= 1) && istype(src.loc, /turf))) || (istype(usr, /mob/living/silicon)))
+	if ((usr.contents.Find(src) || ((get_dist(src, usr) <= 1) && istype(src.loc, /turf))) || (istype(usr, /mob/living/silicon)))
 		usr.set_machine(src)
 		if(href_list["set_channel_name"])
 			src.channel_name = sanitizeSafe(input(usr, "Provide a Feed Channel Name", "Network Channel Handler", ""), MAX_LNAME_LEN)
@@ -752,7 +752,7 @@ var/global/list/obj/machinery/newscaster/allCasters = list() //Global list that 
 	var/is_synth = 0
 	var/obj/item/photo/photo = null
 
-/datum/news_photo/New(var/obj/item/photo/p, var/synth)
+/datum/news_photo/New(obj/item/photo/p, synth)
 	is_synth = synth
 	photo = p
 
@@ -954,7 +954,7 @@ var/global/list/obj/machinery/newscaster/allCasters = list() //Global list that 
 ///obj/machinery/newscaster/process()       //Was thinking of doing the icon update through process, but multiple iterations per second does not
 //	return                                  //bode well with a newscaster network of 10+ machines. Let's just return it, as it's added in the machines list.
 
-/obj/machinery/newscaster/proc/newsAlert(var/news_call)   //This isn't Agouri's work, for it is ugly and vile.
+/obj/machinery/newscaster/proc/newsAlert(news_call)   //This isn't Agouri's work, for it is ugly and vile.
 	var/turf/T = get_turf(src)                      //Who the fuck uses spawn(600) anyway, jesus christ
 	if(news_call)
 		for(var/mob/O in hearers(world.view-1, T))

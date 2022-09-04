@@ -85,7 +85,7 @@
 	var/seal_delay = SEAL_DELAY
 	var/sealing                                               // Keeps track of seal status independantly of canremove.
 	var/offline = 1                                           // Should we be applying suit maluses?
-	var/online_slowdown = 0                                   // If the suit is deployed and powered, it sets slowdown to this.
+	var/online_slowdown = 1                                   // If the suit is deployed and powered, it sets slowdown to this.
 	var/offline_slowdown = 3                                  // If the suit is deployed and unpowered, it sets slowdown to this.
 	var/vision_restriction = TINT_NONE
 	var/offline_vision_restriction = TINT_HEAVY               // tint value given to helmet
@@ -100,6 +100,54 @@
 	var/datum/effect/effect/system/spark_spread/spark_system
 
 	var/banned_modules = list()
+
+/obj/item/rig/get_mechanics_info()
+	. = ..()
+	. += {"
+		<p>A Hardsuit Control Module, or HCM, is a large device that goes into your backpack slot and can be deployed into a full powered hardsuit.</p>
+		<p>HCM oxygen tanks must be refilled like a normal void suit's tank.</p>
+		<p>HCM power cells must be recharged.</p>
+		<p>HCMs and their components are susceptible to damage from EMPs.</p>
+		<p>HCMs rely on an internal power cell to function, and will de-activate themselves if the power cell fully drains. Using modules increases the speed at which the HCM's cell drains.</p>
+
+		<h4>ACTIVATION</h4>
+		<p>To deploy and activate an HCM, follow these steps:</p>
+		<ol>
+			<li>Put the HCM onto your backpack slot. This is a timed action that will require you to remain still while you put it on.</li>
+			<li>Ensure you are not wearing anything on your head, suit, or glove slots, and ensure you are not wearing any magboots. These items will block the HCM from fully deploying.</li>
+			<li>Use the <code>toggle-hardsuit</code> verb in the chat bar, the <code>Toggle Hardsuit</code> option under the <code>Hardsuit</code> tab in the upper right, or the <code>Toggle</code> button next to the Suit status in the Hardsuit Interface. This is a timed action that will require you to remain still until all components of the suit are deployed and sealed.</li>
+			<li>Monitor your chat log - You'll know it's done when you see bold blue text stating the suit tightens around you.</li>
+		</ol>
+
+		<h4>DE-ACTIVATION</h4>
+		<p>You can de-activate the HCM so you can take it off by following these steps:</p>
+		<ol>
+			<li>Use the <code>toggle-hardsuit</code> verb in the chat bar, the <code>Toggle Hardsuit</code> option under the <code>Hardsuit</code> tab in the upper right, or the <code>Toggle</code> button next to the Suit status in the Hardsuit Interface. This is a timed action that will require you to remain still until all components of the suit are retracted and unsealed.</li>
+			<li>Monitor your chat log - You'll know it's done when you see bold blue text stating the suit loosens around you.</li>
+			<li>Click on the HCM with an empty hand to remove it from your back.</li>
+		</ol>
+
+		<h4>TOOL INTERACTIONS</h4>
+		<ul>
+			<li>You can toggle the HCM's access panel lock by using an ID card with the required access on it.</li>
+			<li>You can open or close the HCM's maintenance panel by using a crowbar on it. The panel can only be opened if the HCM's access panel is unlocked.</li>
+			<li>You can remove modules or the oxygen tank by using a wrench on the HCM. You can only do this if the maintenance panel is open.</li>
+			<li>You can insert modules, power cells, oxygen tanks by using them on the HCM while its maintenance panel is open.</li>
+			<li>You can repair the HCM's internals by using nanopaste on it while the maintenance panel is open.</li>
+			<li>You can open or close the HCM's wire panel by using a screwdriver on it. This operates as a standard wire control panel, interactable with a multitool, wirecutters, signallers, etc. once open.</li>
+			<li>You can repair damage to the HCM's chest piece by using a stack of the relevant material or a welder on the HCM or the chest piece while the chest piece is deployed.</li>
+		</ul>
+
+		<h4>HARDSUIT INTERFACE</h4>
+		<p>The HCM's Hardsuit Interface can be accessed by using the <code>Open Hardsuit Interface</code> option under the <code>Hardsuit</code> tab in the top right, or using the <code>open-hardsuit-interface`</code>verb in the chat bar.</p>
+		<ul>
+			<li><b>Power Supply</b> tells you how much charge is remaining in the HCM's power cell.</li>
+			<li><b>AI Control</b> displays and allows you to toggle an inserted pAI or AI intellicard's ability to control movement (CURRENTLY BROKEN, DO NOT USE).</li>
+			<li><b>Cover Status</b> displays and allows you to toggle the HCM's access panel lock.</li>
+			<li><b>Suit Pieces</b> displays the name and status of the major components of the hardsuit, and allows you to toggle the helmet on or off.</li>
+			<li>Additional HCM modules and their controls are displayed in the HCM's interface as well.</li>
+		</ul>
+	"}
 
 /obj/item/rig/get_cell()
 	return cell
@@ -198,7 +246,7 @@
 		ret.icon = mob_icon
 	return ret
 
-/obj/item/rig/proc/set_slowdown_and_vision(var/active)
+/obj/item/rig/proc/set_slowdown_and_vision(active)
 	if(chest)
 		chest.slowdown_per_slot[slot_wear_suit] = (active? online_slowdown : offline_slowdown)
 	if(helmet)
@@ -231,7 +279,7 @@
 			piece.item_flags &= ~ITEM_FLAG_AIRTIGHT
 	update_icon(1)
 
-/obj/item/rig/proc/toggle_seals(var/mob/initiator,var/instant)
+/obj/item/rig/proc/toggle_seals(mob/initiator,instant)
 
 	if(sealing) return
 
@@ -430,7 +478,7 @@
 		return 1
 	return 0
 
-/obj/item/rig/proc/check_power_cost(var/mob/living/user, var/cost, var/use_unconcious, var/obj/item/rig_module/mod, var/user_is_ai)
+/obj/item/rig/proc/check_power_cost(mob/living/user, cost, use_unconcious, obj/item/rig_module/mod, user_is_ai)
 
 	if(!istype(user))
 		return 0
@@ -463,7 +511,7 @@
 	cell.use(cost * CELLRATE)
 	return 1
 
-/obj/item/rig/ui_interact(mob/user, ui_key = "main", var/datum/nanoui/ui = null, var/force_open = 1, var/nano_state = GLOB.inventory_state)
+/obj/item/rig/ui_interact(mob/user, ui_key = "main", datum/nanoui/ui = null, force_open = 1, nano_state = GLOB.inventory_state)
 	if(!user)
 		return
 
@@ -553,7 +601,7 @@
 		ui.open()
 		ui.set_auto_update(1)
 
-/obj/item/rig/on_update_icon(var/update_mob_icon)
+/obj/item/rig/on_update_icon(update_mob_icon)
 
 	//TODO: Maybe consider a cache for this (use mob_icon as blank canvas, use suit icon overlay).
 	overlays.Cut()
@@ -596,7 +644,7 @@
 		return list()
 	return ..()
 
-/obj/item/rig/proc/check_suit_access(var/mob/living/carbon/human/user)
+/obj/item/rig/proc/check_suit_access(mob/living/carbon/human/user)
 
 	if(!security_check_enabled)
 		return 1
@@ -661,7 +709,7 @@
 		air_supply.OnTopic(wearer,href_list)
 		return 1
 
-/obj/item/rig/proc/notify_ai(var/message)
+/obj/item/rig/proc/notify_ai(message)
 	for(var/obj/item/rig_module/ai_container/module in installed_modules)
 		if(module.integrated_ai && module.integrated_ai.client && !module.integrated_ai.stat)
 			to_chat(module.integrated_ai, "[message]")
@@ -691,7 +739,7 @@
 		wearer.wearing_rig = src
 		update_icon()
 
-/obj/item/rig/proc/toggle_piece(var/piece, var/mob/initiator, var/deploy_mode)
+/obj/item/rig/proc/toggle_piece(piece, mob/initiator, deploy_mode)
 
 	if(sealing || !cell || !cell.charge)
 		return
@@ -756,7 +804,7 @@
 	if(piece == "helmet" && helmet)
 		helmet.update_light(wearer)
 
-/obj/item/rig/proc/deploy(mob/M,var/sealed)
+/obj/item/rig/proc/deploy(mob/M,sealed)
 
 	var/mob/living/carbon/human/H = M
 
@@ -789,7 +837,7 @@
 	for(var/piece in list("helmet","gauntlets","chest","boots"))
 		toggle_piece(piece, H, ONLY_DEPLOY)
 
-/obj/item/rig/dropped(var/mob/user)
+/obj/item/rig/dropped(mob/user)
 	..()
 	for(var/piece in list("helmet","gauntlets","chest","boots"))
 		toggle_piece(piece, user, ONLY_RETRACT)
@@ -880,7 +928,7 @@
 			to_chat(wearer, "<span class='warning'>The [source] has damaged your [dam_module.interface_name]!</span>")
 	dam_module.deactivate()
 
-/obj/item/rig/proc/malfunction_check(var/mob/living/carbon/human/user)
+/obj/item/rig/proc/malfunction_check(mob/living/carbon/human/user)
 	if(malfunction_delay)
 		if(offline)
 			to_chat(user, "<span class='danger'>The suit is completely unresponsive.</span>")
@@ -889,7 +937,7 @@
 		return 1
 	return 0
 
-/obj/item/rig/proc/ai_can_move_suit(var/mob/user, var/check_user_module = 0, var/check_for_ai = 0)
+/obj/item/rig/proc/ai_can_move_suit(mob/user, check_user_module = 0, check_for_ai = 0)
 
 	if(check_for_ai)
 		if(!(locate(/obj/item/rig_module/ai_container) in contents))
@@ -923,13 +971,13 @@
 		return 0
 	return 1
 
-/obj/item/rig/proc/force_rest(var/mob/user)
+/obj/item/rig/proc/force_rest(mob/user)
 	if(!ai_can_move_suit(user, check_user_module = 1))
 		return
 	wearer.lay_down()
 	to_chat(user, "<span class='notice'>\The [wearer] is now [wearer.resting ? "resting" : "getting up"].</span>")
 
-/obj/item/rig/proc/forced_move(var/direction, var/mob/user)
+/obj/item/rig/proc/forced_move(direction, mob/user)
 	if(malfunctioning)
 		direction = pick(GLOB.cardinal)
 
