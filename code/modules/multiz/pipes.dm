@@ -16,7 +16,7 @@
 	var/minimum_temperature_difference = 300
 	var/thermal_conductivity = 0 //WALL_HEAT_TRANSFER_COEFFICIENT No
 
-	level = 1
+	level = ATOM_LEVEL_UNDER_TILE
 
 /obj/machinery/atmospherics/pipe/zpipe/hide(i)
 	if(istype(loc, /turf/simulated))
@@ -45,7 +45,7 @@
 	else return 1
 
 /obj/machinery/atmospherics/pipe/zpipe/proc/burst()
-	src.visible_message("<span class='warning'>\The [src] bursts!</span>");
+	src.visible_message(SPAN_WARNING("\The [src] bursts!"));
 	playsound(src.loc, 'sound/effects/bang.ogg', 25, 1)
 	var/datum/effect/effect/system/smoke_spread/smoke = new
 	smoke.set_up(1,0, src.loc, 0)

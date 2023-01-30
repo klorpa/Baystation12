@@ -54,7 +54,7 @@ var/global/list/all_gps_units = list()
 	return T ? "[T.x]:[T.y]:[T.z]" : "N/A"
 
 /obj/item/device/gps/proc/check_visible_to_holder()
-	. = holder && (holder.l_hand == src || holder.r_hand == src)
+	. = !!holder?.IsHolding(src)
 
 /obj/item/device/gps/proc/update_holder(force_clear = FALSE)
 
@@ -189,7 +189,7 @@ var/global/list/all_gps_units = list()
 	var/duration = 5 MINUTES / severity_modifier
 	emped = TRUE
 	update_icon()
-	addtimer(CALLBACK(src, .proc/reset_emp), duration)
+	addtimer(new Callback(src, .proc/reset_emp), duration)
 
 /obj/item/device/gps/proc/reset_emp()
 	emped = FALSE

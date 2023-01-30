@@ -49,7 +49,7 @@ SUBSYSTEM_DEF(ticker)
 /datum/controller/subsystem/ticker/Initialize(start_uptime)
 	pregame_timeleft = config.pre_game_time SECONDS
 	build_mode_cache()
-	to_world("<span class='info'><B>Welcome to the pre-game lobby!</B></span>")
+	to_world(SPAN_INFO("<B>Welcome to the pre-game lobby!</B>"))
 	to_world("Please, setup your character and select ready. Game will start in [round(pregame_timeleft/10)] seconds")
 
 
@@ -175,13 +175,12 @@ SUBSYSTEM_DEF(ticker)
 
 	spawn(0)//Forking here so we don't have to wait for this to finish
 		mode.post_setup() // Drafts antags who don't override jobs.
-		to_world("<span class='info'><B>Enjoy the game!</B></span>")
-		sound_to(world, sound(GLOB.using_map.welcome_sound))
+		to_world(SPAN_INFO("<B>Enjoy the game!</B>"))
 
 		for (var/mob/new_player/player in GLOB.player_list)
 			player.new_player_panel()
 
-	if(!GLOB.admins.len)
+	if(!length(GLOB.admins))
 		send2adminirc("Round has started with no admins online.")
 
 /datum/controller/subsystem/ticker/proc/playing_tick()
@@ -191,8 +190,8 @@ SUBSYSTEM_DEF(ticker)
 	if(mode_finished && game_finished())
 		Master.SetRunLevel(RUNLEVEL_POSTGAME)
 		end_game_state = END_GAME_READY_TO_END
-		INVOKE_ASYNC(src, .proc/declare_completion)
-		if(config.allow_map_switching && config.auto_map_vote && GLOB.all_maps.len > 1)
+		invoke_async(src, .proc/declare_completion)
+		if(config.allow_map_switching && config.auto_map_vote && length(GLOB.all_maps) > 1)
 			SSvote.initiate_vote(/datum/vote/map/end_game, automatic = 1)
 
 	else if(mode_finished && (end_game_state <= END_GAME_NOT_OVER))
@@ -210,11 +209,11 @@ SUBSYSTEM_DEF(ticker)
 			callHook("roundend")
 			if (game_over)
 				if(!delay_end)
-					to_world("<span class='notice'><b>Rebooting due to destruction of [station_name()] in [restart_timeout/10] seconds</b></span>")
+					to_world(SPAN_NOTICE("<b>Rebooting due to destruction of [station_name()] in [restart_timeout/10] seconds</b>"))
 
 			else
 				if(!delay_end)
-					to_world("<span class='notice'><b>Restarting in [restart_timeout/10] seconds</b></span>")
+					to_world(SPAN_NOTICE("<b>Restarting in [restart_timeout/10] seconds</b>"))
 			handle_tickets()
 		if(END_GAME_ENDING)
 			restart_timeout -= (world.time - last_fire)
@@ -414,7 +413,7 @@ Helpers
 
 /datum/controller/subsystem/ticker/proc/attempt_late_antag_spawn(list/antag_choices)
 	var/datum/antagonist/antag = antag_choices[1]
-	while(antag_choices.len && antag)
+	while(length(antag_choices) && antag)
 		var/needs_ghost = antag.flags & (ANTAG_OVERRIDE_JOB | ANTAG_OVERRIDE_MOB)
 		if (needs_ghost)
 			looking_for_antags = 1
@@ -477,18 +476,18 @@ Helpers
 
 /datum/controller/subsystem/ticker/proc/notify_delay()
 	if(!delay_notified)
-		to_world("<span class='notice'><b>An admin has delayed the round end</b></span>")
+		to_world(SPAN_NOTICE("<b>An admin has delayed the round end</b>"))
 	delay_notified = 1
 
 /datum/controller/subsystem/ticker/proc/handle_tickets()
 	for(var/datum/ticket/ticket in tickets)
 		if(ticket.is_active())
 			if(!delay_notified)
-				message_staff("<span class='warning'><b>Automatically delaying restart due to active tickets.</b></span>")
+				message_staff(SPAN_WARNING("<b>Automatically delaying restart due to active tickets.</b>"))
 			notify_delay()
 			end_game_state = END_GAME_AWAITING_TICKETS
 			return
-	message_staff("<span class='warning'><b>No active tickets remaining, restarting in [restart_timeout/10] seconds if an admin has not delayed the round end.</b></span>")
+	message_staff(SPAN_WARNING("<b>No active tickets remaining, restarting in [restart_timeout/10] seconds if an admin has not delayed the round end.</b>"))
 	end_game_state = END_GAME_ENDING
 
 /datum/controller/subsystem/ticker/proc/declare_completion()
@@ -506,7 +505,7 @@ Helpers
 		to_world("<b>[aiPlayer.name][show_ai_key ? " (played by [aiPlayer.key])" : ""]'s laws at the [aiPlayer.stat == 2 ? "time of their deactivation" : "end of round"] were:</b>")
 		aiPlayer.show_laws(1)
 
-		if (aiPlayer.connected_robots.len)
+		if (length(aiPlayer.connected_robots))
 			var/minions = "<b>[aiPlayer.name]'s loyal minions were:</b>"
 			for(var/mob/living/silicon/robot/robo in aiPlayer.connected_robots)
 				var/show_robot_key = robo.get_preference_value(/datum/client_preference/show_ckey_credits) == GLOB.PREF_SHOW
@@ -531,7 +530,7 @@ Helpers
 	if(dronecount)
 		to_world("<b>There [dronecount>1 ? "were" : "was"] [dronecount] industrious maintenance [dronecount>1 ? "drones" : "drone"] at the end of this round.</b>")
 
-	if(all_money_accounts.len)
+	if(length(all_money_accounts))
 		var/datum/money_account/max_profit = all_money_accounts[1]
 		var/datum/money_account/max_loss = all_money_accounts[1]
 		for(var/datum/money_account/D in all_money_accounts)
@@ -542,8 +541,8 @@ Helpers
 				max_profit = D
 			if(saldo <= max_loss.get_balance())
 				max_loss = D
-		to_world("<b>[max_profit.owner_name]</b> received most <font color='green'><B>PROFIT</B></font> today, with net profit of <b>[GLOB.using_map.local_currency_name_short][max_profit.get_balance()]</b>.")
-		to_world("On the other hand, <b>[max_loss.owner_name]</b> had most <font color='red'><B>LOSS</B></font>, with total loss of <b>[GLOB.using_map.local_currency_name_short][max_loss.get_balance()]</b>.")
+		to_world("<b>[max_profit.owner_name]</b> received most [SPAN_COLOR("green", "<B>PROFIT</B>")] today, with net profit of <b>[GLOB.using_map.local_currency_name_short][max_profit.get_balance()]</b>.")
+		to_world("On the other hand, <b>[max_loss.owner_name]</b> had most [SPAN_COLOR("red", "<B>LOSS</B>")], with total loss of <b>[GLOB.using_map.local_currency_name_short][max_loss.get_balance()]</b>.")
 
 	mode.declare_completion()//To declare normal completion.
 
@@ -575,3 +574,13 @@ Helpers
 		bypass_gamemode_vote = 1
 	Master.SetRunLevel(RUNLEVEL_SETUP)
 	return 1
+
+
+/hook/roundstart/proc/PlayWelcomeSound()
+	if (!GLOB.using_map.welcome_sound)
+		return TRUE
+	var/welcome_sound = GLOB.using_map.welcome_sound
+	if (islist(welcome_sound))
+		welcome_sound = pick(welcome_sound)
+	sound_to(world, welcome_sound)
+	return TRUE

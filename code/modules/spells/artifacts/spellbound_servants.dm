@@ -12,7 +12,7 @@
 
 	var/obj/item/implant/translator/natural/I = new()
 	I.implant_in_mob(H, BP_HEAD)
-	if (master.languages.len)
+	if (length(master.languages))
 		var/datum/language/lang = master.languages[1]
 		H.add_language(lang.name)
 		H.set_default_language(lang)
@@ -210,7 +210,7 @@
 	var/datum/ghosttrap/G = get_ghost_trap("wizard familiar")
 	for(var/mob/observer/ghost/ghost in GLOB.player_list)
 		if(G.assess_candidate(ghost,null,FALSE))
-			to_chat(ghost,"<span class='notice'><b>A wizard is requesting a Spell-Bound Servant!</b></span> (<a href='?src=\ref[src];master=\ref[user]'>Join</a>)")
+			to_chat(ghost,"[SPAN_NOTICE("<b>A wizard is requesting a Spell-Bound Servant!</b>")] (<a href='?src=\ref[src];master=\ref[user]'>Join</a>)")
 
 /obj/effect/cleanable/spellbound/CanUseTopic(mob)
 	if(isliving(mob))
@@ -240,7 +240,7 @@
 
 /obj/item/summoning_stone/attack_self(mob/user)
 	if(user.z in GLOB.using_map.admin_levels)
-		to_chat(user, "<span class='warning'>You cannot use \the [src] here.</span>")
+		to_chat(user, SPAN_WARNING("You cannot use \the [src] here."))
 		return
 	user.set_machine(src)
 	interact(user)
@@ -262,7 +262,7 @@
 	if(prob(20))
 		var/list/base_areas = maintlocs //Have to do it this way as its a macro
 		var/list/pareas = base_areas.Copy()
-		while(pareas.len)
+		while(length(pareas))
 			var/a = pick(pareas)
 			var/area/picked_area = pareas[a]
 			pareas -= a
@@ -271,8 +271,8 @@
 				var/turf/T = t
 				if(T.density)
 					turfs -= T
-			if(turfs.len)
-				src.visible_message("<span class='notice'>\The [src] vanishes!</span>")
+			if(length(turfs))
+				src.visible_message(SPAN_NOTICE("\The [src] vanishes!"))
 				src.forceMove(pick(turfs))
 	show_browser(user, null, "window=summoning")
 	qdel(src)

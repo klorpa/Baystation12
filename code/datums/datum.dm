@@ -1,16 +1,13 @@
 /datum
-	var/tmp/gc_destroyed //Time when this object was destroyed.
-	var/tmp/is_processing = FALSE
+	var/gc_destroyed //Time when this object was destroyed.
+	var/is_processing = FALSE
 	var/list/active_timers  //for SStimer
 
 #ifdef TESTING
-	var/tmp/running_find_references
-	var/tmp/last_find_references = 0
+	var/running_find_references
+	var/last_find_references = 0
 #endif
 
-// The following vars cannot be edited by anyone
-/datum/VV_static()
-	return UNLINT(..()) + list("gc_destroyed", "is_processing")
 
 // Default implementation of clean-up code.
 // This should be overridden to remove all references pointing to the object being destroyed.
@@ -26,7 +23,7 @@
 	var/list/timers = active_timers
 	active_timers = null
 	for(var/datum/timedevent/timer as anything in timers)
-		if (timer.spent && !(timer.flags & TIMER_DELETE_ME))
+		if (timer.spent)
 			continue
 		qdel(timer)
 

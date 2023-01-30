@@ -33,7 +33,7 @@
 
 /obj/item/storage/belt/get_mob_overlay(mob/user_mob, slot)
 	var/image/ret = ..()
-	if(slot == slot_belt_str && contents.len)
+	if(slot == slot_belt_str && length(contents))
 		var/list/ret_overlays = list()
 		for(var/obj/item/I in contents)
 			var/use_state = (I.item_state ? I.item_state : I.icon_state)
@@ -329,6 +329,7 @@
 		/obj/item/device/flashlight,
 		/obj/item/reagent_containers/spray/cleaner,
 		/obj/item/soap,
+		/obj/item/reagent_containers/glass/rag,
 		/obj/item/holosign_creator,
 		/obj/item/clothing/gloves,
 		/obj/item/device/assembly/mousetrap,
@@ -399,10 +400,11 @@
 		/obj/item/sample/fibers,
 		/obj/item/device/taperecorder,
 		/obj/item/device/tape,
-		/obj/item/clothing/gloves/latex,
-		/obj/item/clothing/gloves/forensic,
+		/obj/item/clothing/gloves,
 		/obj/item/folder,
 		/obj/item/paper,
+		/obj/item/photo,
+		/obj/item/paper_bundle,
 		/obj/item/forensics/sample_kit,
 		/obj/item/device/camera,
 		/obj/item/device/taperecorder,
@@ -410,7 +412,8 @@
 		/obj/item/storage/csi_markers,
 		/obj/item/device/scanner,
 		/obj/item/clothing/head/beret,
-		/obj/item/material/knife/folding
+		/obj/item/material/knife/folding,
+		/obj/item/modular_computer/tablet
 		)
 
 /obj/item/storage/belt/forensic
@@ -428,10 +431,11 @@
 		/obj/item/sample/fibers,
 		/obj/item/device/taperecorder,
 		/obj/item/device/tape,
-		/obj/item/clothing/gloves/latex,
-		/obj/item/clothing/gloves/forensic,
+		/obj/item/clothing/gloves,
 		/obj/item/folder,
 		/obj/item/paper,
+		/obj/item/photo,
+		/obj/item/paper_bundle,
 		/obj/item/forensics/sample_kit,
 		/obj/item/device/camera,
 		/obj/item/device/taperecorder,
@@ -439,7 +443,8 @@
 		/obj/item/storage/csi_markers,
 		/obj/item/device/scanner,
 		/obj/item/clothing/head/beret,
-		/obj/item/material/knife/folding
+		/obj/item/material/knife/folding,
+		/obj/item/modular_computer/tablet
 		)
 
 /obj/item/storage/belt/holster/machete

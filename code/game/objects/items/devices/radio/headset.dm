@@ -337,7 +337,7 @@
 		return
 
 	if(isScrewdriver(W))
-		if(encryption_keys.len)
+		if(length(encryption_keys))
 			for(var/ch_name in channels)
 				radio_controller.remove_object(src, radiochannels[ch_name])
 				secure_radio_connections[ch_name] = null
@@ -352,11 +352,11 @@
 			to_chat(user, "This headset doesn't have any encryption keys!  How useless...")
 
 	if(istype(W, /obj/item/device/encryptionkey))
-		if(encryption_keys.len >= max_keys)
+		if(length(encryption_keys) >= max_keys)
 			to_chat(user, "The headset can't hold another key!")
 			return
 		if(user.unEquip(W, target = src))
-			to_chat(user, "<span class='notice'>You put \the [W] into \the [src].</span>")
+			to_chat(user, SPAN_NOTICE("You put \the [W] into \the [src]."))
 			encryption_keys += W
 			recalculateChannels(1)
 
@@ -395,11 +395,11 @@
 
 /obj/item/device/radio/headset/proc/setupRadioDescription()
 	var/radio_text = ""
-	for(var/i = 1 to channels.len)
+	for(var/i = 1 to length(channels))
 		var/channel = channels[i]
 		var/key = get_radio_key_from_channel(channel)
 		radio_text += "[key] - [channel]"
-		if(i != channels.len)
+		if(i != length(channels))
 			radio_text += ", "
 
 	radio_desc = radio_text

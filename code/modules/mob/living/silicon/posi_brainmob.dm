@@ -73,7 +73,7 @@
 
 	var/list/new_channels = list()
 	new_channels["Common"] = ";"
-	for(var/i = 1 to R.channels.len)
+	for(var/i = 1 to length(R.channels))
 		var/channel = R.channels[i]
 		var/key = get_radio_key_from_channel(channel)
 		new_channels[channel] = key
@@ -98,7 +98,7 @@
 /mob/living/silicon/sil_brainmob/statelaws(datum/ai_laws/laws)
 	update_law_channels()
 	if(isnull(law_channels[lawchannel]))
-		to_chat(src, "<span class='danger'>[lawchannel]: Unable to state laws. Communication method unavailable.</span>")
+		to_chat(src, SPAN_DANGER("[lawchannel]: Unable to state laws. Communication method unavailable."))
 		return 0
 
 	dostatelaws(lawchannel, law_channels[lawchannel], laws)

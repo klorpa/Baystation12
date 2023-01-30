@@ -44,7 +44,7 @@
 		if(is_component_functioning("camera"))
 			silicon_camera.captureimage(A, usr)
 		else
-			to_chat(src, "<span class='userdanger'>Your camera isn't functional.</span>")
+			to_chat(src, SPAN_CLASS("userdanger", "Your camera isn't functional."))
 		return
 
 	/*
@@ -176,6 +176,12 @@
 	A.attack_robot(src)
 	return TRUE
 
+/**
+ * Called when a silicon robot mob clicks on an atom.
+ *
+ * **Parameters**:
+ * - `user` - The mob clicking on the atom.
+ */
 /atom/proc/attack_robot(mob/user as mob)
 	attack_ai(user)
 	return

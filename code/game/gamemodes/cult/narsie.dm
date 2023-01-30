@@ -43,7 +43,7 @@ var/global/list/narsie_list = list()
 /obj/singularity/narsie/large/New()
 	..()
 	if(announce)
-		to_world("<font size='15' color='red'><b>[uppertext(name)] HAS RISEN</b></font>")
+		to_world(SPAN_SIZE(15, SPAN_COLOR("red", "<b>[uppertext(name)] HAS RISEN</b>")))
 		sound_to(world, sound('sound/effects/wind/wind_5_1.ogg'))
 
 	narsie_spawn_animation()
@@ -79,7 +79,7 @@ var/global/list/narsie_list = list()
 			if(M.status_flags & GODMODE)
 				continue
 			if(!iscultist(M))
-				to_chat(M, "<span class='danger'> You feel your sanity crumble away in an instant as you gaze upon [src.name]...</span>")
+				to_chat(M, SPAN_DANGER(" You feel your sanity crumble away in an instant as you gaze upon [src.name]..."))
 				M.apply_effect(3, EFFECT_STUN)
 
 
@@ -257,7 +257,7 @@ var/global/list/narsie_list = list()
 				if (101 == AM2.invisibility)
 					continue
 
-				addtimer(CALLBACK(AM2, /atom/proc/singularity_pull, src, current_size), 0)
+				addtimer(new Callback(AM2, /atom/proc/singularity_pull, src, current_size), 0)
 
 		if (dist <= consume_range && !istype(A, get_base_turf_by_area(A)))
 			var/turf/T2 = A
@@ -276,7 +276,7 @@ var/global/list/narsie_list = list()
 		if(get_z(cult_nh_mind.current) != z)
 			continue
 		cultists += cult_nh_mind.current
-	if(cultists.len)
+	if(length(cultists))
 		acquire(pick(cultists))
 		return
 		//If there was living cultists, it picks one to follow.
@@ -289,7 +289,7 @@ var/global/list/narsie_list = list()
 		if(pos.z != src.z)
 			continue
 		cultists += food
-	if(cultists.len)
+	if(length(cultists))
 		acquire(pick(cultists))
 		return
 		//no living cultists, pick a living human instead.
@@ -300,7 +300,7 @@ var/global/list/narsie_list = list()
 		if(pos.z != src.z)
 			continue
 		cultists += ghost
-	if(cultists.len)
+	if(length(cultists))
 		acquire(pick(cultists))
 		return
 		//no living humans, follow a ghost instead.
@@ -308,13 +308,13 @@ var/global/list/narsie_list = list()
 /obj/singularity/narsie/proc/acquire(const/mob/food)
 	var/capname = uppertext(name)
 
-	to_chat(target, "<span class='notice'><b>[capname] HAS LOST INTEREST IN YOU.</b></span>")
+	to_chat(target, SPAN_NOTICE("<b>[capname] HAS LOST INTEREST IN YOU.</b>"))
 	target = food
 
 	if (ishuman(target))
-		to_chat(target, "<span class='danger'>[capname] HUNGERS FOR YOUR SOUL.</span>")
+		to_chat(target, SPAN_DANGER("[capname] HUNGERS FOR YOUR SOUL."))
 	else
-		to_chat(target, "<span class='danger'>[capname] HAS CHOSEN YOU TO LEAD HIM TO HIS NEXT MEAL.</span>")
+		to_chat(target, SPAN_DANGER("[capname] HAS CHOSEN YOU TO LEAD HIM TO HIS NEXT MEAL."))
 /obj/singularity/narsie/on_capture()
 	chained = 1
 	move_self = 0

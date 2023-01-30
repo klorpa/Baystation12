@@ -46,7 +46,7 @@
 		</head>
 		<body>
 			<center><h1>Area Air Control</h1></center>
-			<font color="red">[status]</font><br>
+			<span style="color: red">[status]</span><br>
 			<a href="?src=\ref[src];scan=1">Scan</a>
 			<table border="1" width="90%">"}
 	for(var/obj/machinery/portable_atmospherics/powered/scrubber/huge/scrubber in connectedscrubbers)
@@ -103,7 +103,7 @@
 	connectedscrubbers.Cut()
 	for (var/obj/machinery/portable_atmospherics/powered/scrubber/huge/scrubber in orange(range, src))
 		connectedscrubbers += scrubber
-	if (!connectedscrubbers.len)
+	if (!length(connectedscrubbers))
 		status = "ERROR: No scrubber found!"
 	updateUsrDialog()
 
@@ -133,6 +133,6 @@
 		return
 	for (var/obj/machinery/portable_atmospherics/powered/scrubber/huge/scrubber in A)
 		connectedscrubbers += scrubber
-	if (!connectedscrubbers.len)
+	if (!length(connectedscrubbers))
 		status = "ERROR: No scrubber found!"
 	updateUsrDialog()

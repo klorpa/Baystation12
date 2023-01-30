@@ -109,7 +109,7 @@ var/global/list/obj/machinery/telecomms/telecomms_list = list()
 	// return 1 if found, 0 if not found
 	if(!signal)
 		return 0
-	if((signal.frequency in freq_listening) || (!freq_listening.len))
+	if((signal.frequency in freq_listening) || (!length(freq_listening)))
 		return 1
 	else
 		return 0
@@ -130,7 +130,7 @@ var/global/list/obj/machinery/telecomms/telecomms_list = list()
 		var/turf/position = get_turf(src)
 		listening_levels = GetConnectedZlevels(position.z)
 
-	if(autolinkers.len)
+	if(length(autolinkers))
 		// Links nearby machines
 		if(!long_range_link)
 			for(var/obj/machinery/telecomms/T in orange(20, src))
@@ -176,7 +176,7 @@ var/global/list/obj/machinery/telecomms/telecomms_list = list()
 
 /obj/machinery/telecomms/proc/update_power()
 	if(toggled)
-		if(stat & (BROKEN|NOPOWER|EMPED) || integrity <= 0) // if powered, on. if not powered, off. if too damaged, off
+		if(inoperable() || GET_FLAGS(stat, MACHINE_STAT_EMPED) || integrity <= 0) // if powered, on. if not powered, off. if too damaged, off
 			on = 0
 		else
 			on = 1
@@ -236,7 +236,7 @@ var/global/list/obj/machinery/telecomms/telecomms_list = list()
 	if (!use_power)
 		return
 
-	if(!(stat & (NOPOWER|BROKEN)))
+	if(operable())
 		var/turf/simulated/L = loc
 		if(istype(L))
 			var/datum/gas_mixture/env = L.return_air()

@@ -29,7 +29,7 @@
 			continue
 		if(M.buckled)
 			M.buckled.unbuckle_mob()
-		if(toggle && transformed_dudes.len && stop_transformation(M))
+		if(toggle && length(transformed_dudes) && stop_transformation(M))
 			continue
 		var/new_mob = pick(possible_transformations)
 
@@ -64,7 +64,7 @@
 
 /spell/targeted/shapeshift/proc/destroyed_transformer(mob/target) //Juuuuust in case
 	var/mob/current = transformed_dudes[target]
-	to_chat(current, "<span class='danger'>You suddenly feel as if this transformation has become permanent...</span>")
+	to_chat(current, SPAN_DANGER("You suddenly feel as if this transformation has become permanent..."))
 	remove_target(target)
 
 /spell/targeted/shapeshift/proc/stop_transformation(mob/living/target)

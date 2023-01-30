@@ -137,7 +137,7 @@
 	var/autoname = 1
 
 /obj/machinery/power/apc/updateDialog()
-	if (stat & (BROKEN|MAINT))
+	if (MACHINE_IS_BROKEN(src) || GET_FLAGS(stat, MACHINE_STAT_MAINT))
 		return
 	..()
 
@@ -185,7 +185,7 @@
 	else
 		opened = 1
 		operating = 0
-		stat |= MAINT
+		set_stat(MACHINE_STAT_MAINT, TRUE)
 		queue_icon_update()
 
 	if(operating)
@@ -234,7 +234,7 @@
 /obj/machinery/power/apc/examine(mob/user, distance)
 	. = ..()
 	if(distance <= 1)
-		if(stat & BROKEN)
+		if(MACHINE_IS_BROKEN(src))
 			to_chat(user, "Looks broken.")
 			return
 		var/terminal = terminal()
@@ -249,7 +249,7 @@
 				to_chat(user, "There is no electronics nor connected wires.")
 
 		else
-			if (stat & MAINT)
+			if (GET_FLAGS(stat, MACHINE_STAT_MAINT))
 				to_chat(user, "The cover is closed. Something wrong with it: it doesn't work.")
 			else if (hacker && !hacker.hacked_apcs_hidden)
 				to_chat(user, "The cover is locked.")
@@ -262,17 +262,11 @@
 /obj/machinery/power/apc/on_update_icon()
 	if (!status_overlays)
 		status_overlays = 1
-		status_overlays_lock = new
-		status_overlays_charging = new
-		status_overlays_equipment = new
-		status_overlays_lighting = new
-		status_overlays_environ = new
-
-		status_overlays_lock.len = 2
-		status_overlays_charging.len = 3
-		status_overlays_equipment.len = 5
-		status_overlays_lighting.len = 5
-		status_overlays_environ.len = 5
+		status_overlays_lock = new (2)
+		status_overlays_charging = new (3)
+		status_overlays_equipment = new (5)
+		status_overlays_lighting = new (5)
+		status_overlays_environ = new (5)
 
 		status_overlays_lock[1] = image(icon, "apcox-0")    // 0=blue 1=red
 		status_overlays_lock[2] = image(icon, "apcox-1")
@@ -332,14 +326,14 @@
 			icon_state = "apcewires"
 
 	if(!(update_state & UPDATE_ALLGOOD))
-		if(overlays.len)
+		if(length(overlays))
 			overlays.Cut()
 			return
 
 	if(update & 2)
-		if(overlays.len)
+		if(length(overlays))
 			overlays.Cut()
-		if(!(stat & (BROKEN|MAINT)) && update_state & UPDATE_ALLGOOD)
+		if(!MACHINE_IS_BROKEN(src) && !GET_FLAGS(stat, MACHINE_STAT_MAINT) && update_state & UPDATE_ALLGOOD)
 			overlays += status_overlays_lock[locked+1]
 			overlays += status_overlays_charging[charging+1]
 			if(operating)
@@ -352,7 +346,7 @@
 			set_light(0)
 		else if(update_state & UPDATE_BLUESCREEN)
 			set_light(0.8, 0.1, 1, 2, "#00ecff")
-		else if(!(stat & (BROKEN|MAINT)) && update_state & UPDATE_ALLGOOD)
+		else if(!MACHINE_IS_BROKEN(src) && !GET_FLAGS(stat, MACHINE_STAT_MAINT) && update_state & UPDATE_ALLGOOD)
 			var/color
 			switch(charging)
 				if(0)
@@ -375,9 +369,9 @@
 	update_overlay = 0
 	if(get_cell())
 		update_state |= UPDATE_CELL_IN
-	if(stat & BROKEN)
+	if(MACHINE_IS_BROKEN(src))
 		update_state |= UPDATE_BROKE
-	if(stat & MAINT)
+	if(GET_FLAGS(stat, MACHINE_STAT_MAINT))
 		update_state |= UPDATE_MAINT
 	if(opened)
 		if(opened==1)
@@ -444,7 +438,7 @@
 
 				if(do_after(user, 5 SECONDS, src, DO_REPAIR_CONSTRUCT) && opened && (has_electronics == 1) && !terminal()) // redo all checks.
 					has_electronics = 0
-					if ((stat & BROKEN))
+					if (MACHINE_IS_BROKEN(src))
 						user.visible_message(\
 							SPAN_WARNING("\The [user] has broken the power control board inside \the [src]!"),\
 							SPAN_NOTICE("You break the charred power control board and remove the remains."),\
@@ -462,10 +456,10 @@
 				update_icon()
 				return TRUE
 
-		if((stat & BROKEN) || (hacker && !hacker.hacked_apcs_hidden))
+		if(MACHINE_IS_BROKEN(src) || (hacker && !hacker.hacked_apcs_hidden))
 			to_chat(user, SPAN_WARNING("The cover appears broken or stuck."))
 			return TRUE
-		if(coverlocked && !(stat & MAINT))
+		if(coverlocked && !(GET_FLAGS(stat, MACHINE_STAT_MAINT)))
 			to_chat(user, SPAN_WARNING("The cover is locked and cannot be opened."))
 			return TRUE
 		opened = 1
@@ -485,13 +479,13 @@
 						to_chat(user, SPAN_WARNING("You must attach a wire connection first!"))
 						return TRUE
 					has_electronics = 2
-					stat &= ~MAINT
+					set_stat(MACHINE_STAT_MAINT, FALSE)
 					playsound(src.loc, 'sound/items/Screwdriver.ogg', 50, 1)
 					to_chat(user, "You screw the circuit electronics into place.")
 					update_icon()
 				if(2)
 					has_electronics = 1
-					stat |= MAINT
+					set_stat(MACHINE_STAT_MAINT, TRUE)
 					playsound(src.loc, 'sound/items/Screwdriver.ogg', 50, 1)
 					to_chat(user, "You unfasten the electronics.")
 					update_icon()
@@ -512,10 +506,10 @@
 			to_chat(user, "You must close the cover to swipe an ID card.")
 		else if(wiresexposed)
 			to_chat(user, "You must close the panel")
-		else if(stat & (BROKEN|MAINT))
+		else if(MACHINE_IS_BROKEN(src) || GET_FLAGS(stat, MACHINE_STAT_MAINT))
 			to_chat(user, "Nothing happens.")
 		else if(hacker && !hacker.hacked_apcs_hidden)
-			to_chat(user, "<span class='warning'>Access denied.</span>")
+			to_chat(user, SPAN_WARNING("Access denied."))
 		else
 			if(has_access(req_access, user.GetAccess()) && !isWireCut(APC_WIRE_IDSCAN))
 				locked = !locked
@@ -527,7 +521,7 @@
 
 	// Inserting board.
 	if(istype(W, /obj/item/module/power_control))
-		if(stat & BROKEN)
+		if(MACHINE_IS_BROKEN(src))
 			to_chat(user, SPAN_WARNING("You cannot put the board inside, the frame is damaged."))
 			return TRUE
 		if(!opened)
@@ -539,7 +533,7 @@
 		user.visible_message(SPAN_WARNING("\The [user] inserts the power control board into \the [src]."), \
 							"You start to insert the power control board into the frame...")
 		playsound(src.loc, 'sound/items/Deconstruct.ogg', 50, 1)
-		if(do_after(user, 1 SECOND, src, DO_REPAIR_CONSTRUCT) && has_electronics == 0 && opened && !(stat & BROKEN))
+		if(do_after(user, 1 SECOND, src, DO_REPAIR_CONSTRUCT) && has_electronics == 0 && opened && !MACHINE_IS_BROKEN(src))
 			has_electronics = 1
 			reboot() //completely new electronics
 			to_chat(user, SPAN_NOTICE("You place the power control board inside the frame."))
@@ -567,7 +561,7 @@
 		if(do_after(user, 5 SECONDS, src, DO_REPAIR_CONSTRUCT) && opened && has_electronics == 0 && !terminal())
 			if(!WT.remove_fuel(3, user))
 				return TRUE
-			if (emagged || (stat & BROKEN) || opened==2)
+			if (emagged || MACHINE_IS_BROKEN(src) || opened==2)
 				new /obj/item/stack/material/steel(loc)
 				user.visible_message(\
 					SPAN_WARNING("\The [src] has been cut apart by \the [user] with \the [WT]."),\
@@ -592,22 +586,22 @@
 			if(opened==2)
 				opened = 1
 			user.visible_message(\
-				"<span class='warning'>[user.name] has replaced the damaged APC frontal panel with a new one.</span>",\
-				"<span class='notice'>You replace the damaged APC frontal panel with a new one.</span>")
+				SPAN_WARNING("[user.name] has replaced the damaged APC frontal panel with a new one."),\
+				SPAN_NOTICE("You replace the damaged APC frontal panel with a new one."))
 			qdel(W)
 			update_icon()
 			return TRUE
 
-		if((stat & BROKEN) || (hacker && !hacker.hacked_apcs_hidden))
+		if(MACHINE_IS_BROKEN(src) || (hacker && !hacker.hacked_apcs_hidden))
 			if (has_electronics)
-				to_chat(user, "<span class='warning'>You cannot repair this APC until you remove the electronics still inside.</span>")
+				to_chat(user, SPAN_WARNING("You cannot repair this APC until you remove the electronics still inside."))
 				return TRUE
 
-			user.visible_message("<span class='warning'>[user.name] replaces the damaged APC frame with a new one.</span>",\
+			user.visible_message(SPAN_WARNING("[user.name] replaces the damaged APC frame with a new one."),\
 								"You begin to replace the damaged APC frame...")
-			if(do_after(user, 5 SECONDS, src, DO_REPAIR_CONSTRUCT) && opened && !has_electronics && ((stat & BROKEN) || (hacker && !hacker.hacked_apcs_hidden)))
+			if(do_after(user, 5 SECONDS, src, DO_REPAIR_CONSTRUCT) && opened && !has_electronics && (MACHINE_IS_BROKEN(src) || (hacker && !hacker.hacked_apcs_hidden)))
 				user.visible_message(\
-					"<span class='notice'>[user.name] has replaced the damaged APC frame with new one.</span>",\
+					SPAN_NOTICE("[user.name] has replaced the damaged APC frame with new one."),\
 					"You replace the damaged APC frame with new one.")
 				qdel(W)
 				set_broken(FALSE)
@@ -622,14 +616,14 @@
 	if((. = ..())) // Further interactions are low priority attack stuff.
 		return
 
-	if (((stat & BROKEN) || (hacker && !hacker.hacked_apcs_hidden)) \
+	if ((MACHINE_IS_BROKEN(src) || (hacker && !hacker.hacked_apcs_hidden)) \
 			&& !opened \
 			&& W.force >= 5 \
 			&& W.w_class >= 3.0 \
 			&& prob(W.force) )
 		opened = 2
-		user.visible_message("<span class='danger'>The APC cover was knocked down with the [W.name] by [user.name]!</span>", \
-			"<span class='danger'>You knock down the APC cover with your [W.name]!</span>", \
+		user.visible_message(SPAN_DANGER("The APC cover was knocked down with the [W.name] by [user.name]!"), \
+			SPAN_DANGER("You knock down the APC cover with your [W.name]!"), \
 			"You hear a bang")
 		update_icon()
 	else
@@ -638,20 +632,20 @@
 		if (!opened && wiresexposed && (isMultitool(W) || isWirecutter(W) || istype(W, /obj/item/device/assembly/signaler)))
 			return wires.Interact(user)
 
-		user.visible_message("<span class='danger'>The [src.name] has been hit with the [W.name] by [user.name]!</span>", \
-			"<span class='danger'>You hit the [src.name] with your [W.name]!</span>", \
+		user.visible_message(SPAN_DANGER("The [src.name] has been hit with the [W.name] by [user.name]!"), \
+			SPAN_DANGER("You hit the [src.name] with your [W.name]!"), \
 			"You hear a bang")
 		if(W.force >= 5 && W.w_class >= ITEM_SIZE_NORMAL && prob(W.force))
 			var/roulette = rand(1,100)
 			switch(roulette)
 				if(1 to 10)
 					locked = FALSE
-					to_chat(user, "<span class='notice'>You manage to disable the lock on \the [src]!</span>")
+					to_chat(user, SPAN_NOTICE("You manage to disable the lock on \the [src]!"))
 				if(50 to 70)
-					to_chat(user, "<span class='notice'>You manage to bash the lid open!</span>")
+					to_chat(user, SPAN_NOTICE("You manage to bash the lid open!"))
 					opened = 1
 				if(90 to 100)
-					to_chat(user, "<span class='warning'>There's a nasty sound and \the [src] goes cold...</span>")
+					to_chat(user, SPAN_WARNING("There's a nasty sound and \the [src] goes cold..."))
 					set_broken(TRUE)
 			queue_icon_update()
 	playsound(get_turf(src), 'sound/weapons/smash.ogg', 75, 1)
@@ -664,7 +658,7 @@
 			to_chat(user, "You must close the cover to swipe an ID card.")
 		else if(wiresexposed)
 			to_chat(user, "You must close the panel first")
-		else if(stat & (BROKEN|MAINT))
+		else if(MACHINE_IS_BROKEN(src) || GET_FLAGS(stat, MACHINE_STAT_MAINT))
 			to_chat(user, "Nothing happens.")
 		else
 			flick("apc-spark", src)
@@ -673,10 +667,10 @@
 					emagged = TRUE
 					req_access.Cut()
 					locked = 0
-					to_chat(user, "<span class='notice'>You emag the APC interface.</span>")
+					to_chat(user, SPAN_NOTICE("You emag the APC interface."))
 					update_icon()
 				else
-					to_chat(user, "<span class='warning'>You fail to [ locked ? "unlock" : "lock"] the APC interface.</span>")
+					to_chat(user, SPAN_WARNING("You fail to [ locked ? "unlock" : "lock"] the APC interface."))
 				return 1
 
 /obj/machinery/power/apc/CanUseTopicPhysical(mob/user)
@@ -688,7 +682,7 @@
 		var/mob/living/carbon/human/H = user
 
 		if(H.species.can_shred(H))
-			user.visible_message("<span class='warning'>\The [user] slashes at \the [src]!</span>", "<span class='notice'>You slash at \the [src]!</span>")
+			user.visible_message(SPAN_WARNING("\The [user] slashes at \the [src]!"), SPAN_NOTICE("You slash at \the [src]!"))
 			playsound(src.loc, 'sound/weapons/slash.ogg', 100, 1)
 
 			var/allcut = wires.IsAllCut()
@@ -696,12 +690,12 @@
 			if(beenhit >= pick(3, 4) && !wiresexposed)
 				wiresexposed = TRUE
 				src.update_icon()
-				src.visible_message("<span class='warning'>\The The [src]'s cover flies open, exposing the wires!</span>")
+				src.visible_message(SPAN_WARNING("\The The [src]'s cover flies open, exposing the wires!"))
 
 			else if(wiresexposed && allcut == 0)
 				wires.CutAll()
 				src.update_icon()
-				src.visible_message("<span class='warning'>\The [src]'s wires are shredded!</span>")
+				src.visible_message(SPAN_WARNING("\The [src]'s wires are shredded!"))
 			else
 				beenhit += 1
 			return TRUE
@@ -731,7 +725,7 @@
 		"totalCharging" = round(lastused_charging),
 		"coverLocked" = coverlocked,
 		"failTime" = failure_timer * 2,
-		"siliconUser" = istype(user, /mob/living/silicon),
+		"siliconUser" = (istype(user, /mob/living/silicon) || (isghost(user) && isadmin(user))),
 		"powerChannels" = list(
 			list(
 				"title" = "Equipment",
@@ -815,7 +809,7 @@
 
 /obj/machinery/power/apc/CanUseTopic(mob/user, datum/topic_state/state)
 	if(user.lying)
-		to_chat(user, "<span class='warning'>You must stand to use [src]!</span>")
+		to_chat(user, SPAN_WARNING("You must stand to use [src]!"))
 		return STATUS_CLOSE
 	if(istype(user, /mob/living/silicon))
 		var/permit = 0 // Malfunction variable. If AI hacks APC it can control it even without AI control wire.
@@ -831,14 +825,14 @@
 			return STATUS_CLOSE
 	. = ..()
 	if(user.restrained())
-		to_chat(user, "<span class='warning'>You must have free hands to use [src].</span>")
+		to_chat(user, SPAN_WARNING("You must have free hands to use [src]."))
 		. = min(., STATUS_UPDATE)
 
 /obj/machinery/power/apc/Topic(href, href_list)
 	if(..())
 		return 1
 
-	if(!istype(usr, /mob/living/silicon) && (locked && !emagged))
+	if(!istype(usr, /mob/living/silicon) && (locked && !emagged) && !(isghost(usr) && isadmin(usr)))
 		// Shouldn't happen, this is here to prevent href exploits
 		to_chat(usr, "You must unlock the panel to use this!")
 		return 1
@@ -881,13 +875,13 @@
 
 	else if (href_list["toggleaccess"])
 		if(istype(usr, /mob/living/silicon))
-			if(emagged || (stat & (BROKEN|MAINT)))
+			if(emagged || MACHINE_IS_BROKEN(src) || GET_FLAGS(stat, MACHINE_STAT_MAINT))
 				to_chat(usr, "The APC does not respond to the command.")
 			else
 				locked = !locked
 				update_icon()
 
-	return 0
+	return STATUS_UPDATE
 
 /obj/machinery/power/apc/proc/force_update_channels()
 	autoflag = -1 // This clears state, forcing a full recalculation
@@ -914,7 +908,7 @@
 	if(!area.requires_power)
 		return PROCESS_KILL
 
-	if(stat & (BROKEN|MAINT))
+	if(MACHINE_IS_BROKEN(src) || GET_FLAGS(stat, MACHINE_STAT_MAINT))
 		return
 
 	if(failure_timer)
@@ -964,7 +958,7 @@
 		if(cell.fully_charged())
 			charging = 2
 
-		if(stat & NOPOWER)
+		if(!is_powered())
 			power_change() // We are the ones responsible for triggering listeners once power returns, so we run this to detect possible changes.
 
 	// Set channels depending on how much charge we have left
@@ -987,7 +981,7 @@
 	var/obj/item/cell/cell = get_cell()
 	var/percent = cell && cell.percent()
 
-	if(!cell || shorted || (stat & NOPOWER) || !operating)
+	if(!cell || shorted || (!is_powered()) || !operating)
 		if(autoflag != 0)
 			equipment = autoset(equipment, 0)
 			lighting = autoset(lighting, 0)
@@ -1045,22 +1039,6 @@
 /obj/machinery/power/apc/emp_act(severity)
 	if(emp_hardened)
 		return
-	var/obj/item/cell/cell = get_cell()
-	// Fail for 8-12 minutes (divided by severity)
-	// Division by 2 is required, because machinery ticks are every two seconds. Without it we would fail for 16-24 minutes.
-	if(is_critical)
-		// Critical APCs are considered EMP shielded and will be offline only for about half minute. Prevents AIs being one-shot disabled by EMP strike.
-		// Critical APCs are also more resilient to cell corruption/power drain.
-		energy_fail(rand(240, 360) / severity / CRITICAL_APC_EMP_PROTECTION)
-		if(cell)
-			cell.emp_act(severity+2)
-	else
-		// Regular APCs fail for normal time.
-		energy_fail(rand(240, 360) / severity)
-		if(cell)
-			cell.emp_act(severity+1)
-
-	update_icon()
 	..()
 
 /obj/machinery/power/apc/ex_act(severity)
@@ -1083,13 +1061,13 @@
 					C.ex_act(EX_ACT_LIGHT)
 
 /obj/machinery/power/apc/set_broken(new_state)
-	if(!new_state || (stat & BROKEN))
+	if(!new_state || MACHINE_IS_BROKEN(src))
 		return ..()
-	visible_message("<span class='notice'>[src]'s screen flickers with warnings briefly!</span>")
+	visible_message(SPAN_NOTICE("[src]'s screen flickers with warnings briefly!"))
 	GLOB.power_alarm.triggerAlarm(loc, src)
 	spawn(rand(2,5))
 		..()
-		visible_message("<span class='notice'>[src]'s screen suddenly explodes in rain of sparks and small debris!</span>")
+		visible_message(SPAN_NOTICE("[src]'s screen suddenly explodes in rain of sparks and small debris!"))
 		operating = 0
 		update()
 	return TRUE

@@ -84,11 +84,10 @@ GLOBAL_LIST(end_titles)
 	parent.screen += src
 
 /obj/screen/credit/Destroy()
-	var/client/P = parent
 	if(parent)
-		P.screen -= src
-	LAZYREMOVE(P.credits, src)
-	parent = null
+		parent.screen -= src
+		LAZYREMOVE(parent.credits, src)
+		parent = null
 	return ..()
 
 /proc/generate_titles()
@@ -120,7 +119,7 @@ GLOBAL_LIST(end_titles)
 			continue
 		if(H.timeofdeath && H.timeofdeath < 5 MINUTES) //don't mention these losers (prespawned corpses mostly)
 			continue
-		if(!cast.len && !chunksize)
+		if(!length(cast) && !chunksize)
 			chunk += "CAST:"
 		var/job = ""
 		if(GetAssignment(H) != "Unassigned")
@@ -135,7 +134,7 @@ GLOBAL_LIST(end_titles)
 		if(H.ckey && H.client)
 			if(H.client.get_preference_value(/datum/client_preference/show_ckey_credits) == GLOB.PREF_SHOW)
 				showckey = 1
-		var/decl/cultural_info/actor_culture = SSculture.get_culture(H.get_cultural_value(TAG_CULTURE))
+		var/singleton/cultural_info/actor_culture = SSculture.get_culture(H.get_cultural_value(TAG_CULTURE))
 		if(!actor_culture || !(H.species.spawn_flags & SPECIES_CAN_JOIN) || prob(10))
 			actor_culture = SSculture.get_culture(CULTURE_HUMAN)
 		if(!showckey)
@@ -151,7 +150,7 @@ GLOBAL_LIST(end_titles)
 			cast += "<center>[jointext(chunk,"<br>")]</center>"
 			chunk.Cut()
 			chunksize = 0
-	if(chunk.len)
+	if(length(chunk))
 		cast += "<center>[jointext(chunk,"<br>")]</center>"
 
 	titles += cast
@@ -168,7 +167,7 @@ GLOBAL_LIST(end_titles)
 	for(var/spec in monkies)
 		var/datum/species/S = all_species[spec]
 		corpses += "[monkies[spec]] [lowertext(monkies[spec] > 1 ? S.name_plural : S.name)]"
-	if(corpses.len)
+	if(length(corpses))
 		titles += "<center>BASED ON REAL EVENTS<br>In memory of [english_list(corpses)].</center>"
 
 	var/list/staff = list("PRODUCTION STAFF:")
@@ -179,13 +178,13 @@ GLOBAL_LIST(end_titles)
 			continue
 
 		if(C.holder.rights & (R_DEBUG|R_ADMIN))
-			var/decl/cultural_info/cult = SSculture.cultural_info_by_name[pick(SSculture.cultural_info_by_name)]
+			var/singleton/cultural_info/cult = SSculture.cultural_info_by_name[pick(SSculture.cultural_info_by_name)]
 			staff += "[uppertext(pick(staffjobs))] - [cult.get_random_name(pick(MALE, FEMALE))] a.k.a. '[C.key]'"
 		else if(C.holder.rights & R_MOD)
 			goodboys += "[C.key]"
 
 	titles += "<center>[jointext(staff,"<br>")]</center>"
-	if(goodboys.len)
+	if(length(goodboys))
 		titles += "<center>STAFF'S GOOD BOYS:<br>[english_list(goodboys)]</center><br>"
 
 	var/disclaimer = "<br>Sponsored by [GLOB.using_map.company_name].<br>All rights reserved.<br>\

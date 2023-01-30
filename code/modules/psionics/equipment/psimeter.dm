@@ -12,7 +12,7 @@
 	var/mob/living/last_assayed
 
 /obj/machinery/psi_meter/on_update_icon()
-	if(use_power && !(stat & (NOPOWER|BROKEN)))
+	if(use_power && operable())
 		icon_state = "meter_on"
 	else
 		icon_state = "meter_off"
@@ -54,7 +54,7 @@
 			if(last_assay)
 				var/obj/item/paper/P = new(loc)
 				P.name = "paper - Psi-Assay ([last_assayed.name])"
-				P.info = jointext(last_assay - last_assay[last_assay.len],null) // Last line is 'print | clear' link line.
+				P.info = jointext(last_assay - last_assay[length(last_assay)],null) // Last line is 'print | clear' link line.
 				return TRUE
 
 		if(href_list["clear"])

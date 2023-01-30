@@ -98,23 +98,13 @@
 		return
 
 	for (var/obj/machinery/door/D in T)
-		if (D.density)
-			if (D.is_broken())
-				D.open(TRUE)
-				return
-			playsound(loc, 'sound/effects/attackblob.ogg', 50, 1)
-			D.take_damage(damage)
+		if (D.density && MACHINE_IS_BROKEN(D))
+			D.open(TRUE)
 			return
 
 	var/obj/structure/foamedmetal/F = locate() in T
 	if (F)
 		qdel(F)
-		return
-
-	var/obj/machinery/camera/CA = locate() in T
-	if (CA && !CA.is_broken())
-		playsound(loc, 'sound/effects/attackblob.ogg', 50, 1)
-		CA.take_damage(30)
 		return
 
 	var/sound_played
@@ -134,7 +124,7 @@
 			visible_message(SPAN_DANGER("A tendril flies out from \the [src] and smashes into \the [A]!"))
 			if (!sound_played)
 				playsound(loc, 'sound/effects/attackblob.ogg', 50, 1)
-			A.damage_health(damage, damage_type)
+			A.damage_health(damage, damage_type, skip_can_damage_check = TRUE)
 		if (A.density)
 			density_check = TRUE
 

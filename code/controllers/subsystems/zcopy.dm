@@ -85,8 +85,8 @@ SUBSYSTEM_DEF(zcopy)
 	..({"\
 		Mx: [json_encode(zlev_maximums)]\n\
 		Queues: \
-		Turfs [queued_turfs.len - (qt_idex - 1)] \
-		Overlays [queued_overlays.len - (qo_idex - 1)]\n\
+		Turfs [length(queued_turfs) - (qt_idex - 1)] \
+		Overlays [length(queued_overlays) - (qo_idex - 1)]\n\
 		Open Turfs: \
 		Turfs [openspace_turfs] \
 		Overlays [openspace_overlays]\n\
@@ -134,7 +134,7 @@ SUBSYSTEM_DEF(zcopy)
 	var/list/curr_turfs = queued_turfs
 	var/list/curr_ov = queued_overlays
 
-	while (qt_idex <= curr_turfs.len)
+	while (qt_idex <= length(curr_turfs))
 		var/turf/T = curr_turfs[qt_idex]
 		curr_turfs[qt_idex] = null
 		qt_idex += 1
@@ -190,6 +190,11 @@ SUBSYSTEM_DEF(zcopy)
 		var/turf/Td = T
 		while (Td.below)
 			Td = Td.below
+
+		// Debug checking for #32286 - https://github.com/Baystation12/Baystation12/issues/32286
+		if (Td.z > length(zlev_maximums))
+			crash_with("zcopy hit a z-level not included in zlev_maximums: [Td.z] - Maximum z-level: [length(zlev_maximums)] - Source turf: [Td] ([Td.type]) in [get_area(Td)] ([Td.x], [Td.y], [Td.z]).")
+			continue // Prevents the subsystem from halting on the next line
 
 		// Depth must be the depth of the *visible* turf, not self.
 		var/turf_depth
@@ -315,7 +320,7 @@ SUBSYSTEM_DEF(zcopy)
 	if (!no_mc_tick)
 		MC_SPLIT_TICK
 
-	while (qo_idex <= curr_ov.len)
+	while (qo_idex <= length(curr_ov))
 		var/atom/movable/openspace/mimic/OO = curr_ov[qo_idex]
 		curr_ov[qo_idex] = null
 		qo_idex += 1
@@ -386,7 +391,7 @@ SUBSYSTEM_DEF(zcopy)
 		"<head><meta charset='utf-8'/></head><body>",
 		"<h1>Analysis of [T] at [T.x],[T.y],[T.z]</h1>",
 		"<b>Queue occurrences:</b> [T.z_queued]",
-		"<b>Above space:</b> Apparent [T.z_eventually_space ? "Yes" : "No"], Actual [is_above_space ? "Yes" : "No"] - [T.z_eventually_space == is_above_space ? "<font color='green'>OK</font>" : "<font color='red'>MISMATCH</font>"]",
+		"<b>Above space:</b> Apparent [T.z_eventually_space ? "Yes" : "No"], Actual [is_above_space ? "Yes" : "No"] - [T.z_eventually_space == is_above_space ? SPAN_COLOR("green", "OK") : SPAN_COLOR("red", "MISMATCH")]",
 		"<b>Z Flags</b>: [english_list(bitfield2list(T.z_flags, GLOB.mimic_defines), "(none)")]",
 		"<b>Has Shadower:</b> [T.shadower ? "Yes" : "No"]",
 		"<b>Has turf proxy:</b> [T.mimic_proxy ? "Yes" : "No"]",
@@ -402,7 +407,7 @@ SUBSYSTEM_DEF(zcopy)
 	for (var/atom/movable/openspace/O in T)
 		found_oo += O
 
-	if (T.shadower.overlays.len)
+	if (length(T.shadower.overlays))
 		for (var/overlay in T.shadower.overlays)
 			var/atom/movable/openspace/debug/D = new
 			D.appearance = overlay
@@ -464,13 +469,13 @@ SUBSYSTEM_DEF(zcopy)
 		return "<li>\icon[A] <b>\[Turf Mimic\]</b> plane [A.plane], layer [A.layer], Z-level [A.z], delegate of \icon[DC.delegate] [DC.delegate] ([DC.delegate.type])</li>"
 	else if (isturf(A))
 		if (A == original)
-			return "<li>\icon[A] <b>\[Turf\]</b> plane [A.plane], layer [A.layer], depth [FMT_DEPTH(A:z_depth)], Z-level [A.z] - [A] ([A.type]) - <font color='green'>SELF</font></li>"
+			return "<li>\icon[A] <b>\[Turf\]</b> plane [A.plane], layer [A.layer], depth [FMT_DEPTH(A:z_depth)], Z-level [A.z] - [A] ([A.type]) - [SPAN_COLOR("green", "SELF")]</li>"
 		else	// foreign turfs - not visible here, but sometimes good for figuring out layering -- showing these is currently not enabled
-			return "<li>\icon[A] <b>\[Turf\]</b> <em><font color='#646464'>plane [A.plane], layer [A.layer], depth [FMT_DEPTH(A:z_depth)], Z-level [A.z] - [A] ([A.type])</font></em> - <font color='red'>FOREIGN</font></em></li>"
+			return "<li>\icon[A] <b>\[Turf\]</b> <em>[SPAN_COLOR("#646464", "plane [A.plane], layer [A.layer], depth [FMT_DEPTH(A:z_depth)], Z-level [A.z] - [A] ([A.type])")]</em> - [SPAN_COLOR("red", "FOREIGN")]</em></li>"
 	else if (A.type == /atom/movable/openspace/multiplier)
 		return "<li>\icon[A] <b>\[Shadower\]</b> plane [A.plane], layer [A.layer], Z-level [A.z] - [A] ([A.type])</li>"
 	else if (A.type == /atom/movable/openspace/debug)	// These are fake objects that exist just to show the shadower's overlays in this list.
-		return "<li>\icon[A] <b>\[Shadower True Overlay\]</b> plane [A.plane], layer [A.layer] - <font color='grey'>VIRTUAL</font></li>"
+		return "<li>\icon[A] <b>\[Shadower True Overlay\]</b> plane [A.plane], layer [A.layer] - [SPAN_COLOR("grey", "VIRTUAL")]</li>"
 	else if (A.type == /atom/movable/openspace/turf_proxy)
 		return "<li>\icon[A] <b>\[Turf Proxy\]</b> plane [A.plane], layer [A.layer], Z-level [A.z] - [A] ([A.type])</li>"
 	else

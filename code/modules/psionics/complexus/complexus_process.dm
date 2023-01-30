@@ -66,7 +66,7 @@
 	if(!announced && owner && owner.client && !QDELETED(src))
 		announced = TRUE
 		to_chat(owner, "<hr>")
-		to_chat(owner, SPAN_NOTICE("<font size = 3>You are <b>psionic</b>, touched by powers beyond understanding.</font>"))
+		to_chat(owner, SPAN_NOTICE(FONT_LARGE("You are <b>psionic</b>, touched by powers beyond understanding.")))
 		to_chat(owner, SPAN_NOTICE("<b>Shift-left-click your Psi icon</b> on the bottom right to <b>view a summary of how to use them</b>, or <b>left click</b> it to <b>suppress or unsuppress</b> your psionics. Beware: overusing your gifts can have <b>deadly consequences</b>."))
 		to_chat(owner, "<hr>")
 
@@ -193,7 +193,7 @@
 						return
 
 			// Heal broken bones.
-			if(H.bad_external_organs.len)
+			if(length(H.bad_external_organs))
 				for(var/obj/item/organ/external/E in H.bad_external_organs)
 
 					if(BP_IS_ROBOTIC(E))

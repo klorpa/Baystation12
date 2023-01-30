@@ -1,20 +1,18 @@
-//
-// Abstract Class
-//
-
-var/global/list/protected_objects = list(/obj/machinery,
-										 /obj/structure/table,
-										 /obj/structure/cable,
-										 /obj/structure/window,
-										 /obj/structure/wall_frame,
-										 /obj/structure/grille,
-										 /obj/structure/catwalk,
-										 /obj/structure/ladder,
-										 /obj/structure/stairs,
-										 /obj/structure/sign,
-										 /obj/structure/railing,
-										 /obj/item/modular_computer,
-										 /obj/item/projectile/animate)
+GLOBAL_LIST_INIT(mimic_protected, list(
+	/obj/machinery,
+	/obj/structure/table,
+	/obj/structure/cable,
+	/obj/structure/window,
+	/obj/structure/wall_frame,
+	/obj/structure/grille,
+	/obj/structure/catwalk,
+	/obj/structure/ladder,
+	/obj/structure/stairs,
+	/obj/structure/sign,
+	/obj/structure/railing,
+	/obj/item/modular_computer,
+	/obj/item/projectile/animate
+))
 
 /mob/living/simple_animal/hostile/mimic
 	name = "crate"
@@ -73,7 +71,7 @@ var/global/list/protected_objects = list(/obj/machinery,
 
 /mob/living/simple_animal/hostile/mimic/proc/CopyObject(obj/O, mob/living/creator)
 
-	if((istype(O, /obj/item) || istype(O, /obj/structure)) && !is_type_in_list(O, protected_objects))
+	if((istype(O, /obj/item) || istype(O, /obj/structure)) && !is_type_in_list(O, GLOB.mimic_protected))
 		O.forceMove(src)
 		copy_of = weakref(O)
 		appearance = O
@@ -137,7 +135,7 @@ var/global/list/protected_objects = list(/obj/machinery,
 		if(istype(L))
 			if(prob(15))
 				L.Weaken(1)
-				L.visible_message("<span class='danger'>\the [src] knocks down \the [L]!</span>")
+				L.visible_message(SPAN_DANGER("\the [src] knocks down \the [L]!"))
 
 /mob/living/simple_animal/hostile/mimic/Destroy()
 	copy_of = null

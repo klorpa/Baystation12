@@ -1,15 +1,3 @@
-/// Multiplier for converting degrees to radians
-#define DEG_TO_RAD 0.0174532925
-
-
-/// Multiplier for converting radians to degrees
-#define RAD_TO_DEG 57.2957795
-
-
-/// The mathematical constant pi to f32 precision
-#define PI 3.141592
-
-
 /// A random real number between low and high inclusive
 #define Frand(low, high) ( rand() * ((high) - (low)) + (low) )
 
@@ -102,10 +90,10 @@
 	if (islist(values[1]))
 		values = values[1]
 	var/sum = 0
-	if (values.len)
+	if (length(values))
 		for (var/value in values)
 			sum += value
-		sum /= values.len
+		sum /= length(values)
 	return sum
 
 
@@ -194,3 +182,21 @@
 /// Returns the angle of the matrix according to atan2 on the b, a parts
 /matrix/proc/get_angle()
 	return Atan2(b, a)
+
+
+/// Roll a Y sided die X times, producing either a sum result or list of rolls.
+/proc/xdy(x, y, as_list)
+	var/result = 0
+	if (as_list)
+		result = list()
+	x = max(1, round(x))
+	y = max(1, round(y))
+	for (var/i = 1 to x)
+		result += rand(1, y)
+	return result
+
+
+/// Generate a random number from min to max on a sigma^2 = 1 gaussian distribution.
+/proc/grand(min = 0, max = 1)
+	var/static/generator/gauss = generator("num", 0, 1, NORMAL_RAND)
+	return min + gauss.Rand() * (max - min)

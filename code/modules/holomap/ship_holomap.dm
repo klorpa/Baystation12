@@ -13,7 +13,7 @@
 
 	uncreated_component_parts = null
 
-	construct_state = /decl/machine_construction/default/panel_closed
+	construct_state = /singleton/machine_construction/default/panel_closed
 	base_type = /obj/machinery/ship_map
 
 	var/light_power_on = 1
@@ -102,7 +102,7 @@
 		return TRUE
 
 /obj/machinery/ship_map/proc/startWatching(mob/user)
-	if(isliving(user) && anchored && !(stat & (NOPOWER|BROKEN)))
+	if(isliving(user) && anchored && operable())
 		if(user.client)
 			holomap_datum.station_map.loc = GLOB.global_hud.holomap  // Put the image on the holomap hud
 			holomap_datum.station_map.alpha = 0 // Set to transparent so we can fade in
@@ -124,7 +124,7 @@
 			START_PROCESSING_MACHINE(src, MACHINERY_PROCESS_SELF)
 
 /obj/machinery/ship_map/Process()
-	if((stat & (NOPOWER|BROKEN)))
+	if((inoperable()))
 		stopWatching()
 		return PROCESS_KILL
 
@@ -137,7 +137,7 @@
 		if(watching_mob.client)
 			animate(holomap_datum.station_map, alpha = 0, time = 5, easing = LINEAR_EASING)
 			var/mob/M = watching_mob
-			addtimer(CALLBACK(src, .proc/clear_image, M, holomap_datum.station_map), 5, TIMER_CLIENT_TIME)//we give it time to fade out
+			addtimer(new Callback(src, .proc/clear_image, M, holomap_datum.station_map), 5, TIMER_CLIENT_TIME)//we give it time to fade out
 		GLOB.moved_event.unregister(watching_mob, src)
 		GLOB.destroyed_event.unregister(watching_mob, src)
 	watching_mob = null
@@ -152,10 +152,10 @@
 /obj/machinery/ship_map/on_update_icon()
 	. = ..()
 	overlays.Cut()
-	if(stat & BROKEN)
+	if(MACHINE_IS_BROKEN(src))
 		icon_state = "station_mapb"
 		set_light(0)
-	else if((stat & NOPOWER) || !anchored)
+	else if((!is_powered()) || !anchored)
 		icon_state = "station_map0"
 		set_light(0)
 	else
@@ -389,7 +389,7 @@
 
 
 /datum/station_holomap/proc/set_level(level)
-	if(level > z_levels.len)
+	if(level > length(z_levels))
 		return
 
 	displayed_level = level
@@ -416,7 +416,7 @@
 	if(displayed_level > 1)
 		station_map.vis_contents += lbuttons[1]
 
-	if(displayed_level < z_levels.len)
+	if(displayed_level < length(z_levels))
 		station_map.vis_contents += lbuttons[2]
 
 /datum/station_holomap/proc/legend_select(obj/screen/legend/L)

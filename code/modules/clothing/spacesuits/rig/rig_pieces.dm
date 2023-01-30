@@ -81,20 +81,20 @@
 	if(can_support(user))
 		for(var/obj/item/organ/external/E in user.bad_external_organs)
 			if((E.body_part & body_parts_covered) && E.is_broken() && E.apply_splint(src))
-				to_chat(user, "<span class='notice'>You feel [src] constrict about your [E.name], supporting it.</span>")
+				to_chat(user, SPAN_NOTICE("You feel [src] constrict about your [E.name], supporting it."))
 				supporting_limbs |= E
 	else
 		// Otherwise, remove the splints.
 		for(var/obj/item/organ/external/E in supporting_limbs)
 			if(E.splinted == src && E.remove_splint(src))
-				to_chat(user, "<span class='notice'>\The [src] stops supporting your [E.name].</span>")
+				to_chat(user, SPAN_NOTICE("\The [src] stops supporting your [E.name]."))
 		supporting_limbs.Cut()
 
 /obj/item/clothing/suit/space/rig/proc/handle_fracture(mob/living/carbon/human/user, obj/item/organ/external/E)
 	if(!istype(user) || isnull(supporting_limbs) || !can_support(user))
 		return
 	if((E.body_part & body_parts_covered) && E.is_broken() && E.apply_splint(src))
-		to_chat(user, "<span class='notice'>You feel [src] constrict about your [E.name], supporting it.</span>")
+		to_chat(user, SPAN_NOTICE("You feel [src] constrict about your [E.name], supporting it."))
 		supporting_limbs |= E
 
 
@@ -108,7 +108,7 @@
 		return 0
 
 	var/obj/item/rig/suit = H.back
-	if(!suit || !istype(suit) || !suit.installed_modules.len)
+	if(!suit || !istype(suit) || !length(suit.installed_modules))
 		return 0
 
 	for(var/obj/item/rig_module/module in suit.installed_modules)

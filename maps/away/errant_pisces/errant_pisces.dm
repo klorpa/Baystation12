@@ -24,7 +24,8 @@
 	icon_state = "net_f"
 	anchored = TRUE
 	layer = CATWALK_LAYER//probably? Should cover cables, pipes and the rest of objects that are secured on the floor
-	var/health = 100
+	health_max = 100
+	health_min_damage = 10
 
 /obj/structure/net/Initialize(mapload)
 	. = ..()
@@ -37,40 +38,31 @@
 					continue
 				N.update_connections()
 
-/obj/structure/net/examine(mob/user)
-	. = ..()
-	if (health < 20)
-		to_chat(user, "\The [src] is barely hanging on a few last threads.")
-	else if (health < 50)
-		to_chat(user, "Many ribbons of \the [src] are cut away.")
-	else if (health < 90)
-		to_chat(user, "Few ribbons of \the [src] are cut away.")
-
 /obj/structure/net/attackby(obj/item/W as obj, mob/user as mob)
-	if (istype(W, /obj/item/material)) //sharp objects can cut thorugh
+	if (user.a_intent == I_HURT && istype(W, /obj/item/material)) //sharp objects can cut thorugh
 		var/obj/item/material/SH = W
 		if (!(SH.sharp) || (SH.sharp && SH.force < 10))//is not sharp enough or at all
-			to_chat(user,"<span class='warning'>You can't cut throught \the [src] with \the [W], it's too dull.</span>")
-			return
-		visible_message("<span class='warning'>[user] starts to cut through \the [src] with \the [W]!</span>")
-		while (health > 0)
+			to_chat(user,SPAN_WARNING("You can't cut throught \the [src] with \the [W], it's too dull."))
+			return TRUE
+		visible_message(SPAN_WARNING("[user] starts to cut through \the [src] with \the [W]!"))
+		while (!health_dead)
 			if (!do_after(user, 2 SECONDS, src, DO_PUBLIC_UNIQUE))
-				visible_message("<span class='warning'>[user] stops cutting through \the [src] with \the [W]!</span>")
-				return
-			health -= 20 * (1 + (SH.force-10)/10)//the sharper the faster, every point of force above 10 adds 10 % to damage
-		visible_message("<span class='warning'>[user] cuts through \the [src]!</span>")
+				visible_message(SPAN_WARNING("[user] stops cutting through \the [src] with \the [W]!"))
+				return TRUE
+			damage_health(20 * (1 + (SH.force-10) / 10), W.damtype, DAMAGE_FLAG_SHARP)
+		visible_message(SPAN_WARNING("[user] cuts through \the [src]!"))
 		new /obj/item/stack/net(src.loc)
 		qdel(src)
+		return TRUE
+
+	return ..()
 
 /obj/structure/net/bullet_act(obj/item/projectile/P)
 	. = PROJECTILE_CONTINUE //few cloth ribbons won't stop bullet or energy ray
 	if (P.damage_type != DAMAGE_BURN)//beams, lasers, fire. Bullets won't make a lot of damage to the few hanging belts.
 		return
-	visible_message("<span class='warning'>\The [P] hits \the [src] and tears it!</span>")
-	health -= P.damage
-	if (health < 0)
-		visible_message("<span class='warning'>\The [src] is torn apart!</span>")
-		qdel(src)
+	visible_message(SPAN_WARNING("\The [P] hits \the [src] and tears it!"))
+	damage_health(P.damage, P.damage_type)
 
 /obj/structure/net/update_connections()//maybe this should also be called when any of the walls nearby is removed but no idea how I can make it happen
 	overlays.Cut()
@@ -145,11 +137,11 @@
 /obj/item/stack/net/attack_self(mob/user)//press while holding to lay one. If there's net already, place wall
 	var/turf/T = get_turf(user)
 	if (locate(/obj/structure/net/net_wall) in T)
-		to_chat(user, "<span class='warning'>Net wall is already placed here!</span>")
+		to_chat(user, SPAN_WARNING("Net wall is already placed here!"))
 		return
 	if (locate(/obj/structure/net) in T)//if there's already layed "floor" net
 		if (!attach_wall_check())
-			to_chat(user, "<span class='warning'>You try to place net wall but it falls on the floor. Try to attach it to something vertical and stable.</span>")
+			to_chat(user, SPAN_WARNING("You try to place net wall but it falls on the floor. Try to attach it to something vertical and stable."))
 			return
 		new /obj/structure/net/net_wall(T)
 		//update_adjacent_nets(1)//since net-wall was added we also update adjacent wall-nets
@@ -170,10 +162,10 @@
 
 /obj/effect/landmark/corpse/carp_fisher
 	name = "carp fisher"
-	corpse_outfits = list(/decl/hierarchy/outfit/corpse/carp_fisher)
+	corpse_outfits = list(/singleton/hierarchy/outfit/corpse/carp_fisher)
 	species = list(SPECIES_HUMAN = 70, SPECIES_IPC = 20, SPECIES_UNATHI = 10)
 
-/decl/hierarchy/outfit/corpse/carp_fisher
+/singleton/hierarchy/outfit/corpse/carp_fisher
 	name = "Dead carp fisher"
 	uniform = /obj/item/clothing/under/color/green
 	suit = /obj/item/clothing/suit/apron/overalls

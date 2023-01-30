@@ -104,7 +104,7 @@
 
 /obj/item/clothing/suit/armor/reactive/handle_shield(mob/user, damage, atom/damage_source = null, mob/attacker = null, def_zone = null, attack_text = "the attack")
 	if(prob(50))
-		user.visible_message("<span class='danger'>The reactive teleport system flings [user] clear of the attack!</span>")
+		user.visible_message(SPAN_DANGER("The reactive teleport system flings [user] clear of the attack!"))
 		var/list/turfs = new/list()
 		for(var/turf/T in orange(6, user))
 			if(istype(T,/turf/space)) continue
@@ -112,7 +112,7 @@
 			if(T.x>world.maxx-6 || T.x<6)	continue
 			if(T.y>world.maxy-6 || T.y<6)	continue
 			turfs += T
-		if(!turfs.len) turfs += pick(/turf in orange(6))
+		if(!length(turfs)) turfs += pick(/turf in orange(6))
 		var/turf/picked = pick(turfs)
 		if(!isturf(picked)) return
 
@@ -128,11 +128,11 @@
 /obj/item/clothing/suit/armor/reactive/attack_self(mob/user as mob)
 	src.active = !( src.active )
 	if (src.active)
-		to_chat(user, "<span class='notice'>The reactive armor is now active.</span>")
+		to_chat(user, SPAN_NOTICE("The reactive armor is now active."))
 		src.icon_state = "reactive"
 		src.item_state = "reactive"
 	else
-		to_chat(user, "<span class='notice'>The reactive armor is now inactive.</span>")
+		to_chat(user, SPAN_NOTICE("The reactive armor is now inactive."))
 		src.icon_state = "reactiveoff"
 		src.item_state = "reactiveoff"
 		src.add_fingerprint(user)
@@ -366,7 +366,7 @@
 		bomb = ARMOR_BOMB_PADDED
 		)
 	flags_inv = CLOTHING_BULKY
-	slowdown_general = 1
+	slowdown_general = 0.5
 	siemens_coefficient = 0.5
 	accessories = list(/obj/item/clothing/accessory/arm_guards/riot, /obj/item/clothing/accessory/leg_guards/riot)
 
@@ -387,7 +387,7 @@
 		bomb = ARMOR_BOMB_PADDED
 		)
 	flags_inv = CLOTHING_BULKY
-	slowdown_general = 1
+	slowdown_general = 0.5
 	siemens_coefficient = 0.7
 	accessories = list(/obj/item/clothing/accessory/arm_guards/ballistic, /obj/item/clothing/accessory/leg_guards/ballistic)
 
@@ -410,7 +410,7 @@
 		energy = ARMOR_ENERGY_RESISTANT
 		)
 	flags_inv = CLOTHING_BULKY
-	slowdown_general = 1
+	slowdown_general = 0.5
 	siemens_coefficient = 0
 	accessories = list(/obj/item/clothing/accessory/arm_guards/ablative, /obj/item/clothing/accessory/leg_guards/ablative)
 
@@ -422,7 +422,7 @@
 		if(!(def_zone in list(BP_CHEST, BP_GROIN))) //not changing this so arm and leg shots reflect, gives some incentive to not aim center-mass
 			reflectchance /= 2
 		if(P.starting && prob(reflectchance))
-			visible_message("<span class='danger'>\The [user]'s [src.name] reflects [attack_text]!</span>")
+			visible_message(SPAN_DANGER("\The [user]'s [src.name] reflects [attack_text]!"))
 
 			// Find a turf near or on the original location to bounce to
 			var/new_x = P.starting.x + pick(0, 0, 0, 0, 0, -1, 1, -2, 2)

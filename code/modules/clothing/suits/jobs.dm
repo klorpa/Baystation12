@@ -189,7 +189,7 @@
 
 /obj/item/clothing/suit/storage/hazardvest/white
 	name = "white hazard vest"
-	desc = "A high-visibility vest used in work zones. This one has a blue cross!"
+	desc = "A high-visibility vest used in work zones. This one is white!"
 	icon_state = "hazard_w"
 
 /obj/item/clothing/suit/storage/hazardvest/green
@@ -197,6 +197,25 @@
 	desc = "A high-visibility vest used in work zones. This one is green!"
 	icon_state = "hazard_g"
 
+/obj/item/clothing/suit/storage/hazardvest/yellow
+	name = "yellow hazard vest"
+	desc = "A high-visibility vest used in work zones. This one is yellow!"
+	icon_state = "hazard_y"
+
+/obj/item/clothing/suit/storage/hazardvest/red
+	name = "red hazard vest"
+	desc = "A high-visibility vest used in work zones. This one is red!"
+	icon_state = "hazard_r"
+
+/obj/item/clothing/suit/storage/hazardvest/purple
+	name = "purple hazard vest"
+	desc = "A high-visibility vest used in work zones. This one is purple!"
+	icon_state = "hazard_p"
+
+/obj/item/clothing/suit/storage/hazardvest/med
+	name = "medical hazard vest"
+	desc = "A high-visibility vest used in work zones. This one is has a blue cross!"
+	icon_state = "hazard_med"
 
 /obj/item/clothing/suit/storage/toggle/highvis
 	name = "high visibility jacket"
@@ -269,8 +288,8 @@
 
 /obj/item/clothing/suit/storage/medical_chest_rig
 	name = "\improper MT chest-rig"
-	desc = "A black chest-rig with blue pouches worn by medical first responders, meant to carry their equipment. It has a blue 'Medic' tag on its chest."
-	icon_state = "Med-chest-rig"
+	desc = "A white chest-rig with black pouches worn by medical first responders. It has a 'Medic' tag on its chest."
+	icon_state = "med-chest-rig"
 	blood_overlay_type = "armor"
 	allowed = list(
 		/obj/item/stack/medical,

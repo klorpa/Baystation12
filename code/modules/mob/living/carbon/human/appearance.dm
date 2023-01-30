@@ -67,13 +67,13 @@
 	var/list/valid_hairstyles = generate_valid_hairstyles()
 	var/list/valid_facial_hairstyles = generate_valid_facial_hairstyles()
 
-	if(valid_hairstyles.len)
+	if(length(valid_hairstyles))
 		head_hair_style = pick(valid_hairstyles)
 	else
 		//this shouldn't happen
 		head_hair_style = "Bald"
 
-	if(valid_facial_hairstyles.len)
+	if(length(valid_facial_hairstyles))
 		facial_hair_style = pick(valid_facial_hairstyles)
 	else
 		//this shouldn't happen
@@ -109,7 +109,7 @@
 	return 1
 
 /mob/living/carbon/human/proc/change_skin_color(red, green, blue)
-	if (!(species.appearance_flags & HAS_SKIN_COLOR))
+	if (!(species.appearance_flags & SPECIES_APPEARANCE_HAS_SKIN_COLOR))
 		return
 	var/new_skin_color = rgb(red, green, blue)
 	if (skin_color == new_skin_color)
@@ -120,7 +120,7 @@
 	return 1
 
 /mob/living/carbon/human/proc/change_skin_tone(new_skin_tone)
-	if(skin_tone == new_skin_tone || !(species.appearance_flags & HAS_A_SKIN_TONE))
+	if(skin_tone == new_skin_tone || !(species.appearance_flags & SPECIES_APPEARANCE_HAS_A_SKIN_TONE))
 		return
 	skin_tone = new_skin_tone
 	force_update_limbs()
@@ -134,7 +134,7 @@
 /mob/living/carbon/human/proc/generate_valid_languages()
 	var/list/result = list()
 	for (var/cult_key in cultural_info)
-		var/decl/cultural_info/culture = cultural_info[cult_key]
+		var/singleton/cultural_info/culture = cultural_info[cult_key]
 		if (!istype(culture))
 			continue
 		if (culture.language)
@@ -159,9 +159,9 @@
 				continue
 			if(!is_alien_whitelisted(src, current_species))
 				continue
-		if(whitelist.len && !(current_species_name in whitelist))
+		if(length(whitelist) && !(current_species_name in whitelist))
 			continue
-		if(blacklist.len && (current_species_name in blacklist))
+		if(length(blacklist) && (current_species_name in blacklist))
 			continue
 
 		valid_species += current_species_name

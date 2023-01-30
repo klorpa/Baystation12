@@ -16,7 +16,7 @@ GLOBAL_DATUM_INIT(temp_reagents_holder, /obj, new)
 
 /datum/reagents/Destroy()
 	. = ..()
-	del_info = "[my_atom]([reagent_list?.len||"_"]):[my_atom?.x||"_"],[my_atom?.y||"_"],[my_atom?.z||"_"]"
+	del_info = "[my_atom]([length(reagent_list)||"_"]):[my_atom?.x||"_"],[my_atom?.y||"_"],[my_atom?.z||"_"]"
 	UNQUEUE_REACTIONS(src) // While marking for reactions should be avoided just before deleting if possible, the async nature means it might be impossible.
 	QDEL_NULL_LIST(reagent_list)
 	my_atom = null
@@ -111,7 +111,7 @@ GLOBAL_DATUM_INIT(temp_reagents_holder, /obj, new)
 
 			if(my_atom)
 				if(replace_message)
-					my_atom.visible_message("<span class='notice'>[icon2html(my_atom, viewers(get_turf(my_atom)))] [replace_message]</span>")
+					my_atom.visible_message(SPAN_NOTICE("[icon2html(my_atom, viewers(get_turf(my_atom)))] [replace_message]"))
 				if(replace_sound)
 					playsound(my_atom, replace_sound, 80, 1)
 
@@ -238,7 +238,7 @@ GLOBAL_DATUM_INIT(temp_reagents_holder, /obj, new)
 
 /datum/reagents/proc/has_all_reagents(list/check_reagents)
 	//this only works if check_reagents has no duplicate entries... hopefully okay since it expects an associative list
-	var/missing = check_reagents.len
+	var/missing = length(check_reagents)
 	for(var/datum/reagent/current in reagent_list)
 		if(current.type in check_reagents)
 			if(current.volume >= check_reagents[current.type])
@@ -490,8 +490,17 @@ GLOBAL_DATUM_INIT(temp_reagents_holder, /obj, new)
 			return TRUE
 	return FALSE
 
-/* Atom reagent creation - use it all the time */
-
+/**
+ * Creates a reagent holder for the atom. This shouldn't be used if a reagents holder already exists, but it will
+ * partially function by increasing the existing holder's maximum volume instead of creating a new one. If the existing
+ * holder's maximum already exceeded the given value, however, this will not reduce the volume.
+ *
+ * **Parameters**:
+ * - `max_vol` integer - The maximum volume of the new reagents holder.
+ *
+ * Returns instance of `/datum/reagents`. The newly created reagents holder or, if the atom already had a holder, the
+ * pre-existing holder.
+ */
 /atom/proc/create_reagents(max_vol)
 	if(reagents)
 		log_debug("Attempted to create a new reagents holder when already referencing one: [log_info_line(src)]")

@@ -8,8 +8,8 @@
 	active_power_usage = 2000
 	anchored = TRUE
 	density = FALSE
-	level = 1
-	construct_state = /decl/machine_construction/default/panel_closed
+	level = ATOM_LEVEL_UNDER_TILE
+	construct_state = /singleton/machine_construction/default/panel_closed
 	uncreated_component_parts = null
 	stat_immune = 0
 
@@ -37,7 +37,7 @@
 	if(alarm)
 		icon_state = "fdiffuser_emergency"
 		return
-	if((stat & (NOPOWER | BROKEN)) || !enabled)
+	if(inoperable() || !enabled)
 		icon_state = "fdiffuser_off"
 	else
 		icon_state = "fdiffuser_on"

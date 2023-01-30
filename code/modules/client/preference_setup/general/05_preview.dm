@@ -33,7 +33,7 @@
 		var/datum/mil_rank/rank = GLOB.mil_branches.get_rank(branches[previewJob.title], ranks[previewJob.title])
 		previewJob.equip_preview(mannequin, player_alt_titles[previewJob.title], branch, rank)
 		update_icon = TRUE
-	if(!(mannequin.species.appearance_flags && mannequin.species.appearance_flags & HAS_UNDERWEAR))
+	if(!(mannequin.species.appearance_flags && mannequin.species.appearance_flags & SPECIES_APPEARANCE_HAS_UNDERWEAR))
 		if(all_underwear)
 			all_underwear.Cut()
 	if(preview_gear && !(previewJob && preview_job && (previewJob.type == /datum/job/ai || previewJob.type == /datum/job/cyborg)))
@@ -43,7 +43,7 @@
 			var/datum/gear/G = gear_datums[thing]
 			if(G)
 				var/permitted = 0
-				if(G.allowed_roles && G.allowed_roles.len)
+				if(G.allowed_roles && length(G.allowed_roles))
 					if(previewJob)
 						for(var/job_type in G.allowed_roles)
 							if(previewJob.type == job_type)

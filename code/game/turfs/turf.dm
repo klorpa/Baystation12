@@ -1,6 +1,6 @@
 /turf
 	icon = 'icons/turf/floors.dmi'
-	level = 1
+	level = ATOM_LEVEL_UNDER_TILE
 
 	layer = TURF_LAYER
 
@@ -34,7 +34,7 @@
 	var/height = 0 // Determines if fluids can overflow onto next turf
 	var/footstep_type
 
-	var/tmp/changing_turf
+	var/changing_turf
 
 	/// List of 'dangerous' objs that the turf holds that can cause something bad to happen when stepped on, used for AI mobs.
 	var/list/dangerous_objects
@@ -77,7 +77,7 @@
 
 	changing_turf = FALSE
 
-	remove_cleanables()
+	remove_cleanables(FALSE)
 	fluid_update()
 	REMOVE_ACTIVE_FLUID_SOURCE(src)
 
@@ -205,12 +205,12 @@ var/global/const/enterloopsanity = 100
 			objects++
 			spawn(0)
 				if(A)
-					A.HasProximity(thing, 1)
+					A.HasProximity(thing)
 					if ((thing && A) && (thing.movable_flags & MOVABLE_FLAG_PROXMOVE))
-						thing.HasProximity(A, 1)
+						thing.HasProximity(A)
 	return
 
-/turf/proc/adjacent_fire_act(turf/simulated/floor/source, exposed_temperature, exposed_volume)
+/turf/proc/adjacent_fire_act(turf/simulated/floor/adj_turf, datum/gas_mixture/adj_air, adj_temp, adj_volume)
 	return
 
 /turf/proc/is_plating()
@@ -288,19 +288,19 @@ var/global/const/enterloopsanity = 100
 		if(message)
 			to_chat(user, message)
 	else
-		to_chat(user, "<span class='warning'>\The [source] is too dry to wash that.</span>")
+		to_chat(user, SPAN_WARNING("\The [source] is too dry to wash that."))
 	source.reagents.trans_to_turf(src, 1, 10)	//10 is the multiplier for the reaction effect. probably needed to wet the floor properly.
 
-/turf/proc/remove_cleanables()
+/turf/proc/remove_cleanables(skip_blood = TRUE)
 	for(var/obj/effect/O in src)
-		if(istype(O,/obj/effect/rune) || istype(O,/obj/effect/decal/cleanable))
+		if(istype(O,/obj/effect/rune) || (istype(O,/obj/effect/decal/cleanable) && (!skip_blood || !istype(O, /obj/effect/decal/cleanable/blood))))
 			qdel(O)
 
 /turf/proc/update_blood_overlays()
 	return
 
 /turf/proc/remove_decals()
-	if(decals && decals.len)
+	if(decals && length(decals))
 		decals.Cut()
 		decals = null
 
@@ -310,12 +310,14 @@ var/global/const/enterloopsanity = 100
 		if(isliving(AM))
 			var/mob/living/M = AM
 			M.turf_collision(src, TT.speed)
-			if(M.pinned.len)
+			if(length(M.pinned))
 				return
 
 		var/intial_dir = TT.init_dir
 		spawn(2)
 			step(AM, turn(intial_dir, 180))
+
+	..()
 
 /turf/proc/can_engrave()
 	return FALSE
@@ -333,7 +335,7 @@ var/global/const/enterloopsanity = 100
 	for(var/obj/effect/decal/writing/W in src)
 		too_much_graffiti++
 	if(too_much_graffiti >= 5)
-		to_chat(vandal, "<span class='warning'>There's too much graffiti here to add more.</span>")
+		to_chat(vandal, SPAN_WARNING("There's too much graffiti here to add more."))
 		return FALSE
 
 	var/message = sanitize(input("Enter a message to engrave.", "Graffiti") as null|text, trim = TRUE)
@@ -343,19 +345,19 @@ var/global/const/enterloopsanity = 100
 	if(!vandal || vandal.incapacitated() || !Adjacent(vandal) || !tool.loc == vandal)
 		return FALSE
 
-	vandal.visible_message("<span class='warning'>\The [vandal] begins carving something into \the [src].</span>")
+	vandal.visible_message(SPAN_WARNING("\The [vandal] begins carving something into \the [src]."))
 
 	if(!do_after(vandal, max(20, length(message)), src, DO_PUBLIC_UNIQUE))
 		return FALSE
 
-	vandal.visible_message("<span class='danger'>\The [vandal] carves some graffiti into \the [src].</span>")
+	vandal.visible_message(SPAN_DANGER("\The [vandal] carves some graffiti into \the [src]."))
 	var/obj/effect/decal/writing/graffiti = new(src)
 	graffiti.message = message
 	graffiti.author = vandal.ckey
 	vandal.update_personal_goal(/datum/goal/achievement/graffiti, TRUE)
 
 	if(lowertext(message) == "elbereth")
-		to_chat(vandal, "<span class='notice'>You feel much safer.</span>")
+		to_chat(vandal, SPAN_NOTICE("You feel much safer."))
 
 	return TRUE
 
@@ -371,7 +373,7 @@ var/global/const/enterloopsanity = 100
 /turf/proc/get_obstruction()
 	if (density)
 		LAZYADD(., src)
-	if (contents.len > 100 || contents.len <= !!lighting_overlay)
+	if (length(contents) > 100 || length(contents) <= !!lighting_overlay)
 		return    // fuck it, too/not-enough much shit here
 	for (var/thing in src)
 		var/atom/movable/AM = thing

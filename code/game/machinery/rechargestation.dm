@@ -9,7 +9,7 @@
 	base_type = /obj/machinery/recharge_station
 	uncreated_component_parts = null
 	stat_immune = 0
-	construct_state = /decl/machine_construction/default/panel_closed
+	construct_state = /singleton/machine_construction/default/panel_closed
 
 	machine_name = "cyborg recharging station"
 	machine_desc = "A station for recharging robots, cyborgs, and silicon-based humanoids such as IPCs and full-body prosthetics."
@@ -31,7 +31,7 @@
 	update_icon()
 
 /obj/machinery/recharge_station/Process()
-	if(stat & (BROKEN | NOPOWER))
+	if(inoperable())
 		return
 
 	//First, recharge/repair/etc the occupant
@@ -63,7 +63,7 @@
 			R.module.respawn_consumable(R, charging_power * CELLRATE / 250) //consumables are magical, apparently
 		// If we are capable of repairing damage, reboot destroyed components and allow them to be repaired for very large power spike.
 		var/list/damaged = R.get_damaged_components(1,1,1)
-		if(damaged.len && wire_rate && weld_rate)
+		if(length(damaged) && wire_rate && weld_rate)
 			for(var/datum/robot_component/C in damaged)
 				if((C.installed == -1) && use_power_oneoff(100 KILOWATTS, LOCAL) <= 0)
 					C.repair()
@@ -151,12 +151,12 @@
 
 /obj/machinery/recharge_station/on_update_icon()
 	..()
-	if(stat & BROKEN)
+	if(MACHINE_IS_BROKEN(src))
 		icon_state = "borgcharger0"
 		return
 
 	if(occupant)
-		if(stat & NOPOWER)
+		if(!is_powered())
 			icon_state = "borgcharger2"
 		else
 			icon_state = "borgcharger1"

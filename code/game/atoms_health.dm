@@ -91,7 +91,7 @@
  * Should be called before `damage_health()` in most cases.
  * Returns `null` if health is not in use.
  */
-/atom/proc/can_damage_health(damage, damage_type = null)
+/atom/proc/can_damage_health(damage, damage_type = null, damage_flags = EMPTY_BITFIELD)
 	SHOULD_CALL_PARENT(TRUE)
 	if (!health_max)
 		return
@@ -148,11 +148,11 @@
 /**
  * Restore's the atom's health by the given value. Returns `TRUE` if the restoration resulted in a death state change.
  */
-/atom/proc/restore_health(damage, damage_type = null, skip_death_state_change = FALSE)
+/atom/proc/restore_health(damage, damage_type = null, skip_death_state_change = FALSE, skip_can_restore_check = FALSE)
 	SHOULD_CALL_PARENT(TRUE)
 	if (!health_max)
 		return
-	if (!can_restore_health(damage, damage_type))
+	if (!skip_can_restore_check && !can_restore_health(damage, damage_type))
 		return FALSE
 	return mod_health(damage, damage_type, skip_death_state_change)
 
@@ -162,12 +162,13 @@
  * - `damage_type` should be one of the `DAMAGE_*` damage types, or `null`. Defining a damage type is preferable over not.
  * - `damage_flags` is a bitfield of `DAMAGE_FLAG_*` values.
  * - `severity` should be a passthrough of `severity` from `ex_act()` and `emp_act()` for `DAMAGE_EXPLODE` and `DAMAGE_EMP` types respectively.
+ * - `skip_can_damage_check` (boolean) - If `TRUE` skips checking `can_damage_health()`. Intended for cases where this was already checked.
  */
-/atom/proc/damage_health(damage, damage_type, damage_flags = EMPTY_BITFIELD, severity)
+/atom/proc/damage_health(damage, damage_type, damage_flags = EMPTY_BITFIELD, severity, skip_can_damage_check = FALSE)
 	SHOULD_CALL_PARENT(TRUE)
 	if (!health_max)
 		return
-	if (!can_damage_health(damage, damage_type))
+	if (!skip_can_damage_check && !can_damage_health(damage, damage_type, damage_flags))
 		return FALSE
 
 	// Apply resistance/weakness modifiers
@@ -301,78 +302,3 @@
 	target_atom.health_resistances = source_atom.health_resistances
 	target_atom.health_min_damage = source_atom.health_min_damage
 	target_atom.health_dead = source_atom.health_dead
-
-
-// Generalized *_act() handlers
-/atom/emp_act(severity)
-	..()
-	// No hitsound here - Doesn't make sense for EMPs.
-	// Generalized - 75-125 damage at max, 38-63 at medium, 25-42 at minimum severities.
-	damage_health(rand(75, 125) / severity, DAMAGE_EMP, severity = severity)
-
-
-/atom/ex_act(severity, turf_breaker)
-	..()
-	// No hitsound here to avoid noise spam.
-	// Damage is based on severity and maximum health, with DEVASTATING being guaranteed death without any resistances.
-	var/damage_flags = turf_breaker ? DAMAGE_FLAG_TURF_BREAKER : EMPTY_BITFIELD
-	var/damage = 0
-	switch (severity)
-		if (EX_ACT_DEVASTATING)
-			damage = round(health_max * (rand(100, 200) / 100)) // So that even atoms resistant to explosions may still be heavily damaged at this severity. Effective range of 100% to 200%.
-		if (EX_ACT_HEAVY)
-			damage = round(health_max * (rand(50, 100) / 100)) // Effective range of 50% to 100%.
-		if (EX_ACT_LIGHT)
-			damage = round(health_max * (rand(10, 50) / 100)) // Effective range of 10% to 50%.
-	if (damage && can_damage_health(damage, DAMAGE_EXPLODE))
-		damage_health(damage, DAMAGE_EXPLODE, damage_flags, severity)
-
-
-/atom/fire_act(datum/gas_mixture/air, exposed_temperature, exposed_volume)
-	..()
-	// No hitsound here to avoid noise spam.
-	// 1 point of damage for every 100 kelvin above 300 (~27 C).
-	damage_health(round(max(exposed_temperature - 300, 0) / 100), DAMAGE_FIRE)
-
-
-/atom/bullet_act(obj/item/projectile/P, def_zone)
-	. = ..()
-	if (get_max_health())
-		var/damage = P.damage
-		if (istype(src, /obj/structure) || istype(src, /turf/simulated/wall)) // TODO Better conditions for non-structures that want to use structure damage
-			damage = P.get_structure_damage()
-		if (!can_damage_health(damage, P.damage_type))
-			return
-		playsound(damage_hitsound, src, 75)
-		damage_health(damage, P.damage_type)
-		return 0
-
-
-/atom/lava_act(datum/gas_mixture/air, temperature, pressure)
-	if (is_damage_immune(DAMAGE_FIRE))
-		return FALSE
-	if (get_max_health())
-		fire_act(air, temperature)
-		if (!health_dead)
-			return FALSE
-	. = ..()
-
-
-/atom/attackby(obj/item/W, mob/user, click_params)
-	. = ..()
-	if (user.a_intent == I_HURT && get_max_health() && !(W.item_flags & ITEM_FLAG_NO_BLUDGEON))
-		user.setClickCooldown(DEFAULT_ATTACK_COOLDOWN)
-		user.do_attack_animation(src)
-		if (!can_damage_health(W.force, W.damtype))
-			playsound(damage_hitsound, src, 50)
-			user.visible_message(
-				SPAN_WARNING("\The [user] hits \the [src] with \a [W], but it bounces off!"),
-				SPAN_WARNING("You hit \the [src] with \the [W], but it bounces off!")
-			)
-			return
-		playsound(damage_hitsound, src, 75)
-		user.visible_message(
-			SPAN_DANGER("\The [user] hits \the [src] with \a [W]!"),
-			SPAN_DANGER("You hit \the [src] with \the [W]!")
-		)
-		damage_health(W.force, W.damtype)

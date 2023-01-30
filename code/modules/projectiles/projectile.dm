@@ -160,7 +160,7 @@
 	original = target
 	def_zone = target_zone
 
-	addtimer(CALLBACK(src, .proc/finalize_launch, curloc, targloc, x_offset, y_offset, angle_offset),0)
+	addtimer(new Callback(src, .proc/finalize_launch, curloc, targloc, x_offset, y_offset, angle_offset),0)
 	return 0
 
 /obj/item/projectile/proc/launch_from_mob(atom/target, mob/user, target_zone, x_offset = 0, y_offset = 0, angle_offset = 0)
@@ -241,16 +241,16 @@
 
 	if(result == PROJECTILE_FORCE_MISS)
 		if(!silenced)
-			target_mob.visible_message("<span class='notice'>\The [src] misses [target_mob] narrowly!</span>")
+			target_mob.visible_message(SPAN_NOTICE("\The [src] misses [target_mob] narrowly!"))
 			if(LAZYLEN(miss_sounds))
 				playsound(target_mob.loc, pick(miss_sounds), 60, 1)
 		return 0
 
 	//hit messages
 	if(silenced)
-		to_chat(target_mob, "<span class='danger'>You've been hit in the [parse_zone(def_zone)] by \the [src]!</span>")
+		to_chat(target_mob, SPAN_DANGER("You've been hit in the [parse_zone(def_zone)] by \the [src]!"))
 	else
-		target_mob.visible_message("<span class='danger'>\The [target_mob] is hit by \the [src] in the [parse_zone(def_zone)]!</span>")//X has fired Y is now given by the guns so you can't tell who shot you if you could not see the shooter
+		target_mob.visible_message(SPAN_DANGER("\The [target_mob] is hit by \the [src] in the [parse_zone(def_zone)]!"))//X has fired Y is now given by the guns so you cant tell who shot you if you could not see the shooter
 
 	//admin logs
 	if(!no_attack_log)
@@ -342,7 +342,7 @@
 
 	spawn while(src && src.loc)
 		if(life_span-- < 1)
-			on_impact(src.loc) //for any final impact behaviors
+			on_impact(src.loc) //for any final impact behaviours
 			qdel(src)
 			return
 		if((!( current ) || loc == current))

@@ -115,7 +115,7 @@
 	if(suit_overlay_inactive)
 		suit_overlay = suit_overlay_inactive
 
-	if(charges && charges.len)
+	if(charges && length(charges))
 		var/list/processed_charges = list()
 		for(var/list/charge in charges)
 			var/datum/rig_charge/charge_dat = new
@@ -145,30 +145,62 @@
 	holder = new_holder
 	return
 
+/**
+ * Whether or not the module can be installed in the given rig.
+ *
+ * **Parameters**:
+ * - `new_holder` - The rig the module is attempting to be installed to.
+ * - `user` - The user attempting to install the module. Used for feedback messages. Omit for silent checks.
+ *
+ * Returns boolean.
+ */
+/obj/item/rig_module/proc/can_install(obj/item/rig/rig, mob/user = null)
+	if (is_type_in_list(src, rig.banned_modules))
+		if (user)
+			to_chat(user, SPAN_WARNING("\The [rig] cannot mount this type of module."))
+		return FALSE
+
+	if (LAZYLEN(rig.installed_modules))
+		for (var/obj/item/rig_module/installed_module as anything in rig.installed_modules)
+			if (!installed_module.redundant && installed_module.type == type)
+				if (user)
+					to_chat(user, SPAN_WARNING("\The [rig] already has \a [installed_module] installed."))
+				return FALSE
+			if (LAZYLEN(banned_modules) && is_type_in_list(installed_module, banned_modules))
+				if (user)
+					to_chat(user, SPAN_WARNING("\The [installed_module] already installed in \the [rig] is not compatible with \the [src]."))
+				return FALSE
+			if (LAZYLEN(installed_module.banned_modules) && is_type_in_list(src, installed_module.banned_modules))
+				if (user)
+					to_chat(user, SPAN_WARNING("\The [installed_module] already installed in \the [rig] is not compatible with \the [src]."))
+				return FALSE
+
+	return TRUE
+
 /obj/item/rig_module/proc/check(charge = 50)
 
 	if(damage >= 2)
-		to_chat(usr, "<span class='warning'>The [interface_name] is damaged beyond use!</span>")
+		to_chat(usr, SPAN_WARNING("The [interface_name] is damaged beyond use!"))
 		return 0
 
 	if(world.time < next_use)
-		to_chat(usr, "<span class='warning'>You cannot use the [interface_name] again so soon.</span>")
+		to_chat(usr, SPAN_WARNING("You cannot use the [interface_name] again so soon."))
 		return 0
 
 	if(!holder || holder.canremove)
-		to_chat(usr, "<span class='warning'>The suit is not initialized.</span>")
+		to_chat(usr, SPAN_WARNING("The suit is not initialized."))
 		return 0
 
 	if(usr.lying || usr.stat || usr.stunned || usr.paralysis || usr.weakened)
-		to_chat(usr, "<span class='warning'>You cannot use the suit in this state.</span>")
+		to_chat(usr, SPAN_WARNING("You cannot use the suit in this state."))
 		return 0
 
 	if(holder.wearer && holder.wearer.lying)
-		to_chat(usr, "<span class='warning'>The suit cannot function while the wearer is prone.</span>")
+		to_chat(usr, SPAN_WARNING("The suit cannot function while the wearer is prone."))
 		return 0
 
 	if(holder.security_check_enabled && !holder.check_suit_access(usr))
-		to_chat(usr, "<span class='danger'>Access denied.</span>")
+		to_chat(usr, SPAN_DANGER("Access denied."))
 		return 0
 
 	if(!holder.check_power_cost(usr, charge, 0, src, (istype(usr,/mob/living/silicon ? 1 : 0) ) ) )
@@ -267,7 +299,7 @@
 		SetupStat(R)
 
 /mob/proc/SetupStat(obj/item/rig/R)
-	if(R && !R.canremove && R.installed_modules.len && statpanel("Hardsuit Modules"))
+	if(R && !R.canremove && length(R.installed_modules) && statpanel("Hardsuit Modules"))
 		var/cell_status = R.cell ? "[R.cell.charge]/[R.cell.maxcharge]" : "ERROR"
 		stat("Suit Charge:", cell_status)
 		var/air_tank
@@ -364,12 +396,12 @@
 	if(!charge_index)
 		charge_index = 0
 	else
-		charge_index = charge_index == module.charges.len ? 1 : charge_index+1
+		charge_index = charge_index == length(module.charges) ? 1 : charge_index+1
 
 	href_list["charge_type"] = module.charges[charge_index]
 
 /stat_rig_module/charge/CanUse()
-	if(module.charges && module.charges.len)
+	if(module.charges && length(module.charges))
 		var/datum/rig_charge/charge = module.charges[module.charge_selected]
 		name = "[charge.display_name] ([charge.charges]C) - Change"
 		return 1

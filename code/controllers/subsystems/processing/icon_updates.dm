@@ -14,14 +14,14 @@ PROCESSING_SUBSYSTEM_DEF(icon_update)
 /datum/controller/subsystem/processing/icon_update/fire(resumed = FALSE, no_mc_tick = FALSE)
 	var/list/curr = queue
 
-	if (!curr.len)
+	if (!length(curr))
 		suspend()
 		return
 
-	while (curr.len)
-		var/atom/A = curr[curr.len]
+	while (length(curr))
+		var/atom/A = curr[length(curr)]
 		var/list/argv = curr[A]
-		curr.len--
+		LIST_DEC(curr)
 
 		if (islist(argv))
 			A.update_icon(arglist(argv))
@@ -33,6 +33,10 @@ PROCESSING_SUBSYSTEM_DEF(icon_update)
 		else if (MC_TICK_CHECK)
 			return
 
+/**
+ * Adds the atom to the icon_update subsystem to be queued for icon updates. Use this if you're going to be pushing a
+ * lot of icon updates at once.
+ */
 /atom/proc/queue_icon_update(...)
-	SSicon_update.queue[src] = args.len ? args : TRUE
+	SSicon_update.queue[src] = length(args) ? args : TRUE
 	SSicon_update.wake()

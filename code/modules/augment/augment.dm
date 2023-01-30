@@ -90,7 +90,7 @@
 #undef ORGAN_STYLE
 
 
-/obj/item/organ/internal/augment/surgery_configure(mob/living/user, mob/living/carbon/human/target, obj/item/organ/parent, obj/item/tool, decl/surgery_step/action)
+/obj/item/organ/internal/augment/surgery_configure(mob/living/user, mob/living/carbon/human/target, obj/item/organ/parent, obj/item/tool, singleton/surgery_step/action)
 	var/found
 	switch (parent?.organ_tag)
 		if (null)
@@ -192,7 +192,7 @@
 			discovery += "scanners"
 		if (augment_flags & AUGMENT_INSPECTABLE)
 			discovery += "manual inspection"
-		if (discovery.len)
+		if (length(discovery))
 			message += " It can be discovered by [english_list(discovery)]."
 		else
 			message += " It is undetectable."

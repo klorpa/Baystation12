@@ -88,7 +88,7 @@ Teleporter beacon, and its subtypes
 	var/datum/effect/effect/system/smoke_spread/smoke = new /datum/effect/effect/system/smoke_spread()
 	smoke.set_up(5, 0, src.loc)
 	smoke.start()
-	visible_message("<span class='danger'>\The [src] warps in!</span>")
+	visible_message(SPAN_DANGER("\The [src] warps in!"))
 	playsound(src.loc, 'sound/effects/EMPulse.ogg', 25, 1)
 	set_AI_busy(TRUE)
 	spawn_time = world.time + spawn_delay
@@ -122,7 +122,7 @@ Special projectiles
 */
 /obj/item/projectile/bullet/gyro/megabot
 	name = "microrocket"
-	gyro_light_impact = 1
+	explosion_radius = 1
 	distance_falloff = 1.3
 
 /obj/item/projectile/beam/megabot
@@ -247,7 +247,7 @@ The megabot
 	var/datum/extension/armor/toggle/armor = get_extension(src, /datum/extension/armor)
 	if(armor)
 		armor.toggle(FALSE)
-	addtimer(CALLBACK(src, .proc/reactivate), 4 SECONDS)
+	addtimer(new Callback(src, .proc/reactivate), 4 SECONDS)
 
 /mob/living/simple_animal/hostile/hivebot/mega/proc/reactivate()
 	set_AI_busy(FALSE)

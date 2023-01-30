@@ -26,7 +26,7 @@
 
 	var/datum/species/mob_species = all_species[species]
 	var/list/valid_hairstyles = mob_species.get_hair_styles()
-	if(valid_hairstyles.len)
+	if(length(valid_hairstyles))
 		h_style = pick(valid_hairstyles)
 
 	return h_style
@@ -35,7 +35,7 @@
 	var/f_style = "Shaved"
 	var/datum/species/mob_species = all_species[species]
 	var/list/valid_facialhairstyles = mob_species.get_facial_hair_styles(gender)
-	if(valid_facialhairstyles.len)
+	if(length(valid_facialhairstyles))
 		f_style = pick(valid_facialhairstyles)
 		return f_style
 
@@ -43,7 +43,7 @@
 	if(species)
 		var/datum/species/current_species = all_species[species]
 		if(current_species)
-			var/decl/cultural_info/current_culture = SSculture.get_culture(current_species.default_cultural_info[TAG_CULTURE])
+			var/singleton/cultural_info/current_culture = SSculture.get_culture(current_species.default_cultural_info[TAG_CULTURE])
 			if(current_culture)
 				return current_culture.get_random_name(gender)
 	return capitalize(pick(gender == FEMALE ? GLOB.first_names_female : GLOB.first_names_male)) + " " + capitalize(pick(GLOB.last_names))
@@ -90,7 +90,7 @@
 	for(var/icon_state in icon_states)
 		if(health >= text2num(icon_state))
 			return icon_state
-	return icon_states[icon_states.len] // If we had no match, return the last element
+	return icon_states[length(icon_states)] // If we had no match, return the last element
 
 //checks whether this item is a module of the robot it is located in.
 /proc/is_robot_module(obj/item/thing)
@@ -107,7 +107,9 @@
 	return pick(BP_HEAD, BP_L_HAND, BP_R_HAND, BP_L_FOOT, BP_R_FOOT, BP_L_ARM, BP_R_ARM, BP_L_LEG, BP_R_LEG, BP_CHEST, BP_GROIN)
 
 
+/// Integer. Unique sequential ID from the `do_after` proc used to validate `DO_USER_UNIQUE_ACT` flag checks.
 /mob/var/do_unique_user_handle = 0
+/// The mob currently interacting with the atom during a `do_after` timer. Used to validate `DO_TARGET_UNIQUE_ACT` flag checks.
 /atom/var/do_unique_target_user
 
 /proc/do_after(mob/user, delay, atom/target, do_flags = DO_DEFAULT, incapacitation_flags = INCAPACITATION_DEFAULT)

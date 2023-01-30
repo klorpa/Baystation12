@@ -117,7 +117,7 @@
 	. = ..()
 	if(!emagged)
 		if(user)
-			to_chat(user, "<span class='notice'>You short out [src]'s threat identificator.</span>")
+			to_chat(user, SPAN_NOTICE("You short out [src]'s threat identificator."))
 			ignore_list |= user
 		emagged = TRUE
 		return 1
@@ -137,7 +137,7 @@
 	if(declare_arrests)
 		broadcast_security_hud_message("[src] is arresting a level [threat] suspect <b>[suspect_name]</b> in <b>[get_area(src)]</b>.", src)
 	say("Down on the floor, [suspect_name]! You have [SECBOT_WAIT_TIME] seconds to comply.")
-	if (preparing_arrest_sounds.len)
+	if (length(preparing_arrest_sounds))
 		playsound(src.loc, pick(preparing_arrest_sounds), 50)
 	GLOB.moved_event.register(target, src, /mob/living/bot/secbot/proc/target_moved)
 
@@ -217,7 +217,7 @@
 	flick(attack_state, src)
 
 /mob/living/bot/secbot/explode()
-	visible_message("<span class='warning'>[src] blows apart!</span>")
+	visible_message(SPAN_WARNING("[src] blows apart!"))
 	var/turf/Tsec = get_turf(src)
 	new /obj/item/device/assembly/prox_sensor(Tsec)
 	new /obj/item/melee/baton(Tsec)

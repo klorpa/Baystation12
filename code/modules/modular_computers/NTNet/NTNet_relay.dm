@@ -8,7 +8,7 @@
 	icon_state = "bus"
 	anchored = TRUE
 	density = TRUE
-	construct_state = /decl/machine_construction/default/panel_closed
+	construct_state = /singleton/machine_construction/default/panel_closed
 	uncreated_component_parts = null
 	stat_immune = 0
 	machine_name = "\improper NTNet quantum relay"
@@ -31,7 +31,7 @@
 
 // TODO: Implement more logic here. For now it's only a placeholder.
 /obj/machinery/ntnet_relay/operable()
-	if(!..(EMPED))
+	if(!..(MACHINE_STAT_EMPED))
 		return FALSE
 	if(dos_failure)
 		return FALSE
@@ -111,13 +111,13 @@
 	if(ntnet_global)
 		ntnet_global.relays.Add(src)
 		NTNet = ntnet_global
-		ntnet_global.add_log("New Quantum Relay ([uid]) activated. Current amount of linked relays: [NTNet.relays.len]")
+		ntnet_global.add_log("New Quantum Relay ([uid]) activated. Current amount of linked relays: [length(NTNet.relays)]")
 	..()
 
 /obj/machinery/ntnet_relay/Destroy()
 	if(ntnet_global)
 		ntnet_global.relays.Remove(src)
-		ntnet_global.add_log("Quantum Relay ([uid]) connection severed. Current amount of linked relays: [NTNet.relays.len]")
+		ntnet_global.add_log("Quantum Relay ([uid]) connection severed. Current amount of linked relays: [length(NTNet.relays)]")
 		NTNet = null
 	for(var/datum/computer_file/program/ntnet_dos/D in dos_sources)
 		D.target = null

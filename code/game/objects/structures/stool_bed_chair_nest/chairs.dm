@@ -5,7 +5,7 @@
 	color = "#666666"
 	base_icon = "chair"
 	buckle_dir = 0
-	buckle_lying = 0 //force people to sit up in chairs when buckled
+	buckle_stance = BUCKLE_FORCE_STAND
 	obj_flags = OBJ_FLAG_ROTATABLE
 	var/propelled = 0 // Check for fire-extinguisher-driven chairs
 	buckle_movable = TRUE
@@ -20,7 +20,7 @@
 	if(!padding_material && istype(W, /obj/item/assembly/shock_kit))
 		var/obj/item/assembly/shock_kit/SK = W
 		if(!SK.status)
-			to_chat(user, "<span class='notice'>\The [SK] is not ready to be attached!</span>")
+			to_chat(user, SPAN_NOTICE("\The [SK] is not ready to be attached!"))
 			return
 		if(!user.unEquip(SK))
 			return
@@ -251,7 +251,7 @@
 			victim.apply_effect(6, EFFECT_WEAKEN, blocked)
 			victim.apply_effect(6, EFFECT_STUTTER, blocked)
 			victim.apply_damage(10, DAMAGE_BRUTE, def_zone)
-		occupant.visible_message("<span class='danger'>[occupant] crashed into \the [A]!</span>")
+		occupant.visible_message(SPAN_DANGER("[occupant] crashed into \the [A]!"))
 
 /obj/structure/bed/chair/office/light/New(newloc, newmaterial = DEFAULT_FURNITURE_MATERIAL)
 	..(newloc, newmaterial, MATERIAL_CLOTH)
@@ -300,7 +300,7 @@
 	desc = "A comfortable, secure seat. It has a sturdy-looking buckling system for smoother flights."
 	base_icon = "shuttle_chair"
 	icon_state = "shuttle_chair_preview"
-	buckling_sound = 'sound/effects/metal_close.ogg'
+	buckle_sound = 'sound/effects/metal_close.ogg'
 	buckle_movable = FALSE
 
 /obj/structure/bed/chair/shuttle/post_buckle_mob()

@@ -60,6 +60,8 @@
 	// Telegraph to give a small window to dodge if really close.
 	do_windup_animation(A, tunnel_warning)
 	sleep(tunnel_warning) // For the telegraphing.
+	if (QDELETED(src))
+		return FALSE
 
 	// Do the dig!
 	visible_message(SPAN_DANGER("\The [src] tunnels towards \the [A]!"))
@@ -121,7 +123,7 @@
 		// Update T.
 		T = get_step(src, get_dir(src, destination))
 		if (T.density)
-			to_chat(src, "<span class='critical'>You hit something really solid!</span>")
+			to_chat(src, SPAN_CLASS("critical", "You hit something really solid!"))
 			playsound(src, "punch", 75, 1)
 			Weaken(5)
 			return FALSE // Hit a wall.

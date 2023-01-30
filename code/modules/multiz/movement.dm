@@ -45,28 +45,38 @@
 	var/turf/destination = (direction == UP) ? GetAbove(pulling) : GetBelow(pulling)
 
 	if(!start.CanZPass(pulling, direction))
-		to_chat(src, "<span class='warning'>\The [start] blocked your pulled object!</span>")
+		to_chat(src, SPAN_WARNING("\The [start] blocked your pulled object!"))
 		stop_pulling()
 		return 0
 
 	if(!destination.CanZPass(pulling, direction))
-		to_chat(src, "<span class='warning'>The [pulling] you were pulling bumps up against \the [destination].</span>")
+		to_chat(src, SPAN_WARNING("The [pulling] you were pulling bumps up against \the [destination]."))
 		stop_pulling()
 		return 0
 
 	for(var/atom/A in destination)
 		if(!A.CanMoveOnto(pulling, start, 1.5, direction))
-			to_chat(src, "<span class='warning'>\The [A] blocks the [pulling] you were pulling.</span>")
+			to_chat(src, SPAN_WARNING("\The [A] blocks the [pulling] you were pulling."))
 			stop_pulling()
 			return 0
 
 	pulling.forceMove(destination)
 	return 1
 
+/**
+ * Whether or not an atom can move through or onto the same tile as this atom. Primarily used for z-level transitioning in multi-z areas.
+ *
+ * By default, passes directly to `CanPass()` and also checks upward movement with climbable atoms.
+ *
+ * **Parameters**:
+ * - `mover` - The atom attempting to move onto `target`.
+ * - `target` - The originally targeted turf that `src `may be blocking.
+ * - `height` (float) -
+ * - `direction` (bitflag/direction) - The direction of movement. This should only ever be `DOWN` or `UP`.
+ *
+ * Returns boolean.
+ */
 /atom/proc/CanMoveOnto(atom/movable/mover, turf/target, height=1.5, direction = 0)
-	//Purpose: Determines if the object can move through this
-	//Uses regular limitations plus whatever we think is an exception for the purpose of
-	//moving up and down z levles
 	return CanPass(mover, target, height, 0) || (direction == DOWN && (atom_flags & ATOM_FLAG_CLIMBABLE))
 
 /mob/proc/can_overcome_gravity()
@@ -145,7 +155,9 @@
 // Entered() which is part of Move(), by spawn()ing we let that complete.  But we want to preserve if we were in client movement
 // or normal movement so other move behavior can continue.
 /atom/movable/proc/begin_falling(lastloc, below)
-	addtimer(CALLBACK(src, /atom/movable/proc/fall_callback, below), 0)
+	if (QDELETED(src))
+		return
+	addtimer(new Callback(src, /atom/movable/proc/fall_callback, below), 0)
 
 /atom/movable/proc/fall_callback(turf/below)
 	var/mob/M = src
@@ -262,10 +274,10 @@
 			var/obj/item/organ/external/E = get_organ(tag)
 			if(E && !E.is_stump() && !E.dislocated && !BP_IS_ROBOTIC(E))
 				victims += E
-		if(victims.len)
+		if(length(victims))
 			var/obj/item/organ/external/victim = pick(victims)
 			victim.dislocate()
-			to_chat(src, "<span class='warning'>You feel a sickening pop as your [victim.joint] is wrenched out of the socket.</span>")
+			to_chat(src, SPAN_WARNING("You feel a sickening pop as your [victim.joint] is wrenched out of the socket."))
 	updatehealth()
 
 
@@ -280,12 +292,12 @@
 		if(location.has_gravity && !can_overcome_gravity())
 			return FALSE
 
-		visible_message("<span class='notice'>[src] starts climbing onto \the [A]!</span>", "<span class='notice'>You start climbing onto \the [A]!</span>")
+		visible_message(SPAN_NOTICE("[src] starts climbing onto \the [A]!"), SPAN_NOTICE("You start climbing onto \the [A]!"))
 		if(do_after(src, 5 SECONDS, A, DO_PUBLIC_UNIQUE))
-			visible_message("<span class='notice'>[src] climbs onto \the [A]!</span>", "<span class='notice'>You climb onto \the [A]!</span>")
+			visible_message(SPAN_NOTICE("[src] climbs onto \the [A]!"), SPAN_NOTICE("You climb onto \the [A]!"))
 			src.Move(T)
 		else
-			visible_message("<span class='warning'>[src] gives up on trying to climb onto \the [A]!</span>", "<span class='warning'>You give up on trying to climb onto \the [A]!</span>")
+			visible_message(SPAN_WARNING("[src] gives up on trying to climb onto \the [A]!"), SPAN_WARNING("You give up on trying to climb onto \the [A]!"))
 		return TRUE
 
 /atom/movable/proc/can_float()

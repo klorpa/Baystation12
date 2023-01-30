@@ -1,4 +1,4 @@
-/mob/living/carbon/human/get_acrobatics_multiplier(decl/maneuver/attempting_maneuver)
+/mob/living/carbon/human/get_acrobatics_multiplier(singleton/maneuver/attempting_maneuver)
 	. = ..() * 0.5
 
 	. += ((get_skill_value(SKILL_HAULING) - SKILL_MIN)/(SKILL_MAX - SKILL_MIN))
@@ -10,6 +10,8 @@
 	// Broken limb checks
 	for (var/_limb in BP_LEGS_FEET)
 		var/obj/item/organ/external/limb = get_organ(_limb)
+		if (!limb)
+			return
 		if (limb.status & ORGAN_BROKEN)
 			. -= limb.splinted ? 0.25 : 0.5
 
@@ -17,7 +19,7 @@
 /mob/living/carbon/human/get_jump_distance()
 	return species.standing_jump_range
 
-/mob/living/carbon/human/can_do_maneuver(decl/maneuver/maneuver, silent = FALSE)
+/mob/living/carbon/human/can_do_maneuver(singleton/maneuver/maneuver, silent = FALSE)
 	. = ..()
 	if(.)
 		if(nutrition <= 20)

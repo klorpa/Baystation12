@@ -18,7 +18,7 @@ SUBSYSTEM_DEF(mapping)
 /datum/controller/subsystem/mapping/Initialize(start_uptime)
 	// Load templates and build away sites.
 	preloadTemplates()
-	for(var/atype in subtypesof(/decl/submap_archetype))
+	for(var/atype in subtypesof(/singleton/submap_archetype))
 		submap_archetypes[atype] = new atype
 
 
@@ -76,7 +76,7 @@ SUBSYSTEM_DEF(mapping)
 /proc/generateMapList(filename)
 	var/list/potentialMaps = list()
 	var/list/Lines = world.file2list(filename)
-	if(!Lines.len)
+	if(!length(Lines))
 		return
 	for (var/t in Lines)
 		if (!t)

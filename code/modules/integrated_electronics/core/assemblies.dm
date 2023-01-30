@@ -80,7 +80,7 @@
 		spark_system.start()
 	playsound(loc, 'sound/items/electronic_assembly_empty.ogg', 100, 1)
 	icon = 0
-	addtimer(CALLBACK(src, .proc/fall_apart), 5.1)
+	addtimer(new Callback(src, .proc/fall_apart), 5.1)
 
 /obj/item/device/electronic_assembly/post_health_change(health_mod, damage_type)
 	..()
@@ -171,7 +171,7 @@
 		if(topic_data)
 			listed_components = TRUE
 			HTML += "<b>[circuit.displayed_name]: </b>"
-			if(topic_data.len != 1)
+			if(length(topic_data) != 1)
 				HTML += "<br>"
 			for(var/entry in topic_data)
 				var/href = topic_data[entry]
@@ -200,7 +200,7 @@
 	if(battery)
 		HTML += "[round(battery.charge, 0.1)]/[battery.maxcharge] ([round(battery.percent(), 0.1)]%) cell charge. <a href='?src=\ref[src];remove_cell=1'>\[Remove\]</a>"
 	else
-		HTML += "<span class='danger'>No power cell detected!</span>"
+		HTML += SPAN_DANGER("No power cell detected!")
 
 	if(length(assembly_components))
 		HTML += "<br><br>"
@@ -233,7 +233,7 @@
 /obj/item/device/electronic_assembly/Topic(href, href_list)
 	if(href_list["ghostscan"])
 		if((isobserver(usr) && ckeys_allowed_to_scan[usr.ckey]) || check_rights(R_ADMIN,0,usr))
-			if(assembly_components.len)
+			if(length(assembly_components))
 				var/saved = "On circuit printers with cloning enabled, you may use the code below to clone the circuit:<br><br><code>[SScircuit.save_electronic_assembly(src)]</code>"
 				show_browser(usr, saved, "window=circuit_scan;size=500x600;border=1;can_resize=1;can_close=1;can_minimize=1")
 			else
@@ -531,11 +531,6 @@
 		playsound(loc, SOUNDS_BULLET_METAL, 100, 1)
 	..()
 
-/obj/item/device/electronic_assembly/attack_generic(mob/user, damage)
-	user.visible_message(SPAN_WARNING("\The [user] smashes \the [src]!"), SPAN_WARNING("You smash \the [src]!"))
-	attack_animation(user)
-	damage_health(damage)
-
 /obj/item/device/electronic_assembly/emp_act(severity)
 	for(var/I in src)
 		var/atom/movable/AM = I
@@ -780,8 +775,8 @@
 		return
 	playsound(loc, 'sound/machines/click.ogg', 75, 1)
 	user.visible_message("[user.name] attaches [src] to the wall.",
-		"<span class='notice'>You attach [src] to the wall.</span>",
-		"<span class='italics'>You hear clicking.</span>")
+		SPAN_NOTICE("You attach [src] to the wall."),
+		SPAN_CLASS("italics", "You hear clicking."))
 	if(user.unEquip(src,T))
 		var/rotation = 0
 		switch(ndir)

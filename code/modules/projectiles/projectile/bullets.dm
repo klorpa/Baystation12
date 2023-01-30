@@ -53,7 +53,7 @@
 	if(prob(chance))
 		if(A.opacity)
 			//display a message so that people on the other side aren't so confused
-			A.visible_message("<span class='warning'>\The [src] pierces through \the [A]!</span>")
+			A.visible_message(SPAN_WARNING("\The [src] pierces through \the [A]!"))
 		return 1
 
 	return 0
@@ -235,13 +235,12 @@
 /obj/item/projectile/bullet/gyro
 	name = "minirocket"
 	fire_sound = 'sound/effects/Explosion1.ogg'
-	var/gyro_devastation = -1
-	var/gyro_heavy_impact = 0
-	var/gyro_light_impact = 2
+	var/explosion_radius = 2
+	var/explosion_max_power = EX_ACT_LIGHT
 
 /obj/item/projectile/bullet/gyro/on_hit(atom/target, blocked = 0)
 	if(isturf(target))
-		explosion(target, gyro_devastation, gyro_heavy_impact, gyro_light_impact)
+		explosion(target, explosion_radius, explosion_max_power)
 	..()
 
 /obj/item/projectile/bullet/blank

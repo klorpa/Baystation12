@@ -18,7 +18,7 @@
 	anchored = TRUE
 	idle_power_usage = 0
 	active_power_usage = 1000
-	construct_state = /decl/machine_construction/default/panel_closed
+	construct_state = /singleton/machine_construction/default/panel_closed
 	uncreated_component_parts = null
 	stat_immune = 0
 	init_flags = EMPTY_BITFIELD
@@ -56,7 +56,7 @@
 		if (is_processing)
 			to_chat(user, "It is[is_processing ? "" : " not"] running.")
 		if (distance < 3)
-			if (cooking.len)
+			if (length(cooking))
 				to_chat(user, "You can see \an [english_list(cooking)] inside.")
 			else
 				to_chat(user, "It is empty.")
@@ -99,7 +99,7 @@
 	if (stat)
 		to_chat(user, SPAN_WARNING("\The [src] is in no condition to operate."))
 		return
-	var/option = alert(user, "", "[src] Options", "Empty", "Turn [is_processing ? "Off" : "On"]", cook_modes.len > 1 ? "Cook Mode" : null)
+	var/option = alert(user, "", "[src] Options", "Empty", "Turn [is_processing ? "Off" : "On"]", length(cook_modes) > 1 ? "Cook Mode" : null)
 	if (!option || QDELETED(src) || stat)
 		return
 	if (!Adjacent(user) || user.stat)
@@ -147,7 +147,7 @@
 	if (!istype(I, /obj/item/reagent_containers/food/snacks))
 		to_chat(user, SPAN_WARNING("Cooking \a [I] wouldn't be very tasty."))
 		return
-	if (cooking.len >= capacity)
+	if (length(cooking) >= capacity)
 		to_chat(user, SPAN_WARNING("\The [src] is already full up."))
 		return
 	if (!user.unEquip(I))
@@ -158,7 +158,7 @@
 
 
 /obj/machinery/cooker/Process()
-	if (!cooking.len)
+	if (!length(cooking))
 		disable()
 	var/time = world.time - started
 	if (time < cook_time)
@@ -166,13 +166,13 @@
 	if (!threshold)
 		var/list/source = cooking.Copy()
 		cooking.Cut()
-		var/index = source.len
+		var/index = length(source)
 		while (index)
 			cooking += cook_item(source[index])
 			--index
 		QDEL_NULL_LIST(source)
 		audible_message(SPAN_ITALIC("\The [src] lets out a happy ding."))
-		playsound(src, 'sound/machines/ding.ogg', 0.5)
+		playsound(src, 'sound/machines/ding.ogg', 70, frequency = 0.75)
 		threshold = 1
 	if (!burn_time)
 		empty()
@@ -183,15 +183,20 @@
 	if (threshold < 2)
 		var/list/source = cooking.Copy()
 		cooking.Cut()
-		var/index = source.len
+		var/index = length(source)
 		while (index)
 			cooking += new /obj/item/reagent_containers/food/snacks/badrecipe(src)
 			--index
 		QDEL_NULL_LIST(source)
 		threshold = 2
-	if (prob(10))
+	if (prob(15))
 		visible_message(SPAN_WARNING("\The [src] vomits a gout of rancid smoke!"))
 		smoke.start()
+	if (threshold < 3 && prob(10))
+		visible_message(SPAN_WARNING("\The [src] is on fire!"))
+		var/turf/adjacent = get_step(src, dir)
+		adjacent.IgniteTurf(20)
+		threshold = 3
 
 
 /obj/machinery/cooker/proc/cook_item(obj/item/reagent_containers/food/snacks/source)

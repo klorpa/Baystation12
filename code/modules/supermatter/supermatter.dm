@@ -251,7 +251,7 @@
 
 	// Effect 4: Medium scale explosion
 	spawn(0)
-		explosion(TS, explosion_power/2, explosion_power, explosion_power * 2, explosion_power * 4, 1)
+		explosion(TS, explosion_power * 3.5)
 		qdel(src)
 
 /obj/machinery/power/supermatter/examine(mob/user)
@@ -430,7 +430,7 @@
 
 	color = new_color
 
-	if (damage >= emergency_point && !filters.len)
+	if (damage >= emergency_point && !length(filters))
 		filters = filter(type="rays", size = 64, color = "#ffd04f", factor = 0.6, density = 12)
 		animate(filters[1], time = 10 SECONDS, offset = 10, loop=-1)
 		animate(time = 10 SECONDS, offset = 0, loop=-1)
@@ -522,8 +522,8 @@
 		SPAN_WARNING("For a brief moment, you hear an oppressive, unnatural silence.")
 	)
 
-	user.drop_from_inventory(W)
-	Consume(W)
+	if (user.drop_from_inventory(W))
+		Consume(W)
 
 	user.apply_damage(150, DAMAGE_RADIATION, damage_flags = DAMAGE_FLAG_DISPERSED)
 
@@ -676,7 +676,7 @@
 	desc = "An industrial rotating alarm light. This one is used to monitor supermatter engines."
 
 	frame_type = /obj/item/frame/supermatter_alarm
-	construct_state = /decl/machine_construction/default/item_chassis
+	construct_state = /singleton/machine_construction/default/item_chassis
 	base_type = /obj/machinery/rotating_alarm/supermatter
 
 /obj/machinery/rotating_alarm/supermatter/Initialize()

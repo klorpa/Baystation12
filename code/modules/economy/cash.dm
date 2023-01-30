@@ -35,7 +35,7 @@
 			var/mob/living/carbon/human/h_user = user
 			h_user.drop_from_inventory(bundle)
 			h_user.put_in_hands(bundle)
-		to_chat(user, "<span class='notice'>You add [src.worth] [GLOB.using_map.local_currency_name] worth of money to the bundles.<br>It holds [bundle.worth] [GLOB.using_map.local_currency_name] now.</span>")
+		to_chat(user, SPAN_NOTICE("You add [src.worth] [GLOB.using_map.local_currency_name] worth of money to the bundles.<br>It holds [bundle.worth] [GLOB.using_map.local_currency_name] now."))
 		qdel(src)
 
 	else if(istype(W, /obj/item/gun/launcher/money))
@@ -89,7 +89,7 @@
 	else
 		src.SetName("pile of [worth] [GLOB.using_map.local_currency_name]")
 
-	if(overlays.len <= 2)
+	if(length(overlays) <= 2)
 		w_class = ITEM_SIZE_TINY
 	else
 		w_class = ITEM_SIZE_SMALL
@@ -187,4 +187,4 @@
 /obj/item/spacecash/ewallet/examine(mob/user, distance)
 	. = ..(user)
 	if (distance > 2 && user != loc) return
-	to_chat(user, "<span class='notice'>Charge card's owner: [src.owner_name]. [GLOB.using_map.local_currency_name] remaining: [src.worth].</span>")
+	to_chat(user, SPAN_NOTICE("Charge card's owner: [src.owner_name]. [GLOB.using_map.local_currency_name] remaining: [src.worth]."))

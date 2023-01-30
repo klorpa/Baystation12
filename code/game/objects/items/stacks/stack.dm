@@ -69,7 +69,7 @@
 		recipe_list = srl.recipes
 	var/t1 = list()
 	t1 += "<HTML><HEAD><title>Constructions from [src]</title></HEAD><body><TT>Amount Left: [src.get_amount()]<br>"
-	for(var/i=1;i<=recipe_list.len,i++)
+	for(var/i=1;i<=length(recipe_list),i++)
 		var/E = recipe_list[i]
 		if (isnull(E))
 			continue
@@ -93,8 +93,8 @@
 			title+= " ([R.req_amount] [src.singular_name]\s)"
 			var/skill_label = ""
 			if(!user.skill_check(SKILL_CONSTRUCTION, R.difficulty))
-				var/decl/hierarchy/skill/S = decls_repository.get_decl(SKILL_CONSTRUCTION)
-				skill_label = "<font color='red'>\[[S.levels[R.difficulty]]]</font>"
+				var/singleton/hierarchy/skill/S = GET_SINGLETON(SKILL_CONSTRUCTION)
+				skill_label = SPAN_COLOR("red", "\[[S.levels[R.difficulty]]\]")
 			if (can_build)
 				t1 +="[skill_label]<A href='?src=\ref[src];sublist=[recipes_sublist];make=[i];multiplier=1'>[title]</A>"
 			else
@@ -124,27 +124,28 @@
 
 	if (!can_use(required))
 		if (produced>1)
-			to_chat(user, "<span class='warning'>You haven't got enough [src] to build \the [produced] [recipe.display_name()]\s!</span>")
+			to_chat(user, SPAN_WARNING("You haven't got enough [src] to build \the [produced] [recipe.display_name()]\s!"))
 		else
-			to_chat(user, "<span class='warning'>You haven't got enough [src] to build \the [recipe.display_name()]!</span>")
+			to_chat(user, SPAN_WARNING("You haven't got enough [src] to build \the [recipe.display_name()]!"))
 		return
 
 	if(!recipe.can_make(user))
 		return
 
 	if (recipe.time)
-		to_chat(user, "<span class='notice'>Building [recipe.display_name()] ...</span>")
-		if (!user.do_skilled(recipe.time, SKILL_CONSTRUCTION, src, do_flags = DO_REPAIR_CONSTRUCT))
+		to_chat(user, SPAN_NOTICE("Building [recipe.display_name()] ..."))
+		if (!user.do_skilled(recipe.time, SKILL_CONSTRUCTION, src, do_flags = DO_REPAIR_CONSTRUCT | DO_BAR_OVER_USER))
 			return
 
 	if (use(required))
 		if(user.skill_fail_prob(SKILL_CONSTRUCTION, 90, recipe.difficulty))
-			to_chat(user, "<span class='warning'>You waste some [name] and fail to build \the [recipe.display_name()]!</span>")
+			to_chat(user, SPAN_WARNING("You waste some [name] and fail to build \the [recipe.display_name()]!"))
 			return
 		var/atom/O = recipe.spawn_result(user, user.loc, produced)
-		O.add_fingerprint(user)
-
-		user.put_in_hands(O)
+		// Stack recipes will delete the created item if it merges with a stack already in hand.
+		if (!QDELETED(O))
+			O.add_fingerprint(user)
+			user.put_in_hands(O)
 
 /obj/item/stack/Topic(href, href_list)
 	..()
@@ -195,7 +196,7 @@
 	else
 		if(get_amount() < used)
 			return 0
-		for(var/i = 1 to charge_costs.len)
+		for(var/i = 1 to length(charge_costs))
 			var/datum/matter_synth/S = synths[i]
 			S.use_charge(charge_costs[i] * used) // Doesn't need to be deleted
 		return 1
@@ -208,7 +209,7 @@
 			amount += extra
 			update_icon()
 		return 1
-	else if(!synths || synths.len < uses_charge)
+	else if(!synths || length(synths) < uses_charge)
 		return 0
 	else
 		for(var/i = 1 to uses_charge)
@@ -265,12 +266,12 @@
 
 /obj/item/stack/proc/get_amount()
 	if(uses_charge)
-		if(!synths || synths.len < uses_charge)
+		if(!synths || length(synths) < uses_charge)
 			return 0
 		var/datum/matter_synth/S = synths[1]
 		. = round(S.get_charge() / charge_costs[1])
-		if(charge_costs.len > 1)
-			for(var/i = 2 to charge_costs.len)
+		if(length(charge_costs) > 1)
+			for(var/i = 2 to length(charge_costs))
 				S = synths[i]
 				. = min(., round(S.get_charge() / charge_costs[i]))
 		return
@@ -278,7 +279,7 @@
 
 /obj/item/stack/proc/get_max_amount()
 	if(uses_charge)
-		if(!synths || synths.len < uses_charge)
+		if(!synths || length(synths) < uses_charge)
 			return 0
 		var/datum/matter_synth/S = synths[1]
 		. = round(S.max_energy / charge_costs[1])
@@ -292,18 +293,16 @@
 /obj/item/stack/proc/add_to_stacks(mob/user, check_hands)
 	var/list/stacks = list()
 	if(check_hands)
-		if(isstack(user.l_hand))
-			stacks += user.l_hand
-		if(isstack(user.r_hand))
-			stacks += user.r_hand
+		for (var/obj/item/stack/stack as anything in user.GetAllHeld(/obj/item/stack))
+			stacks += stack
 	for (var/obj/item/stack/item in user.loc)
-		stacks += item
+		stacks |= item
 	for (var/obj/item/stack/item in stacks)
 		if (item==src)
 			continue
 		var/transfer = src.transfer_to(item)
 		if (transfer)
-			to_chat(user, "<span class='notice'>You add a new [item.singular_name] to the stack. It now contains [item.amount] [item.singular_name]\s.</span>")
+			to_chat(user, SPAN_NOTICE("You add a new [item.singular_name] to the stack. It now contains [item.amount] [item.singular_name]\s."))
 		if(!amount)
 			break
 
@@ -363,6 +362,7 @@
 	if(material)
 		use_material = material.name
 		difficulty += material.construction_difficulty
+		difficulty = clamp(difficulty, MATERIAL_EASY_DIY, MATERIAL_VERY_HARD_DIY)
 	if(reinforce_material)
 		use_reinf_material = reinforce_material
 
@@ -384,12 +384,12 @@
 
 /datum/stack_recipe/proc/can_make(mob/user)
 	if (one_per_turf && (locate(result_type) in user.loc))
-		to_chat(user, "<span class='warning'>There is another [display_name()] here!</span>")
+		to_chat(user, SPAN_WARNING("There is another [display_name()] here!"))
 		return FALSE
 
 	var/turf/T = get_turf(user.loc)
 	if (on_floor && !T.is_floor())
-		to_chat(user, "<span class='warning'>\The [display_name()] must be constructed on the floor!</span>")
+		to_chat(user, SPAN_WARNING("\The [display_name()] must be constructed on the floor!"))
 		return FALSE
 
 	return TRUE

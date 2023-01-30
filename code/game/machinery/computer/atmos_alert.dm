@@ -31,10 +31,10 @@ var/global/list/minor_air_alarms = list()
 	var/minor_alarms[0]
 
 	for(var/datum/alarm/alarm in GLOB.atmosphere_alarm.major_alarms(get_z(src)))
-		major_alarms[++major_alarms.len] = list("name" = sanitize(alarm.alarm_name()), "ref" = "\ref[alarm]")
+		major_alarms[LIST_PRE_INC(major_alarms)] = list("name" = sanitize(alarm.alarm_name()), "ref" = "\ref[alarm]")
 
 	for(var/datum/alarm/alarm in GLOB.atmosphere_alarm.minor_alarms(get_z(src)))
-		minor_alarms[++minor_alarms.len] = list("name" = sanitize(alarm.alarm_name()), "ref" = "\ref[alarm]")
+		minor_alarms[LIST_PRE_INC(minor_alarms)] = list("name" = sanitize(alarm.alarm_name()), "ref" = "\ref[alarm]")
 
 	data["priority_alarms"] = major_alarms
 	data["minor_alarms"] = minor_alarms
@@ -47,7 +47,7 @@ var/global/list/minor_air_alarms = list()
 		ui.set_auto_update(1)
 
 /obj/machinery/computer/atmos_alert/on_update_icon()
-	if(!(stat & (NOPOWER|BROKEN)))
+	if(operable())
 		if(GLOB.atmosphere_alarm.has_major_alarms(get_z(src)))
 			icon_screen = "alert:2"
 		else if (GLOB.atmosphere_alarm.has_minor_alarms(get_z(src)))

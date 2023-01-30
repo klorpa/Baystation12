@@ -13,7 +13,7 @@
 
 /obj/item/robot_module/medical/build_equipment()
 	. = ..()
-	equipment += new /obj/item/robot_rack/roller(src, 1)
+	equipment += new /obj/item/robot_rack/roller_bed(src, 1)
 
 /obj/item/robot_module/medical/surgeon
 	name = "surgeon robot module"
@@ -44,7 +44,9 @@
 		/obj/item/crowbar,
 		/obj/item/stack/nanopaste,
 		/obj/item/stack/medical/advanced/bruise_pack,
-		/obj/item/reagent_containers/dropper
+		/obj/item/reagent_containers/dropper,
+		/obj/item/reagent_containers/spray/cleaner/drone,
+		/obj/item/reagent_containers/spray/sterilizine
 	)
 	synths = list(
 		/datum/matter_synth/medicine = 10000,
@@ -116,7 +118,8 @@
 		/obj/item/inflatable_dispenser/robot,
 		/obj/item/stack/medical/advanced/ointment,
 		/obj/item/stack/medical/advanced/bruise_pack,
-		/obj/item/stack/medical/splint
+		/obj/item/stack/medical/splint,
+		/obj/item/reagent_containers/spray/cleaner/drone
 	)
 	synths = list(
 		/datum/matter_synth/medicine = 15000

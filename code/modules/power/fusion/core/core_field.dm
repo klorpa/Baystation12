@@ -112,7 +112,7 @@
 
 /obj/effect/fusion_em_field/Initialize()
 	. = ..()
-	addtimer(CALLBACK(src, .proc/update_light_colors), 10 SECONDS, TIMER_LOOP)
+	addtimer(new Callback(src, .proc/update_light_colors), 10 SECONDS, TIMER_LOOP)
 
 /obj/effect/fusion_em_field/proc/update_light_colors()
 	var/use_range
@@ -230,22 +230,22 @@
 			var/ripple_radius = (((size-1) / 2) * WORLD_ICON_SIZE) + WORLD_ICON_SIZE
 			var/wave_size = 4
 			if(plasma_temperature < FUSION_RUPTURE_THRESHOLD)
-				visible_message("<span class='danger'>\The [src] ripples uneasily, like a disturbed pond.</span>")
+				visible_message(SPAN_DANGER("\The [src] ripples uneasily, like a disturbed pond."))
 			else
 				var/flare
 				var/fuel_loss
 				var/rupture
 				if(percent_unstable < 0.7)
-					visible_message("<span class='danger'>\The [src] ripples uneasily, like a disturbed pond.</span>")
+					visible_message(SPAN_DANGER("\The [src] ripples uneasily, like a disturbed pond."))
 					fuel_loss = prob(5)
 				else if(percent_unstable < 0.9)
-					visible_message("<span class='danger'>\The [src] undulates violently, shedding plumes of plasma!</span>")
+					visible_message(SPAN_DANGER("\The [src] undulates violently, shedding plumes of plasma!"))
 					flare = prob(50)
 					fuel_loss = prob(20)
 					rupture = prob(5)
 					wave_size += 2
 				else
-					visible_message("<span class='danger'>\The [src] is wracked by a series of horrendous distortions, buckling and twisting like a living thing!</span>")
+					visible_message(SPAN_DANGER("\The [src] is wracked by a series of horrendous distortions, buckling and twisting like a living thing!"))
 					flare = 1
 					fuel_loss = prob(50)
 					rupture = prob(25)
@@ -279,7 +279,7 @@
 		animate(filters[1], time = 0, loop = 1, radius = 0, flags=ANIMATION_PARALLEL)
 		animate(time = 2 SECONDS, radius = _radius)
 		animating_ripple = TRUE
-		addtimer(CALLBACK(src, .proc/ResetRipple), 2 SECONDS, TIMER_CLIENT_TIME)
+		addtimer(new Callback(src, .proc/ResetRipple), 2 SECONDS, TIMER_CLIENT_TIME)
 
 /obj/effect/fusion_em_field/proc/ResetRipple()
 	animating_ripple = FALSE
@@ -288,12 +288,12 @@
 	return plasma_temperature < 1000
 
 /obj/effect/fusion_em_field/proc/Rupture()
-	visible_message("<span class='danger'>\The [src] shudders like a dying animal before flaring to eye-searing brightness and rupturing!</span>")
+	visible_message(SPAN_DANGER("\The [src] shudders like a dying animal before flaring to eye-searing brightness and rupturing!"))
 	set_light(1, 0.1, 15, 2, "#ccccff")
 	empulse(get_turf(src), Ceil(plasma_temperature/1000), Ceil(plasma_temperature/300))
 	sleep(5)
 	RadiateAll()
-	explosion(get_turf(owned_core),-1,-1,8,10) // Blow out all the windows.
+	explosion(get_turf(owned_core), 8, EX_ACT_LIGHT) // Blow out all the windows.
 	return
 
 /obj/effect/fusion_em_field/proc/ChangeFieldStrength(new_strength)
@@ -381,7 +381,7 @@
 			if(skip_obstacle)
 				continue
 
-			AM.visible_message("<span class='danger'>The field buckles visibly around \the [AM]!</span>")
+			AM.visible_message(SPAN_DANGER("The field buckles visibly around \the [AM]!"))
 			tick_instability += rand(30,50)
 			AM.emp_act(empsev)
 
@@ -408,8 +408,8 @@
 	var/list/react_pool = reactants.Copy()
 	last_reactants = 0
 
-	//can't have any reactions if there aren't any reactants present
-	if(react_pool.len)
+	//cant have any reactions if there aren't any reactants present
+	if(length(react_pool))
 		//determine a random amount to actually react this cycle, and remove it from the standard pool
 		//this is a hack, and quite nonrealistic :(
 		for(var/reactant in react_pool)
@@ -421,7 +421,7 @@
 		//loop through all the reacting reagents, picking out random reactions for them
 		var/list/produced_reactants = new/list
 		var/list/p_react_pool = react_pool.Copy()
-		while(p_react_pool.len)
+		while(length(p_react_pool))
 			//pick one of the unprocessed reacting reagents randomly
 			var/cur_p_react = pick(p_react_pool)
 			p_react_pool.Remove(cur_p_react)
@@ -438,7 +438,7 @@
 			for(var/cur_s_react in possible_s_reacts)
 				if(possible_s_reacts[cur_s_react] < 1)
 					continue
-				var/decl/fusion_reaction/cur_reaction = get_fusion_reaction(cur_p_react, cur_s_react)
+				var/singleton/fusion_reaction/cur_reaction = get_fusion_reaction(cur_p_react, cur_s_react)
 				if(cur_reaction && plasma_temperature >= cur_reaction.minimum_energy_level)
 					LAZYDISTINCTADD(possible_reactions, cur_reaction)
 
@@ -450,8 +450,8 @@
 			sortTim(possible_reactions, /proc/cmp_fusion_reaction_des)
 
 			//split up the reacting atoms between the possible reactions
-			while(possible_reactions.len)
-				var/decl/fusion_reaction/cur_reaction = possible_reactions[1]
+			while(length(possible_reactions))
+				var/singleton/fusion_reaction/cur_reaction = possible_reactions[1]
 				possible_reactions.Remove(cur_reaction)
 
 				//set the randmax to be the lower of the two involved reactants

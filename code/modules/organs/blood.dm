@@ -75,9 +75,9 @@
 						if(blinding)
 							H.eye_blurry = max(H.eye_blurry, 10)
 							H.eye_blind = max(H.eye_blind, 5)
-							to_chat(H, "<span class='danger'>You are blinded by a spray of blood!</span>")
+							to_chat(H, SPAN_DANGER("You are blinded by a spray of blood!"))
 						else
-							to_chat(H, "<span class='danger'>You are hit by a spray of blood!</span>")
+							to_chat(H, SPAN_DANGER("You are hit by a spray of blood!"))
 						hit_mob = TRUE
 
 				if(hit_mob || !A.CanPass(src, sprayloc))
@@ -228,7 +228,7 @@
 	for(var/obj/effect/decal/cleanable/blood/drip/drop in T)
 		drips |= drop.drips
 		qdel(drop)
-	if(!large && drips.len < 3)
+	if(!large && length(drips) < 3)
 		decal_type = /obj/effect/decal/cleanable/blood/drip
 
 	// Find a blood decal or create a new one.
@@ -240,7 +240,7 @@
 		B = new decal_type(T)
 
 	var/obj/effect/decal/cleanable/blood/drip/drop = B
-	if(istype(drop) && drips && drips.len && !large)
+	if(istype(drop) && drips && length(drips) && !large)
 		drop.overlays |= drips
 		drop.drips |= drips
 
@@ -264,7 +264,7 @@
 		else
 			B.blood_DNA[source.data["blood_DNA"]] = "O+"
 
-	B.fluorescent  = 0
+	B.fluorescent  = ATOM_FLOURESCENCE_NONE
 	B.set_invisibility(0)
 	return B
 

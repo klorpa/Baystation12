@@ -3,6 +3,8 @@
 
 	glide_size = 6
 
+	animate_movement = SLIDE_STEPS
+
 	var/waterproof = TRUE
 	var/movable_flags
 
@@ -20,6 +22,12 @@
 	var/item_state = null // Used to specify the item state for the on-mob overlays.
 	var/does_spin = TRUE // Does the atom spin when thrown (of course it does :P)
 
+	/// The icon width this movable expects to have by default.
+	var/icon_width = 32
+
+	/// The icon height this movable expects to have by default.
+	var/icon_height = 32
+
 
 /atom/movable/Initialize()
 	if (!isnull(config.glide_size))
@@ -28,7 +36,7 @@
 
 /atom/movable/Destroy()
 	if(!(atom_flags & ATOM_FLAG_INITIALIZED))
-		crash_with("Was deleted before initalization")
+		crash_with("\A [src] was deleted before initalization")
 	walk(src, 0)
 	for(var/A in src)
 		qdel(A)
@@ -52,7 +60,7 @@
 
 	if (A && yes)
 		A.last_bumped = world.time
-		INVOKE_ASYNC(A, /atom/proc/Bumped, src) // Avoids bad actors sleeping or unexpected side effects, as the legacy behavior was to spawn here
+		invoke_async(A, /atom/proc/Bumped, src) // Avoids bad actors sleeping or unexpected side effects, as the legacy behavior was to spawn here
 	..()
 
 /atom/movable/proc/forceMove(atom/destination)
@@ -237,3 +245,7 @@
 
 /atom/movable/proc/get_bullet_impact_effect_type()
 	return BULLET_IMPACT_NONE
+
+
+/atom/movable/proc/CheckDexterity(mob/living/user)
+	return TRUE

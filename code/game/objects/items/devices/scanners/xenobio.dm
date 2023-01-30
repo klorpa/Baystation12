@@ -71,15 +71,15 @@
 		. += "[T.colour] [T.is_adult ? "adult" : "baby"] slime"
 		. += "Nutrition:\t[T.nutrition]/[T.get_max_nutrition()]"
 		if(T.nutrition < T.get_starve_nutrition())
-			. += "<span class='alert'>Warning:\tthe slime is starving!</span>"
+			. += SPAN_CLASS("alert", "Warning:\tthe slime is starving!")
 		else if (T.nutrition < T.get_hunger_nutrition())
-			. += "<span class='warning'>Warning:\tthe slime is hungry.</span>"
+			. += SPAN_WARNING("Warning:\tthe slime is hungry.")
 		. += "Electric charge strength:\t[T.powerlevel]"
 		. += "Health:\t[round((T.health * 100) / T.maxHealth)]%"
 
 		var/list/mutations = T.GetMutations()
 
-		if(!mutations.len)
+		if(!length(mutations))
 			. += "This slime will never mutate."
 		else
 			var/list/mutationChances = list()
@@ -87,9 +87,9 @@
 				if(i == T.colour)
 					continue
 				if(mutationChances[i])
-					mutationChances[i] += T.mutation_chance / mutations.len
+					mutationChances[i] += T.mutation_chance / length(mutations)
 				else
-					mutationChances[i] = T.mutation_chance / mutations.len
+					mutationChances[i] = T.mutation_chance / length(mutations)
 
 			var/list/mutationTexts = list("[T.colour] ([100 - T.mutation_chance]%)")
 			for(var/i in mutationChances)

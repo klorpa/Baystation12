@@ -49,7 +49,7 @@
 	for(var/job_type in allowed_jobs)
 		var/datum/job/job = SSjobs.get_by_path(job_type)
 		// Most species are restricted from SCG security and command roles
-		if(job && (job.department_flag & COM) && job.allowed_branches.len && !(/datum/mil_branch/civilian in job.allowed_branches))
+		if(job && (job.department_flag & COM) && length(job.allowed_branches) && !(/datum/mil_branch/civilian in job.allowed_branches))
 			for(var/species_name in list(SPECIES_IPC, SPECIES_SKRELL, SPECIES_UNATHI))
 				var/datum/species/S = all_species[species_name]
 				var/species_blacklist = species_to_job_blacklist[S.type]
@@ -59,19 +59,19 @@
 				species_blacklist |= job.type
 
 // Some jobs for nabber grades defined here due to map-specific job datums.
-/decl/cultural_info/culture/nabber/New()
+/singleton/cultural_info/culture/nabber/New()
 	LAZYADD(valid_jobs, /datum/job/scientist_assistant)
 	..()
 
-/decl/cultural_info/culture/nabber/b/New()
+/singleton/cultural_info/culture/nabber/b/New()
 	LAZYADD(valid_jobs, /datum/job/cargo_tech)
 	..()
 
-/decl/cultural_info/culture/nabber/a/New()
+/singleton/cultural_info/culture/nabber/a/New()
 	LAZYADD(valid_jobs, /datum/job/engineer)
 	..()
 
-/decl/cultural_info/culture/nabber/a/plus/New()
+/singleton/cultural_info/culture/nabber/a/plus/New()
 	LAZYADD(valid_jobs, /datum/job/doctor)
 	..()
 

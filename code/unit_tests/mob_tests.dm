@@ -492,10 +492,10 @@ var/global/default_mobloc = null
 
 	var/list/valid_states = icon_states(icon_file)
 
-	if(!valid_states.len)
+	if(!length(valid_states))
 		return 1
 
-	for(var/i=1, i<=SSrobots.all_module_names.len, i++)
+	for(var/i = 1 to length(SSrobots.all_module_names))
 		var/modname = lowertext(SSrobots.all_module_names[i])
 		var/bad_msg = "[ascii_red]--------------- [modname]"
 		if(!(modname in valid_states))
@@ -522,11 +522,11 @@ var/global/default_mobloc = null
 	for(var/species_name in all_species)
 		var/datum/species/S = all_species[species_name]
 		if(S.base_skin_colours)
-			if(!(S.appearance_flags & HAS_BASE_SKIN_COLOURS))
-				log_unit_test("[S.name] has a skin colour list but no HAS_BASE_SKIN_COLOURS flag.")
+			if(!(S.appearance_flags & SPECIES_APPEARANCE_HAS_BASE_SKIN_COLOURS))
+				log_unit_test("[S.name] has a skin colour list but no SPECIES_APPEARANCE_HAS_BASE_SKIN_COLOURS flag.")
 				failcount++
 				continue
-			if(!(S.base_skin_colours.len >= 2))
+			if(!(length(S.base_skin_colours) >= 2))
 				log_unit_test("[S.name] needs at least two items in the base_skin_colour list.")
 				failcount++
 				continue
@@ -549,8 +549,8 @@ var/global/default_mobloc = null
 				failcount++
 				continue
 
-		else if(S.appearance_flags & HAS_BASE_SKIN_COLOURS)
-			log_unit_test("[S.name] has a HAS_BASE_SKIN_COLOURS flag but no skin colour list.")
+		else if(S.appearance_flags & SPECIES_APPEARANCE_HAS_BASE_SKIN_COLOURS)
+			log_unit_test("[S.name] has a SPECIES_APPEARANCE_HAS_BASE_SKIN_COLOURS flag but no skin colour list.")
 			failcount++
 			continue
 

@@ -83,30 +83,30 @@
 	if(O.GetIdCard())
 		if(access_scanner.allowed(user) && !open)
 			locked = !locked
-			to_chat(user, "<span class='notice'>Controls are now [locked ? "locked." : "unlocked."]</span>")
+			to_chat(user, SPAN_NOTICE("Controls are now [locked ? "locked." : "unlocked."]"))
 			Interact(usr)
 		else if(open)
-			to_chat(user, "<span class='warning'>Please close the access panel before locking it.</span>")
+			to_chat(user, SPAN_WARNING("Please close the access panel before locking it."))
 		else
-			to_chat(user, "<span class='warning'>Access denied.</span>")
+			to_chat(user, SPAN_WARNING("Access denied."))
 		return
 	else if(isScrewdriver(O))
 		if(!locked)
 			open = !open
-			to_chat(user, "<span class='notice'>Maintenance panel is now [open ? "opened" : "closed"].</span>")
+			to_chat(user, SPAN_NOTICE("Maintenance panel is now [open ? "opened" : "closed"]."))
 			Interact(usr)
 		else
-			to_chat(user, "<span class='notice'>You need to unlock the controls first.</span>")
+			to_chat(user, SPAN_NOTICE("You need to unlock the controls first."))
 		return
 	else if(isWelder(O))
 		if(health < maxHealth)
 			if(open)
 				health = min(maxHealth, health + 10)
-				user.visible_message("<span class='notice'>\The [user] repairs \the [src].</span>","<span class='notice'>You repair \the [src].</span>")
+				user.visible_message(SPAN_NOTICE("\The [user] repairs \the [src]."),SPAN_NOTICE("You repair \the [src]."))
 			else
-				to_chat(user, "<span class='notice'>Unable to repair with the maintenance panel closed.</span>")
+				to_chat(user, SPAN_NOTICE("Unable to repair with the maintenance panel closed."))
 		else
-			to_chat(user, "<span class='notice'>\The [src] does not need a repair.</span>")
+			to_chat(user, SPAN_NOTICE("\The [src] does not need a repair."))
 		return
 	else
 		..()
@@ -202,7 +202,7 @@
 	return 0
 
 /mob/living/bot/proc/handleAI()
-	if(ignore_list.len)
+	if(length(ignore_list))
 		for(var/atom/A in ignore_list)
 			if(!A || !A.loc || prob(1))
 				ignore_list -= A
@@ -222,7 +222,7 @@
 		resetTarget()
 		lookForTargets()
 		if(will_patrol && !pulledby && !target)
-			if(patrol_path && patrol_path.len)
+			if(patrol_path && length(patrol_path))
 				for(var/i = 1 to patrol_speed)
 					sleep(20 / (patrol_speed + 1))
 					handlePatrol()
@@ -246,7 +246,7 @@
 	if(!target || !target.loc)
 		return
 	if(get_dist(src, target) > min_target_dist)
-		if(!target_path.len || get_turf(target) != target_path[target_path.len])
+		if(!length(target_path) || get_turf(target) != target_path[length(target_path)])
 			calcTargetPath()
 		if(makeStep(target_path))
 			frustration = 0
@@ -320,7 +320,7 @@
 	return
 
 /mob/living/bot/proc/makeStep(list/path)
-	if(!path.len)
+	if(!length(path))
 		return 0
 	var/turf/T = path[1]
 	if(get_turf(src) == T)
