@@ -20,6 +20,7 @@ GLOBAL_LIST_INIT(bitflags, list(1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 204
 #define ATOM_FLAG_NO_TEMP_CHANGE         FLAG(6)  // Reagents do not cool or heat to ambient temperature in this container.
 #define ATOM_FLAG_CAN_BE_PAINTED         FLAG(7)  // Can be painted using a paint sprayer or similar.
 #define ATOM_FLAG_ADJACENT_EXCEPTION     FLAG(8)  // Skips adjacent checks for atoms that should always be reachable in window tiles
+#define ATOM_FLAG_NO_TOOLS               FLAG(9)  // Blocks tool interactions.
 
 #define MOVABLE_FLAG_PROXMOVE       FLAG(0)  // Does this object require proximity checking in Enter()?
 #define MOVABLE_FLAG_Z_INTERACT     FLAG(1)  // Should attackby and attack_hand be relayed through ladders and open spaces?
@@ -29,6 +30,10 @@ GLOBAL_LIST_INIT(bitflags, list(1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 204
 #define OBJ_FLAG_CONDUCTIBLE    FLAG(1)  // Conducts electricity. (metal etc.)
 #define OBJ_FLAG_ROTATABLE      FLAG(2)  // Can be rotated with alt-click
 #define OBJ_FLAG_NOFALL		    FLAG(3)  // Will prevent mobs from falling
+/// Can be click+dragged onto a table, rack, etc
+#define OBJ_FLAG_CAN_TABLE      FLAG(4)
+/// Can receive objects with the `OBJ_FLAG_CAN_TABLE` flag
+#define OBJ_FLAG_RECEIVE_TABLE  FLAG(5)
 
 //Flags for items (equipment)
 #define ITEM_FLAG_NO_BLUDGEON               FLAG(0)  // When an item has this it produces no "X has been hit by Y with Z" message with the default handler.
@@ -58,3 +63,11 @@ GLOBAL_LIST_INIT(bitflags, list(1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 204
 #define TANK_FLAG_FORCED     FLAG(1)
 #define TANK_FLAG_LEAKING    FLAG(2)
 #define TANK_FLAG_WIRED      FLAG(3)
+
+// Flags for beds/chairs
+/// The bed/chair cannot be dismantled with a wrench.
+#define BED_FLAG_CANNOT_BE_DISMANTLED FLAG(1)
+/// The bed/chair cannot be padded with material.
+#define BED_FLAG_CANNOT_BE_PADDED FLAG(2)
+/// The bed/chair cannot be made into an electric chair with a shock kit. Only applies to `/obj/structure/bed/chair` subtypes.
+#define BED_FLAG_CANNOT_BE_ELECTRIFIED FLAG(3)

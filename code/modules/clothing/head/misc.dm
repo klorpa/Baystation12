@@ -39,7 +39,7 @@
 	item_state = "pwig"
 
 /obj/item/clothing/head/that
-	name = "top-hat"
+	name = "tophat"
 	desc = "It's an amish looking hat."
 	icon_state = "tophat"
 	item_state = "tophat"
@@ -59,7 +59,7 @@
 	body_parts_covered = 0
 
 /obj/item/clothing/head/plaguedoctorhat
-	name = "plague doctor's hat"
+	name = "plague doctor hat"
 	desc = "These were once used by Plague doctors. They're pretty much useless."
 	icon_state = "plaguedoctor"
 	permeability_coefficient = 0.01
@@ -114,25 +114,6 @@
 /obj/item/clothing/head/cardborg/Initialize()
 	. = ..()
 	set_extension(src, /datum/extension/appearance/cardborg)
-
-/obj/item/clothing/head/justice
-	name = "justice hat"
-	desc = "fight for what's righteous!"
-	icon_state = "justicered"
-	flags_inv = BLOCKHAIR
-	body_parts_covered = HEAD|EYES
-
-/obj/item/clothing/head/justice/blue
-	icon_state = "justiceblue"
-
-/obj/item/clothing/head/justice/yellow
-	icon_state = "justiceyellow"
-
-/obj/item/clothing/head/justice/green
-	icon_state = "justicegreen"
-
-/obj/item/clothing/head/justice/pink
-	icon_state = "justicepink"
 
 /obj/item/clothing/head/rabbitears
 	name = "rabbit ears"

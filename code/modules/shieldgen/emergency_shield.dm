@@ -1,5 +1,5 @@
 /obj/machinery/shield
-	name = "Emergency energy shield"
+	name = "emergency energy shield"
 	desc = "An energy shield used to contain hull breaches."
 	icon = 'icons/effects/effects.dmi'
 	icon_state = "shield-old"
@@ -35,7 +35,7 @@
 	if(!height || air_group) return 0
 	else return ..()
 
-/obj/machinery/shield/post_health_change(health_mod, damage_type)
+/obj/machinery/shield/post_health_change(health_mod, prior_health, damage_type)
 	. = ..()
 	if (health_dead)
 		return
@@ -48,7 +48,7 @@
 	qdel(src)
 
 /obj/machinery/shieldgen
-	name = "Emergency shield projector"
+	name = "emergency shield projector"
 	desc = "Used to seal minor hull breaches."
 	icon = 'icons/obj/objects.dmi'
 	icon_state = "shieldoff"
@@ -144,7 +144,7 @@
 		else
 			check_delay--
 
-/obj/machinery/shieldgen/post_health_change(health_mod, damage_type)
+/obj/machinery/shieldgen/post_health_change(health_mod, prior_health, damage_type)
 	. = ..()
 	queue_icon_update()
 	if (get_current_health() <= 30)

@@ -217,6 +217,7 @@ world
 #define TO_HEX_DIGIT(n) ascii2text((n&15) + ((n&15)<10 ? 48 : 87))
 
 /icon/proc/MakeLying()
+	RETURN_TYPE(/icon)
 	var/icon/I = new(src,dir=SOUTH)
 	I.BecomeLying()
 	return I
@@ -318,6 +319,7 @@ world
  */
 
 /proc/ReadRGB(rgb)
+	RETURN_TYPE(/list)
 	if(!rgb) return
 
 	// interpret the HSV or HSVA value
@@ -368,6 +370,7 @@ world
 	if(usealpha) . += alpha
 
 /proc/ReadHSV(hsv)
+	RETURN_TYPE(/list)
 	if(!hsv) return
 
 	// interpret the HSV or HSVA value
@@ -635,6 +638,7 @@ The _flatIcons list is a cache for generated icon files.
 */
 
 /proc/getFlatIcon(image/A, defdir=2, deficon=null, defstate="", defblend=BLEND_DEFAULT, always_use_defdir = 0)
+	RETURN_TYPE(/icon)
 	// We start with a blank canvas, otherwise some icon procs crash silently
 	var/icon/flat = icon('icons/effects/effects.dmi', "icon_state"="nothing") // Final flattened icon
 	if(!A)
@@ -746,24 +750,6 @@ The _flatIcons list is a cache for generated icon files.
 		if(I == copy) // 'I' is an /image based on the object being flattened.
 			curblend = BLEND_OVERLAY
 			add = icon(I:icon, I:icon_state, I:dir)
-			// This checks for a silent failure mode of the icon routine. If the requested dir
-			// doesn't exist in this icon state it returns a 32x32 icon with 0 alpha.
-			if (I:dir != SOUTH && add.Width() == 32 && add.Height() == 32)
-				// Check every pixel for blank (computationally expensive, but the process is limited
-				// by the amount of film on the station, only happens when we hit something that's
-				// turned, and bails at the very first pixel it sees.
-				var/blankpixel;
-				for(var/y;y<=32;y++)
-					for(var/x;x<32;x++)
-						blankpixel = isnull(add.GetPixel(x,y))
-						if(!blankpixel)
-							break
-					if(!blankpixel)
-						break
-				// If we ALWAYS returned a null (which happens when GetPixel encounters something with alpha 0)
-				if (blankpixel)
-					// Pull the default direction.
-					add = icon(I:icon, I:icon_state)
 		else // 'I' is an appearance object.
 			if(istype(A,/obj/machinery/atmospherics) && (I in A.underlays))
 				var/image/Im = I
@@ -800,6 +786,7 @@ The _flatIcons list is a cache for generated icon files.
 	return icon(flat, "", SOUTH)
 
 /proc/getIconMask(atom/A)//By yours truly. Creates a dynamic mask for a mob/whatever. /N
+	RETURN_TYPE(/icon)
 	var/icon/alpha_mask = new(A.icon,A.icon_state)//So we want the default icon and icon state of A.
 	for(var/I in A.overlays)//For every image in overlays. var/image/I will not work, don't try it.
 		if(I:layer>A.layer)	continue//If layer is greater than what we need, skip it.
@@ -828,6 +815,7 @@ The _flatIcons list is a cache for generated icon files.
 #define HOLOPAD_LONG_RANGE 2
 
 /proc/getHologramIcon(icon/A, safety=1, noDecolor=FALSE, hologram_color=HOLOPAD_SHORT_RANGE)//If safety is on, a new icon is not created.
+	RETURN_TYPE(/icon)
 	var/icon/flat_icon = safety ? A : new(A)//Has to be a new icon to not constantly change the same icon.
 	if (noDecolor == FALSE)
 		if(hologram_color == HOLOPAD_LONG_RANGE)
@@ -841,6 +829,7 @@ The _flatIcons list is a cache for generated icon files.
 
 //For photo camera.
 /proc/build_composite_icon(atom/A)
+	RETURN_TYPE(/icon)
 	var/icon/composite = icon(A.icon, A.icon_state, A.dir, 1)
 	for(var/O in A.overlays)
 		var/image/I = O
@@ -858,6 +847,7 @@ The _flatIcons list is a cache for generated icon files.
 	return rgb(RGB[1],RGB[2],RGB[3])
 
 /proc/sort_atoms_by_layer(list/atoms)
+	RETURN_TYPE(/list)
 	// Comb sort icons based on levels
 	var/list/result = atoms.Copy()
 	var/gap = length(result)
@@ -882,6 +872,7 @@ cap_mode is capturing mode (optional), user is capturing mob (requred only wehen
 lighting determines lighting capturing (optional), suppress_errors suppreses errors and continues to capture (optional).
 */
 /proc/generate_image(tx as num, ty as num, tz as num, range as num, cap_mode = CAPTURE_MODE_PARTIAL, mob/living/user, lighting = 1, suppress_errors = 1)
+	RETURN_TYPE(/icon)
 	var/list/turfstocapture = list()
 	//Lines below determine what tiles will be rendered
 	for(var/xoff = 0 to range)

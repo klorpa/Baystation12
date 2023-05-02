@@ -9,6 +9,7 @@ GLOBAL_LIST_EMPTY(admin_departments)
 	icon = 'icons/obj/bureaucracy.dmi'
 	icon_state = "fax"
 	insert_anim = "faxsend"
+	obj_flags = OBJ_FLAG_ANCHORABLE | OBJ_FLAG_CAN_TABLE
 	var/send_access = list()
 
 	idle_power_usage = 30
@@ -319,6 +320,7 @@ GLOBAL_LIST_EMPTY(admin_departments)
 
 /// Retrieves a list of all fax machines matching the given department tag.
 /proc/get_fax_machines_by_department(department)
+	RETURN_TYPE(/list)
 	if (!department)
 		department = "Unknown"
 	var/list/faxes = list()

@@ -79,7 +79,7 @@
 	if (!iv_bag)
 		to_chat(user, "It has no IV bag attached.")
 		return
-	var/volume = Floor(iv_bag.reagents.total_volume)
+	var/volume = floor(iv_bag.reagents.total_volume)
 	if (!volume)
 		to_chat(user, "It has an empty [iv_bag.name] attached.")
 		return
@@ -94,44 +94,32 @@
 		return ..()
 
 
-/obj/structure/roller_bed/attackby(obj/item/item, mob/living/user)
-	. = TRUE
-	if (istype(item, /obj/item/reagent_containers/ivbag))
+/obj/structure/roller_bed/use_grab(obj/item/grab/grab, list/click_params)
+	// Buckle victim
+	if (!AttemptBuckle(grab.affecting, grab.assailant))
+		return TRUE
+	qdel(grab)
+	return TRUE
+
+
+/obj/structure/roller_bed/use_tool(obj/item/tool, mob/user, list/click_params)
+	// IV Bag - Attach bag
+	if (istype(tool, /obj/item/reagent_containers/ivbag))
 		if (iv_bag)
-			to_chat(user, SPAN_WARNING("\The [src] already has \a [iv_bag] attached."))
-			return
-		if (!user.unEquip(item, src))
-			return
-		user.visible_message(
-			SPAN_ITALIC("\The [user] hangs \a [item] from \a [src]."),
-			SPAN_ITALIC("You hang \the [item] from \the [src]."),
-			range = 5
-		)
-		iv_bag = item
+			USE_FEEDBACK_FAILURE("\The [src] already has \a [iv_bag] attached")
+			return TRUE
+		if (!user.unEquip(tool, src))
+			FEEDBACK_UNEQUIP_FAILURE(user, tool)
+			return TRUE
+		iv_bag = tool
 		last_reagent_color = iv_bag.reagents.get_color()
 		update_icon()
-		return
-	if (istype(item, /obj/item/grab))
-		if (buckled_mob)
-			to_chat(user, SPAN_WARNING("\The [buckled_mob] is already on \the [src]."))
-			return
-		var/obj/item/grab/grab = item
 		user.visible_message(
-			SPAN_ITALIC("\The [user] starts buckling \the [grab.affecting] to \a [src]."),
-			SPAN_ITALIC("You start buckling \the [grab.affecting] to \the [src]."),
-			range = 5
+			SPAN_NOTICE("\The [user] hangs \a [tool] from \the [src]."),
+			SPAN_NOTICE("You hang \the [tool] from \the [src]."),
 		)
-		if (!do_after(user, 3 SECONDS, src, DO_PUBLIC_UNIQUE))
-			return
-		if (QDELETED(grab))
-			return
-		if (buckled_mob)
-			to_chat(user, SPAN_WARNING("\The [buckled_mob] is already on \the [src]."))
-			return
-		if (!AttemptBuckle(grab.affecting, user))
-			return
-		qdel(grab)
-		return
+		return TRUE
+
 	return ..()
 
 
@@ -199,12 +187,6 @@
 /obj/structure/roller_bed/MouseDrop_T(atom/dropped, mob/living/user)
 	if (src == dropped && user.canClick())
 		user.ClickOn(src)
-		return
-	if (!CheckDexterity(user))
-		to_chat(user, SPAN_WARNING("You're not dextrous enough to do that."))
-		return
-	if (user.incapacitated())
-		to_chat(user, SPAN_WARNING("You're in no condition to do that."))
 		return
 	if (!buckled_mob)
 		if (isliving(dropped))

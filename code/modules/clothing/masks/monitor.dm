@@ -11,7 +11,9 @@
 	icon_override = 'icons/mob/monitor_icons.dmi'
 	icon_state = "ipc_blank"
 	item_state = null
-	item_flags = null
+	item_flags = ITEM_FLAG_INVALID_FOR_CHAMELEON
+
+	z_flags = ZMM_MANGLE_PLANES
 
 	var/monitor_state_index = "blank"
 	var/static/list/monitor_states = list(

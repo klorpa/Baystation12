@@ -46,7 +46,7 @@
 		remove_contents(user)
 
 /obj/item/reagent_containers/glass/rag/attackby(obj/item/W, mob/user)
-	if(!on_fire && isflamesource(W))
+	if (!on_fire && W.IsFlameSource())
 		ignite()
 		if(on_fire)
 			user.visible_message(
@@ -138,8 +138,8 @@
 						H.forehead_graffiti = null
 						reagents.remove_reagent(R, wash_amount)
 						if (user == target)
-							var/datum/gender/G = gender_datums[M.get_gender()]
-							user.visible_message(SPAN_NOTICE("\The [user] scrubs the ink off [G.his] forehead."), SPAN_NOTICE("You scrub the ink off your forehead."))
+							var/datum/pronouns/P = M.choose_from_pronouns()
+							user.visible_message(SPAN_NOTICE("\The [user] scrubs the ink off [P.his] forehead."), SPAN_NOTICE("You scrub the ink off your forehead."))
 						else
 							user.visible_message(SPAN_NOTICE("\The [user] scrubs the ink off \the [M]'s forehead."), SPAN_NOTICE("You scrub the ink off \the [M]'s forehead."))
 					else

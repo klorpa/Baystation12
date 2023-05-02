@@ -2,6 +2,7 @@
 
 	#include "../../packs/faction_iccgn/_pack.dm"
 	#include "../../packs/event_2022jul30/_pack.dm"
+	#include "../../packs/deepmaint/_pack.dm"
 
 	#include "torch_announcements.dm"
 	#include "torch_antagonism.dm"
@@ -23,6 +24,7 @@
 	#include "torch_submaps.dm"
 	#include "torch_turfs.dm"
 	#include "torch_unit_testing.dm"
+	#include "torch_simplemobs.dm"
 
 	#include "datums/uniforms.dm"
 	#include "datums/uniforms_expedition.dm"

@@ -29,6 +29,8 @@
 	var/climb_speed_mult = 1
 	/// Bitflag (Any of `INIT_*`). Flags for special/additional handling of the `Initialize()` chain. See `code\__defines\misc.dm`.
 	var/init_flags = EMPTY_BITFIELD
+	/// Stores overlays managed by update_overlays() to prevent removing overlays that were not added by the same proc
+	var/list/managed_overlays
 
 /atom/New(loc, ...)
 	SHOULD_CALL_PARENT(TRUE) // Ensures atoms don't unintentionally skip initialization by not calling parent in New()
@@ -377,8 +379,14 @@
 
 	to_chat(user, "[icon2html(src, user)] That's [f_name] [suffix]")
 	to_chat(user, desc)
-	if (health_max)
+	if (get_max_health())
 		examine_damage_state(user)
+
+	if (IsFlameSource())
+		to_chat(user, SPAN_DANGER("It has an open flame."))
+	else if (distance <= 1 && IsHeatSource())
+		to_chat(user, SPAN_WARNING("It's hot to the touch."))
+
 	return TRUE
 
 /**
@@ -430,6 +438,14 @@
 		return
 	on_update_icon(arglist(args))
 
+	var/list/new_overlays = update_overlays()
+	if (managed_overlays)
+		overlays -= managed_overlays
+		managed_overlays = null
+	if (length(new_overlays))
+		managed_overlays = new_overlays
+		overlays += new_overlays
+
 /**
  * Handler for updating the atom's icon and overlay states. Generally, all changes to `overlays`, `underlays`, `icon`,
  * `icon_state`, `item_state`, etc should be contained in here.
@@ -439,6 +455,11 @@
 /atom/proc/on_update_icon()
 	return
 
+/** Updates the overlays of the atom */
+/atom/proc/update_overlays()
+	SHOULD_CALL_PARENT(TRUE)
+	. = list()
+
 /**
  * Called when an explosion affects the atom.
  *
@@ -447,18 +468,19 @@
  * stronger.
  */
 /atom/proc/ex_act(severity, turf_breaker)
-	if (get_max_health())
+	var/max_health = get_max_health()
+	if (max_health)
 		// No hitsound here to avoid noise spam.
 		// Damage is based on severity and maximum health, with DEVASTATING being guaranteed death without any resistances.
 		var/damage_flags = turf_breaker ? DAMAGE_FLAG_TURF_BREAKER : EMPTY_BITFIELD
 		var/damage = 0
 		switch (severity)
 			if (EX_ACT_DEVASTATING)
-				damage = round(health_max * (rand(100, 200) / 100)) // So that even atoms resistant to explosions may still be heavily damaged at this severity. Effective range of 100% to 200%.
+				damage = round(max_health * (rand(100, 200) / 100)) // So that even atoms resistant to explosions may still be heavily damaged at this severity. Effective range of 100% to 200%.
 			if (EX_ACT_HEAVY)
-				damage = round(health_max * (rand(50, 100) / 100)) // Effective range of 50% to 100%.
+				damage = round(max_health * (rand(50, 100) / 100)) // Effective range of 50% to 100%.
 			if (EX_ACT_LIGHT)
-				damage = round(health_max * (rand(10, 50) / 100)) // Effective range of 10% to 50%.
+				damage = round(max_health * (rand(10, 50) / 100)) // Effective range of 10% to 50%.
 		if (damage)
 			damage_health(damage, DAMAGE_EXPLODE, damage_flags, severity)
 
@@ -757,17 +779,6 @@
 		user.visible_message(SPAN_WARNING("[user.name] shakes \the [src]."), \
 					SPAN_NOTICE("You shake \the [src]."))
 		object_shaken()
-
-/**
- * Called when the atom is clicked on with an active grab.
- *
- * **Parameters**:
- * - `G` - The grab the atom was clicked on with.
- *
- * Returns boolean. Whether or not the interaction was handled. If `TRUE`, skips `attackby()` and `afterattack()` calls.
- */
-/atom/proc/grab_attack(obj/item/grab/G)
-	return FALSE
 
 /**
  * Verb to allow climbing onto an object. Passes directly to `/atom/proc/do_climb(usr)`.

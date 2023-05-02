@@ -15,9 +15,11 @@
 	var/blood = 1
 	var/list/target_types = list()
 
-/mob/living/bot/cleanbot/New()
-	..()
+
+/mob/living/bot/cleanbot/Initialize(mapload)
+	. = ..()
 	get_targets()
+
 
 /mob/living/bot/cleanbot/handleIdle()
 	if(!screwloose && !oddbutton && prob(5))
@@ -142,6 +144,19 @@
 		oddbutton = 1
 		screwloose = 1
 		return 1
+
+
+/mob/living/bot/cleanbot/get_construction_info()
+	return list(
+		"Attach a <b>Proximity Sensor</b> to a <b>Bucket</b>.",
+		"Add a <b>Robot Arm</b> to complete the cleanbot."
+	)
+
+
+/mob/living/bot/cleanbot/get_antag_interactions_info()
+	. = ..()
+	.[CODEX_INTERACTION_EMAG] += "<p>Turns on malfunctions that causes \the [initial(name)] to spew out gibs and water.</p>"
+
 
 /mob/living/bot/cleanbot/proc/get_targets()
 	target_types = list()

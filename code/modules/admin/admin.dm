@@ -87,6 +87,8 @@ var/global/floorIsLava = 0
 		<A href='?src=\ref[src];newban=\ref[M];last_key=[last_ckey]'>Ban</A> |
 		<A href='?src=\ref[src];jobban2=\ref[M]'>Jobban</A> |
 		<A href='?src=\ref[src];notes=show;mob=\ref[M]'>Notes</A> |
+		<A HREF='?src=\ref[src];connections=\ref[M]'>Check Connections</A> |
+		<A HREF='?src=\ref[src];bans=\ref[M]'>Check Bans</A> |
 	"}
 
 	if (!istype(M, /mob/new_player) && !istype(M, /mob/observer))
@@ -266,6 +268,8 @@ var/global/floorIsLava = 0
 /datum/player_info/var/rank //rank of admin who made the notes
 /datum/player_info/var/content // text content of the information
 /datum/player_info/var/timestamp // Because this is bloody annoying
+/// Round ID of the note
+/datum/player_info/var/game_id
 
 #define PLAYER_NOTES_ENTRIES_PER_PAGE 50
 /datum/admins/proc/PlayerNotes()
@@ -389,6 +393,7 @@ var/global/floorIsLava = 0
 					<b>[comment.author || "(not recorded)"]</b>, \
 					<b>[comment.rank || "(not recorded)"]</b>, \
 					on <b>[comment.timestamp || "(not recorded)"]</b>\
+					[comment.game_id ? "<br>Round ID: <b>[comment.game_id]</b>" : null]\
 				</div>\
 				[remove_button]\
 			</div>\
@@ -844,7 +849,7 @@ GLOBAL_VAR_INIT(skip_allow_lists, FALSE)
 	if (config.hub_visible && !world.reachable)
 		message_admins("WARNING: The server will not show up on the hub because byond is detecting that a firewall is blocking incoming connections.")
 
-	send2adminirc("[key_name(src)]" + long_message)
+	send_to_admin_discord(EXCOM_MSG_AHELP, "[key_name(src, highlight_special_characters = FALSE)]" + long_message)
 	log_and_message_admins(long_message)
 
 /datum/admins/proc/toggletraitorscaling()

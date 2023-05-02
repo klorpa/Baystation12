@@ -26,7 +26,7 @@
 	var/stripe_color
 	var/static/list/wall_stripe_cache = list()
 	var/list/blend_turfs = list(/turf/simulated/wall/cult, /turf/simulated/wall/wood, /turf/simulated/wall/walnut, /turf/simulated/wall/maple, /turf/simulated/wall/mahogany, /turf/simulated/wall/ebony)
-	var/list/blend_objects = list(/obj/machinery/door, /obj/structure/wall_frame, /obj/structure/grille, /obj/structure/window/reinforced/full, /obj/structure/window/reinforced/polarized/full, /obj/structure/window/shuttle, ,/obj/structure/window/phoronbasic/full, /obj/structure/window/phoronreinforced/full) // Objects which to blend with
+	var/list/blend_objects = list(/obj/machinery/door, /obj/structure/wall_frame, /obj/structure/grille, /obj/structure/window/reinforced/full, /obj/structure/window/reinforced/polarized/full, /obj/structure/window/shuttle, ,/obj/structure/window/boron_basic/full, /obj/structure/window/boron_reinforced/full) // Objects which to blend with
 	var/list/noblend_objects = list(/obj/machinery/door/window) //Objects to avoid blending with (such as children of listed blend objects.)
 
 /turf/simulated/wall/New(newloc, materialtype, rmaterialtype)
@@ -70,23 +70,23 @@
 
 /turf/simulated/wall/proc/calculate_damage_data()
 	// Health
-	var/max_health = material.integrity
+	var/max_health = material.integrity * 1.5
 	if (reinf_material)
-		max_health += round(reinf_material.integrity / 2)
+		max_health += round(reinf_material.integrity * 0.75)
 	set_max_health(max_health)
 
 	// Minimum force required to damage the wall
-	health_min_damage = material.hardness * 1.5
+	health_min_damage = material.hardness * 2.6
 	if (reinf_material)
-		health_min_damage += round(reinf_material.hardness * 1.5)
+		health_min_damage += round(reinf_material.hardness * 1.9)
 	health_min_damage = round(health_min_damage / 10)
 
 	// Brute and burn armor
-	var/brute_armor = material.brute_armor * 0.2
-	var/burn_armor = material.burn_armor * 0.2
+	var/brute_armor = material.brute_armor * 0.4
+	var/burn_armor = material.burn_armor * 0.4
 	if (reinf_material)
-		brute_armor += reinf_material.brute_armor * 0.2
-		burn_armor += reinf_material.burn_armor * 0.2
+		brute_armor += reinf_material.brute_armor * 0.4
+		burn_armor += reinf_material.burn_armor * 0.4
 	// Materials enter armor as divisors, health system uses multipliers
 	if (brute_armor)
 		brute_armor = round(1 / brute_armor, 0.01)
@@ -163,9 +163,9 @@
 	if (locate(/obj/effect/overlay/wallrot) in src)
 		. = round(. / 10)
 
-/turf/simulated/wall/post_health_change(damage, damage_type)
+/turf/simulated/wall/post_health_change(damage, prior_health, damage_type)
 	..()
-	update_icon()
+	queue_icon_update()
 
 /turf/simulated/wall/on_death()
 	dismantle_wall(TRUE)

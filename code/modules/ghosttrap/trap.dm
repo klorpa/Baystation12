@@ -4,11 +4,13 @@
 var/global/list/ghost_traps
 
 /proc/get_ghost_trap(trap_key)
+	RETURN_TYPE(/datum/ghosttrap)
 	if(!ghost_traps)
 		populate_ghost_traps()
 	return ghost_traps[trap_key]
 
 /proc/get_ghost_traps()
+	RETURN_TYPE(/list)
 	if(!ghost_traps)
 		populate_ghost_traps()
 	return ghost_traps
@@ -80,6 +82,8 @@ var/global/list/ghost_traps
 		unregister_target(target)
 
 	for(var/mob/observer/ghost/O in GLOB.player_list)
+		if (O.client.get_preference_value(/datum/client_preference/notify_ghost_trap) == GLOB.PREF_NO)
+			return
 		if(!assess_candidate(O, target, FALSE))
 			continue
 		if(O.client)

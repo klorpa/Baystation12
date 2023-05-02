@@ -33,6 +33,7 @@
 	siemens_coefficient = 0.2
 	permeability_coefficient = 0.1
 	unacidable = TRUE
+	equip_delay = 5 SECONDS
 
 	var/equipment_overlay_icon = 'icons/mob/onmob/onmob_rig_modules.dmi'
 	var/hides_uniform = 1 	//used to determinate if uniform should be visible whenever the suit is sealed or not
@@ -318,7 +319,7 @@
 			SPAN_INFO("[wearer]'s suit emits a quiet hum as it begins to adjust its seals."), \
 			SPAN_INFO("With a quiet hum, the suit begins running checks and adjusting components."))
 
-			if(seal_delay && !do_after(wearer,seal_delay, src))
+			if(seal_delay && !instant && !do_after(wearer,seal_delay, src))
 				failed_to_seal = 1
 
 		if(!wearer)
@@ -537,7 +538,7 @@
 
 	data["charge"] =       cell ? round(cell.charge,1) : 0
 	data["maxcharge"] =    cell ? cell.maxcharge : 0
-	data["chargestatus"] = cell ? Floor(cell.percent()/2) : 0
+	data["chargestatus"] = cell ? floor(cell.percent()/2) : 0
 
 	data["emagged"] =       subverted
 	data["coverlock"] =     locked
@@ -720,29 +721,24 @@
 			to_chat(module.integrated_ai, "[message]")
 			. = 1
 
-/obj/item/rig/equipped(mob/living/carbon/human/M)
-	..()
+/obj/item/rig/equip_delay_before(mob/user, slot, equip_flags)
+	user.setClickCooldown(1 SECOND)
+	user.visible_message(
+		SPAN_ITALIC("\The [user] begins to struggle into \the [src]."),
+		SPAN_ITALIC("You begin to struggle into \the [src]."),
+		SPAN_ITALIC("You can hear metal clicking and fabric rustling."),
+		range = 5
+	)
+	wearer = user
+	wearer.wearing_rig = src
+	update_icon()
 
-	if(seal_delay > 0 && istype(M) && M.back == src)
-		M.visible_message(\
-		SPAN_INFO("[M] starts putting on \the [src]..."), \
-		SPAN_INFO("You start putting on \the [src]..."))
-
-		if(!do_after(M, seal_delay, src, DO_PUBLIC_UNIQUE))
-			if(M && M.back == src)
-				if(!M.unEquip(src))
-					return
-			src.dropInto(loc)
-			return
-
-	if(istype(M) && M.back == src)
-		M.visible_message(\
-		SPAN_INFO("<b>[M] struggles into \the [src].</b>"), \
-		SPAN_INFO("<b>You struggle into \the [src].</b>"))
-
-		wearer = M
-		wearer.wearing_rig = src
-		update_icon()
+/obj/item/rig/space/equip_delay_after(mob/user, slot, equip_flags)
+	user.visible_message(
+		SPAN_ITALIC("\The [user] finishes putting on \the [src]."),
+		SPAN_NOTICE("You finish putting on \the [src]."),
+		range = 5
+	)
 
 /obj/item/rig/proc/toggle_piece(piece, mob/initiator, deploy_mode)
 
@@ -757,7 +753,7 @@
 
 	var/obj/item/check_slot
 	var/equip_to
-	var/obj/item/use_obj
+	var/obj/item/clothing/use_obj
 
 	if(!wearer)
 		return
@@ -800,8 +796,11 @@
 			use_obj.forceMove(wearer)
 			if(!wearer.equip_to_slot_if_possible(use_obj, equip_to, TRYEQUIP_REDRAW | TRYEQUIP_SILENT))
 				use_obj.forceMove(src)
+				if(wearer.species && use_obj.species_restricted && !(wearer.species in use_obj.species_restricted))
+					FEEDBACK_FAILURE(initiator, "You are unable to deploy \the [piece] as [use_obj.gender == PLURAL ? "they are" : "it is"] not compatible with the anatomy of your species.")
+					return
 				if(check_slot)
-					to_chat(initiator, SPAN_CLASS("danger", "You are unable to deploy \the [piece] as \the [check_slot] [check_slot.gender == PLURAL ? "are" : "is"] in the way."))
+					FEEDBACK_FAILURE(initiator, "You are unable to deploy \the [piece] as \the [check_slot] [check_slot.gender == PLURAL ? "are" : "is"] in the way.")
 					return
 			else
 				to_chat(wearer, SPAN_NOTICE("Your [use_obj.name] [use_obj.gender == PLURAL ? "deploy" : "deploys"] swiftly."))

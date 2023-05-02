@@ -1,4 +1,4 @@
-/mob/living/carbon/New()
+/mob/living/carbon/Initialize(mapload)
 	//setup reagent holders
 	bloodstr = new/datum/reagents/metabolism(120, src, CHEM_BLOOD)
 	touching = new/datum/reagents/metabolism(1000, src, CHEM_TOUCH)
@@ -6,7 +6,8 @@
 
 	if (!default_language && species_language)
 		default_language = all_languages[species_language]
-	..()
+	. = ..()
+
 
 /mob/living/carbon/Destroy()
 	QDEL_NULL(touching)
@@ -184,6 +185,7 @@
 		swap_hand()
 
 /mob/living/carbon/proc/help_shake_act(mob/living/carbon/M)
+	var/datum/pronouns/P = src.choose_from_pronouns()
 	if(!is_asystole())
 		if (on_fire)
 			playsound(src.loc, 'sound/weapons/thudswoosh.ogg', 50, 1, -1)
@@ -209,11 +211,6 @@
 							src.ExtinguishMob()
 							src.fire_stacks = 0
 		else
-			var/t_him = "it"
-			if (src.gender == MALE)
-				t_him = "him"
-			else if (src.gender == FEMALE)
-				t_him = "her"
 			if (istype(src,/mob/living/carbon/human) && src:w_uniform)
 				var/mob/living/carbon/human/H = src
 				H.w_uniform.add_fingerprint(M)
@@ -222,20 +219,20 @@
 			var/mob/living/carbon/human/H = src
 			if(istype(H)) show_ssd = H.species.show_ssd
 			if(show_ssd && ssd_check())
-				M.visible_message(SPAN_NOTICE("[M] shakes [src] trying to wake [t_him] up!"), \
+				M.visible_message(SPAN_NOTICE("[M] shakes [src] trying to wake [P.him] up!"), \
 				SPAN_NOTICE("You shake [src], but they do not respond... Maybe they have S.S.D?"))
 			else if(lying || src.sleeping || player_triggered_sleeping)
 				src.player_triggered_sleeping = 0
 				src.sleeping = max(0,src.sleeping - 5)
-				M.visible_message(SPAN_NOTICE("[M] shakes [src] trying to wake [t_him] up!"), \
-									SPAN_NOTICE("You shake [src] trying to wake [t_him] up!"))
+				M.visible_message(SPAN_NOTICE("[M] shakes [src] trying to wake [P.him] up!"), \
+									SPAN_NOTICE("You shake [src] trying to wake [P.him] up!"))
 			else
 				var/mob/living/carbon/human/hugger = M
 				if(istype(hugger))
 					hugger.species.hug(hugger,src)
 				else
-					M.visible_message(SPAN_NOTICE("[M] hugs [src] to make [t_him] feel better!"), \
-								SPAN_NOTICE("You hug [src] to make [t_him] feel better!"))
+					M.visible_message(SPAN_NOTICE("[M] hugs [src] to make [P.him] feel better!"), \
+								SPAN_NOTICE("You hug [src] to make [P.him] feel better!"))
 				if(M.fire_stacks >= (src.fire_stacks + 3))
 					src.fire_stacks += 1
 					M.fire_stacks -= 1
@@ -362,7 +359,7 @@
 		if(buckled && buckled.buckle_require_restraints)
 			buckled.unbuckle_mob()
 	else
-	 ..()
+		..()
 
 	return
 
@@ -387,7 +384,7 @@
 	stop_pulling()
 	to_chat(src, SPAN_WARNING("You slipped on [slipped_on]!"))
 	playsound(loc, 'sound/misc/slip.ogg', 50, 1, -3)
-	Weaken(Floor(stun_duration/2))
+	Weaken(floor(stun_duration/2))
 	return TRUE
 
 /mob/living/carbon/proc/add_chemical_effect(effect, magnitude = 1)

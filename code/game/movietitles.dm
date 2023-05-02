@@ -91,6 +91,7 @@ GLOBAL_LIST(end_titles)
 	return ..()
 
 /proc/generate_titles()
+	RETURN_TYPE(/list)
 	var/list/titles = list()
 	var/list/cast = list()
 	var/list/chunk = list()
@@ -98,8 +99,8 @@ GLOBAL_LIST(end_titles)
 	var/chunksize = 0
 	if(!GLOB.end_credits_title)
 		/* Establish a big-ass list of potential titles for the "episode". */
-		possible_titles += "THE [pick("DOWNFALL OF", "RISE OF", "TROUBLE WITH", "FINAL STAND OF", "DARK SIDE OF", "DESOLATION OF", "DESTRUCTION OF", "CRISIS OF")]\
-							 [pick("SPACEMEN", "HUMANITY", "DIGNITY", "SANITY", "THE CHIMPANZEES", "THE VENDOMAT PRICES", "GIANT ARMORED", "THE GAS JANITOR",\
+		possible_titles += "THE [pick("DOWNFALL OF ", "RISE OF ", "TROUBLE WITH ", "FINAL STAND OF ", "DARK SIDE OF ", "DESOLATION OF ", "DESTRUCTION OF ", "CRISIS OF ")]\
+							[pick("SPACEMEN", "HUMANITY", "DIGNITY", "SANITY", "THE CHIMPANZEES", "THE VENDOMAT PRICES", "GIANT ARMORED", "THE GAS JANITOR",\
 							"THE SUPERMATTER CRYSTAL", "MEDICAL", "ENGINEERING", "SECURITY", "RESEARCH", "THE SERVICE DEPARTMENT", "COMMAND", "THE EXPLORERS", "THE PATHFINDER",\
 							"[uppertext(GLOB.using_map.station_name)]")]"
 		possible_titles += "THE CREW GETS [pick("RACIST", "PICKLED", "AN INCURABLE DISEASE", "PIZZA", "A VALUABLE HISTORY LESSON", "A BREAK", "HIGH", "TO LIVE", "TO RELIVE THEIR CHILDHOOD", "EMBROILED IN CIVIL WAR", "A BAD HANGOVER", "SERIOUS ABOUT [pick("DRUG ABUSE", "CRIME", "PRODUCTIVITY", "ANCIENT AMERICAN CARTOONS", "SPACEBALL", "DECOMPRESSION PROCEDURES")]")]"
@@ -117,7 +118,7 @@ GLOBAL_LIST(end_titles)
 			continue
 		if(H.is_species(SPECIES_MONKEY) && findtext(H.real_name,"[lowertext(H.species.name)]")) //no monki
 			continue
-		if(H.timeofdeath && H.timeofdeath < 5 MINUTES) //don't mention these losers (prespawned corpses mostly)
+		if(H.last_ckey == null) //don't mention these losers (prespawned corpses mostly)
 			continue
 		if(!length(cast) && !chunksize)
 			chunk += "CAST:"
@@ -139,12 +140,12 @@ GLOBAL_LIST(end_titles)
 			actor_culture = SSculture.get_culture(CULTURE_HUMAN)
 		if(!showckey)
 			if(prob(90))
-				chunk += "[actor_culture.get_random_name(H.gender)]\t \t \t \t[uppertext(used_name)][job]"
+				chunk += "[actor_culture.get_random_name(H.pronouns)]\t \t \t \t[uppertext(used_name)][job]"
 			else
-				var/datum/gender/G = gender_datums[H.gender]
-				chunk += "[used_name]\t \t \t \t[uppertext(G.him)]SELF"
+				var/datum/pronouns/P = H.choose_from_pronouns()
+				chunk += "[used_name]\t \t \t \t[uppertext(P.him)]SELF"
 		else
-			chunk += "[uppertext(actor_culture.get_random_name(H.gender))] a.k.a. '[uppertext(H.ckey)]'\t \t \t \t[uppertext(used_name)][job]"
+			chunk += "[uppertext(actor_culture.get_random_name(H.pronouns))] a.k.a. '[uppertext(H.ckey)]'\t \t \t \t[uppertext(used_name)][job]"
 		chunksize++
 		if(chunksize > 2)
 			cast += "<center>[jointext(chunk,"<br>")]</center>"
@@ -158,7 +159,7 @@ GLOBAL_LIST(end_titles)
 	var/list/corpses = list()
 	var/list/monkies = list()
 	for(var/mob/living/carbon/human/H in GLOB.dead_mobs)
-		if(H.timeofdeath < 5 MINUTES) //no prespawned corpses
+		if(H.last_ckey == null) //no prespawned corpses
 			continue
 		if(H.is_species(SPECIES_MONKEY) && findtext(H.real_name,"[lowertext(H.species.name)]"))
 			monkies[H.species.name] += 1

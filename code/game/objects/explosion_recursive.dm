@@ -8,26 +8,16 @@ var/global/explosion_in_progress = 0
 
 
 /proc/explosion_rec(turf/epicenter, power, shaped)
-	var/debug_coord = "\[[epicenter.x],[epicenter.y],[epicenter.z]\]"
-	log_debug(append_admin_tools("[debug_coord] RECURSIVE EXPLOSION: Starting. Power [power]."))
 	var/loopbreak = 0
 	while(explosion_in_progress)
-		log_debug("[debug_coord] RECURSIVE EXPLOSION: Explosion in progress, delaying. Loopbreak [loopbreak].")
-		if(loopbreak >= 15)
-			log_debug("[debug_coord] RECURSIVE EXPLOSION: Explosion still in progress. Exiting.")
-			return
+		if(loopbreak >= 15) return
 		sleep(10)
 		loopbreak++
 
-	if(power <= 0)
-		log_debug("[debug_coord] RECURSIVE EXPLOSION: Invalid power [power]. Exiting.")
-		return
+	if(power <= 0) return
 	epicenter = get_turf(epicenter)
-	if(!epicenter)
-		log_debug("[debug_coord] RECURSIVE EXPLOSION: Invalid or null turf. Exiting.")
-		return
+	if(!epicenter) return
 
-	log_debug("[debug_coord] RECURSIVE EXPLOSION: Setting explosion in progress.")
 	explosion_in_progress = 1
 	explosion_turfs = list()
 
@@ -59,7 +49,7 @@ var/global/explosion_in_progress = 0
 		severity /= max(3, power / 3) // One third the total explosion power - One third because there are three power levels and I want each one to take up a third of the crater
 		severity = clamp(severity, 1, 3) // Sanity
 		severity = 4 - severity // Invert the value to accomodate lower numbers being a higher severity. Removing this inversion would require a lot of refactoring of math in `ex_act()` handlers.
-		severity = Floor(severity)
+		severity = floor(severity)
 
 		var/x = T.x
 		var/y = T.y
@@ -77,7 +67,6 @@ var/global/explosion_in_progress = 0
 					addtimer(new Callback(AM, /atom/movable/.proc/throw_at, throw_target, 9/severity, 9/severity), 0)
 
 	explosion_turfs.Cut()
-	log_debug("[debug_coord] RECURSIVE EXPLOSION: Unsetting explosion in progress and exiting.")
 	explosion_in_progress = 0
 
 

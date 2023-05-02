@@ -13,6 +13,7 @@
 #define blocked_mult(blocked) max(1 - (blocked/100), 0)
 
 /proc/mobs_in_view(range, source)
+	RETURN_TYPE(/list)
 	var/list/mobs = list()
 	for(var/atom/movable/AM in view(range, source))
 		var/M = AM.get_mob()
@@ -40,13 +41,9 @@
 		return f_style
 
 /proc/random_name(gender, species = SPECIES_HUMAN)
-	if(species)
-		var/datum/species/current_species = all_species[species]
-		if(current_species)
-			var/singleton/cultural_info/current_culture = SSculture.get_culture(current_species.default_cultural_info[TAG_CULTURE])
-			if(current_culture)
-				return current_culture.get_random_name(gender)
-	return capitalize(pick(gender == FEMALE ? GLOB.first_names_female : GLOB.first_names_male)) + " " + capitalize(pick(GLOB.last_names))
+	var/datum/species/current_species = all_species[species]
+	var/singleton/cultural_info/current_culture = SSculture.get_culture(current_species.default_cultural_info[TAG_CULTURE])
+	return current_culture.get_random_name(gender)
 
 /proc/random_skin_tone(datum/species/current_species)
 	var/species_tone = current_species ? 35 - current_species.max_skin_tone() : -185
@@ -155,6 +152,13 @@
 
 	var/datum/progressbar/bar
 	if (do_flags & DO_SHOW_PROGRESS)
+		// Autoset over-user if not in an otherwise visible location
+		// For public progress: This is if it's not on a turf.
+		// For private progress: This is if it's not on a turf or directly in the user's visible inventory HUD.
+		if (!HAS_FLAGS(do_flags, DO_BAR_OVER_USER) && !isturf(target.loc))
+			if (HAS_FLAGS(do_flags, DO_PUBLIC_PROGRESS) || target.loc != user)
+				SET_FLAGS(do_flags, DO_BAR_OVER_USER)
+
 		if (do_flags & DO_PUBLIC_PROGRESS)
 			bar = new /datum/progressbar/public(user, delay, target, !!(do_flags & DO_BAR_OVER_USER))
 		else
@@ -203,23 +207,23 @@
 	if (. && do_feedback)
 		switch (.)
 			if (DO_MISSING_TARGET)
-				to_chat(user, SPAN_WARNING("\The [target] no longer exists!"))
+				USE_FEEDBACK_FAILURE("\The [target] no longer exists!")
 			if (DO_INCAPACITATED)
-				to_chat(user, SPAN_WARNING("You're no longer able to act!"))
+				USE_FEEDBACK_FAILURE("You're no longer able to act!")
 			if (DO_USER_CAN_MOVE)
-				to_chat(user, SPAN_WARNING("You must remain still to perform that action!"))
+				USE_FEEDBACK_FAILURE("You must remain still to perform that action!")
 			if (DO_TARGET_CAN_MOVE)
-				to_chat(user, SPAN_WARNING("\The [target] must remain still to perform that action!"))
+				USE_FEEDBACK_FAILURE("\The [target] must remain still to perform that action!")
 			if (DO_USER_CAN_TURN)
-				to_chat(user, SPAN_WARNING("You must face the same direction to perform that action!"))
+				USE_FEEDBACK_FAILURE("You must face the same direction to perform that action!")
 			if (DO_TARGET_CAN_TURN)
-				to_chat(user, SPAN_WARNING("\The [target] must face the same direction to perform that action!"))
+				USE_FEEDBACK_FAILURE("\The [target] must face the same direction to perform that action!")
 			if (DO_USER_SAME_HAND)
-				to_chat(user, SPAN_WARNING("You must remain on the same active hand to perform that action!"))
+				USE_FEEDBACK_FAILURE("You must remain on the same active hand to perform that action!")
 			if (DO_USER_UNIQUE_ACT)
-				to_chat(user, SPAN_WARNING("You stop what you're doing with \the [target]."))
+				USE_FEEDBACK_FAILURE("You stop what you're doing with \the [target].")
 			if (DO_USER_SAME_ZONE)
-				to_chat(user, SPAN_WARNING("You must remain targeting the same zone to perform that action!"))
+				USE_FEEDBACK_FAILURE("You must remain targeting the same zone to perform that action!")
 
 	if (bar)
 		qdel(bar)
@@ -229,6 +233,7 @@
 		target.do_unique_target_user = null
 
 /proc/able_mobs_in_oview(origin)
+	RETURN_TYPE(/list)
 	var/list/mobs = list()
 	for(var/mob/living/M in oview(origin)) // Only living mobs are considered able.
 		if(!M.is_physically_disabled())
@@ -273,6 +278,7 @@
 
 //Find a dead mob with a brain and client.
 /proc/find_dead_player(find_key, include_observers = 0)
+	RETURN_TYPE(/mob)
 	if(isnull(find_key))
 		return
 

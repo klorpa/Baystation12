@@ -3,6 +3,7 @@
 	icon = 'icons/obj/items.dmi'
 	w_class = ITEM_SIZE_NORMAL
 	mouse_drag_pointer = MOUSE_ACTIVE_POINTER
+	blocks_emissive = EMISSIVE_BLOCK_GENERIC
 
 	var/image/blood_overlay = null //this saves our blood splatter overlay, which will be processed not to go over the edges of the sprite
 	var/randpixel = 6
@@ -152,7 +153,7 @@
 
 /obj/item/ex_act(severity)
 	..()
-	if (health_max)
+	if (get_max_health())
 		return
 	switch(severity)
 		if(EX_ACT_DEVASTATING)
@@ -298,6 +299,9 @@
 	GLOB.mob_unequipped_event.raise_event(user, src)
 	GLOB.item_unequipped_event.raise_event(src, user)
 
+	if(user && (z_flags & ZMM_MANGLE_PLANES))
+		addtimer(new Callback(user, /mob/proc/check_emissive_equipment), 0, TIMER_UNIQUE)
+
 
 // called just as an item is picked up (loc is not yet changed)
 /obj/item/proc/pickup(mob/user)
@@ -335,6 +339,9 @@ note this isn't called during the initial dressing of a player
 		item.update_twohanding()
 	GLOB.mob_equipped_event.raise_event(user, src, slot)
 	GLOB.item_equipped_event.raise_event(src, user, slot)
+
+	if(user && (z_flags & ZMM_MANGLE_PLANES))
+		addtimer(new Callback(user, /mob/proc/check_emissive_equipment), 0, TIMER_UNIQUE)
 
 
 /obj/item/proc/equipped_robot(mob/user)

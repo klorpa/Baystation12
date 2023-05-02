@@ -46,6 +46,22 @@
 	icon = initial(icon)
 	icon_state = initial(icon_state)
 
+	// Connecting multiple computers in a row
+	if(initial(icon_state) == "computer")
+		var/append_string = ""
+		var/left = turn(dir, 90)
+		var/right = turn(dir, -90)
+		var/turf/L = get_step(src, left)
+		var/turf/R = get_step(src, right)
+		var/obj/machinery/computer/LC = locate() in L
+		var/obj/machinery/computer/RC = locate() in R
+		if(LC && LC.dir == dir && initial(LC.icon_state) == "computer")
+			append_string += "_L"
+		if(RC && RC.dir == dir && initial(RC.icon_state) == "computer")
+			append_string += "_R"
+		icon_state = "computer[append_string]"
+
+
 	if(reason_broken & MACHINE_BROKEN_NO_PARTS)
 		set_light(0)
 		icon = 'icons/obj/computer.dmi'
@@ -59,12 +75,9 @@
 		return
 
 	if(!is_powered())
-		set_light(0)
 		if(icon_keyboard)
 			overlays += image(icon,"[icon_keyboard]_off", overlay_layer)
 		return
-	else
-		set_light(light_max_bright_on, light_inner_range_on, light_outer_range_on, 2, light_color)
 
 	if(MACHINE_IS_BROKEN(src))
 		overlays += image(icon,"[icon_state]_broken", overlay_layer)
@@ -72,18 +85,35 @@
 		overlays += get_screen_overlay()
 
 	overlays += get_keyboard_overlay()
+	var/screen_is_glowing = update_glow()
+	if(screen_is_glowing)
+		overlays += emissive_appearance(icon, icon_screen)
+		if(icon_keyboard)
+			overlays += emissive_appearance(icon, "[icon_keyboard]_mask")
 
 /obj/machinery/computer/proc/get_screen_overlay()
-	return image(icon,icon_screen, overlay_layer)
+	return overlay_image(icon,icon_screen)
 
 /obj/machinery/computer/proc/get_keyboard_overlay()
 	if(icon_keyboard)
-		overlays += image(icon, icon_keyboard, overlay_layer)
+		return overlay_image(icon, icon_keyboard, overlay_layer)
 
 /obj/machinery/computer/proc/decode(text)
 	// Adds line breaks
 	text = replacetext(text, "\n", "<BR>")
 	return text
+
+/**
+ * Makes the computer emit light if the screen is on.
+ * Returns TRUE if the screen is on, otherwise FALSE.
+ */
+/obj/machinery/computer/proc/update_glow()
+	if (operable())
+		set_light(light_max_bright_on, light_inner_range_on, light_outer_range_on, 2, light_color)
+		return TRUE
+	else
+		set_light(0)
+		return FALSE
 
 /obj/machinery/computer/dismantle(mob/user)
 	if(MACHINE_IS_BROKEN(src))

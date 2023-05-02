@@ -1072,6 +1072,18 @@
 			return
 		P.copy_to(H)
 
+	else if (href_list["connections"])
+		if (!check_rights(R_ADMIN))
+			return
+		var/mob/target = locate(href_list["connections"])
+		target.show_associated_connections(usr)
+
+	else if (href_list["bans"])
+		if (!check_rights(R_ADMIN))
+			return
+		var/mob/target = locate(href_list["bans"])
+		target.show_associated_bans(usr)
+
 	else if (href_list["cloneother"])
 		if (!check_rights(R_DEBUG))
 			return

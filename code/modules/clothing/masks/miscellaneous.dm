@@ -55,56 +55,13 @@
 	visible_name = "Scoundrel"
 
 /obj/item/clothing/mask/snorkel
-	name = "Snorkel"
+	name = "snorkel"
 	desc = "For the Swimming Savant."
 	icon_state = "snorkel"
 	item_state = "snorkel"
 	item_flags = null
 	flags_inv = HIDEFACE
 	body_parts_covered = 0
-
-//scarves (fit in in mask slot)
-//None of these actually have on-mob sprites...
-/obj/item/clothing/mask/bluescarf
-	name = "blue neck scarf"
-	desc = "A blue neck scarf."
-	icon_state = "blueneckscarf"
-	item_state = "blueneckscarf"
-	body_parts_covered = FACE
-	item_flags = ITEM_FLAG_FLEXIBLEMATERIAL | ITEM_FLAG_WASHER_ALLOWED
-	w_class = ITEM_SIZE_SMALL
-	gas_transfer_coefficient = 0.90
-
-/obj/item/clothing/mask/redscarf
-	name = "red scarf"
-	desc = "A red and white checkered neck scarf."
-	icon_state = "redwhite_scarf"
-	item_state = "redwhite_scarf"
-	body_parts_covered = FACE
-	item_flags = ITEM_FLAG_FLEXIBLEMATERIAL | ITEM_FLAG_WASHER_ALLOWED
-	w_class = ITEM_SIZE_SMALL
-	gas_transfer_coefficient = 0.90
-
-/obj/item/clothing/mask/greenscarf
-	name = "green scarf"
-	desc = "A green neck scarf."
-	icon_state = "green_scarf"
-	item_state = "green_scarf"
-	body_parts_covered = FACE
-	item_flags = ITEM_FLAG_THICKMATERIAL | ITEM_FLAG_WASHER_ALLOWED
-	w_class = ITEM_SIZE_SMALL
-	gas_transfer_coefficient = 0.90
-
-/obj/item/clothing/mask/ninjascarf
-	name = "ninja scarf"
-	desc = "A stealthy, dark scarf."
-	icon_state = "ninja_scarf"
-	item_state = "ninja_scarf"
-	body_parts_covered = FACE
-	item_flags = ITEM_FLAG_THICKMATERIAL | ITEM_FLAG_WASHER_ALLOWED
-	w_class = ITEM_SIZE_SMALL
-	gas_transfer_coefficient = 0.90
-	siemens_coefficient = 0
 
 /obj/item/clothing/mask/pig
 	name = "pig mask"
@@ -201,25 +158,25 @@
 	body_parts_covered = HEAD|FACE|EYES
 
 /obj/item/clothing/mask/rubber/trasen
-	name = "Jack Trasen mask"
+	name = "\improper Jack Trasen mask"
 	desc = "CEO of NanoTrasen corporation. Perfect for scaring the unionizing children."
 	icon_state = "trasen"
 	visible_name = "Jack Trasen"
 
 /obj/item/clothing/mask/rubber/barros
-	name = "Amaya Barros mask"
+	name = "\improper Amaya Barros mask"
 	desc = "Current Secretary-General of Sol Cental Government. Not that the real thing would visit this pigsty."
 	icon_state = "barros"
 	visible_name = "Amaya Barros"
 
 /obj/item/clothing/mask/rubber/admiral
-	name = "Admiral Diwali mask"
+	name = "\improper Admiral Diwali mask"
 	desc = "Admiral that led the infamous last stand at Helios against the Independent Navy in the Gaia conflict. For bridge officers who wish they'd achieve a fraction of that."
 	icon_state = "admiral"
 	visible_name = "Admiral Diwali"
 
 /obj/item/clothing/mask/rubber/turner
-	name = "Charles Turner mask"
+	name = "\improper Charles Turner mask"
 	desc = "Premier of the Gilgamesh Colonial Confederation. Probably shouldn't wear this in front of your veteran uncle."
 	icon_state = "turner"
 	visible_name = "Charles Turner"
@@ -282,11 +239,18 @@
 			flags_inv = initial(flags_inv)
 			body_parts_covered = initial(body_parts_covered)
 			icon_state = initial(icon_state)
+			sprite_sheets = list(
+				SPECIES_VOX = 'icons/mob/species/vox/onmob_mask_vox.dmi',
+				SPECIES_UNATHI = 'icons/mob/species/unathi/onmob_mask_unathi.dmi'
+				)
 		if(slot_head)
 			flags_inv = 0
 			body_parts_covered = HEAD
 			icon_state = "[initial(icon_state)]_up"
-			sprite_sheets = list()
+			sprite_sheets = list(
+				SPECIES_VOX = 'icons/mob/species/vox/onmob_head_vox.dmi',
+				SPECIES_UNATHI = 'icons/mob/species/unathi/onmob_head_unathi.dmi'
+				)
 
 	return ..()
 

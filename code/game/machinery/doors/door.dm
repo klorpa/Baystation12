@@ -198,7 +198,7 @@
 
 		//figure out how much metal we need
 		var/amount_needed = get_damage_value() / DOOR_REPAIR_AMOUNT
-		amount_needed = Ceil(amount_needed)
+		amount_needed = ceil(amount_needed)
 
 		var/obj/item/stack/stack = I
 		var/transfer
@@ -213,7 +213,7 @@
 				transfer = repairing.amount
 
 		if (transfer)
-			to_chat(user, SPAN_NOTICE("You fit [transfer] [stack.singular_name]\s to damaged and broken parts on \the [src]."))
+			to_chat(user, SPAN_NOTICE("You fit [stack.get_exact_name(transfer)] to damaged and broken parts on \the [src]."))
 
 		return
 
@@ -267,11 +267,11 @@
 		set_broken(TRUE)
 		return 1
 
-/obj/machinery/door/post_health_change(health_mod, damage_type)
+/obj/machinery/door/post_health_change(health_mod, prior_health, damage_type)
 	. = ..()
 	queue_icon_update()
 	if (health_mod < 0 && !health_dead)
-		var/initial_damage_percentage = round(((get_current_health() - health_mod) / get_max_health()) * 100)
+		var/initial_damage_percentage = round((prior_health / get_max_health()) * 100)
 		var/damage_percentage = get_damage_percentage()
 		if (damage_percentage >= 75 && initial_damage_percentage < 75)
 			visible_message("\The [src] looks like it's about to break!" )

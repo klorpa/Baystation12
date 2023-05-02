@@ -1,6 +1,6 @@
 /datum/map/torch
 
-	base_floor_type = /turf/simulated/floor/reinforced/airless
+	base_floor_type = /turf/simulated/floor/reinforced
 	base_floor_area = /area/torchexterior
 
 	post_round_safe_areas = list (
@@ -386,7 +386,7 @@
 /area/aquila
 	name = "\improper SEV Aquila"
 	icon_state = "shuttlered"
-	base_turf = /turf/simulated/floor/reinforced/airless
+	base_turf = /turf/simulated/floor/reinforced
 	requires_power = 1
 	dynamic_lighting = 1
 	area_flags = AREA_FLAG_RAD_SHIELDED | AREA_FLAG_ION_SHIELDED | AREA_FLAG_HIDE_FROM_HOLOMAP
@@ -623,6 +623,7 @@
 	name = "Officer's Mess"
 	icon_state = "bar"
 	sound_env = MEDIUM_SOFTFLOOR
+	req_access = list(access_o_mess, access_solgov_crew)
 	lighting_tone = AREA_LIGHTING_WARM
 
 /area/command/pathfinder
@@ -973,8 +974,11 @@
 	icon_state = "toilet"
 	sound_env = SMALL_ENCLOSED
 
-/area/crew_quarters/head/aux
+/area/crew_quarters/head/deck1
 	name = "\improper First Deck Head"
+
+/area/crew_quarters/head/deck4
+	name = "\improper Fourth Deck Head"
 
 /area/crew_quarters/head/sauna
 	name = "\improper Sauna"
@@ -1015,6 +1019,24 @@
 	icon_state = "crew_quarters"
 	req_access = list(access_commissary)
 
+/area/crew_quarters/diplomatic_office
+	name = "\improper Diplomatic Meeting Room"
+	icon_state = "crew_quarters"
+	lighting_tone = AREA_LIGHTING_COOL
+
+/area/crew_quarters/chief_steward
+	name = "\improper Chief Steward's Office"
+	icon_state = "kitchen"
+	req_access = list(access_chief_steward)
+	sound_env = SMALL_ENCLOSED
+	lighting_tone = AREA_LIGHTING_WARM
+
+/area/crew_quarters/service_break_room
+	name = "\improper Service Break Room"
+	icon_state = "fitness"
+	sound_env = SMALL_ENCLOSED
+	lighting_tone = AREA_LIGHTING_WARM
+
 /area/crew_quarters/lounge
 	name = "\improper Lounge"
 	icon_state = "crew_quarters"
@@ -1050,14 +1072,6 @@
 /area/holocontrol
 	name = "\improper Holodeck Control"
 	icon_state = "Holodeck"
-
-/area/hydroponics/storage
-	name = "\improper Hydroponics Storage"
-
-// Tcomms
-/area/tcommsat/storage
-	name = "\improper Telecoms Storage"
-	icon_state = "tcomsatstore"
 
 // Borg Upload
 
@@ -1339,6 +1353,7 @@
 	has_gravity = FALSE
 	turf_initializer = /singleton/turf_initializer/maintenance/space
 	req_access = list(access_external_airlocks, access_maint_tunnels)
+	turfs_airless = TRUE
 
 // CentCom
 
@@ -1385,6 +1400,7 @@
 	has_gravity = FALSE
 	base_turf = /turf/space
 	req_access = list(access_engine_equip)
+	turfs_airless = TRUE
 
 /area/solar/auxstarboard
 	name = "\improper Fore Starboard Solar Array"

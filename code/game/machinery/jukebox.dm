@@ -10,6 +10,7 @@
 	active_power_usage = 100
 	clicksound = 'sound/machines/buttonbeep.ogg'
 	pixel_x = -8
+	obj_flags = OBJ_FLAG_ANCHORABLE
 
 	var/jukebox/jukebox
 
@@ -57,16 +58,6 @@
 /obj/machinery/jukebox/interface_interact(mob/user)
 	jukebox.ui_interact(user)
 	return TRUE
-
-
-/obj/machinery/jukebox/attackby(obj/item/I, mob/user)
-	if (isWrench(I))
-		add_fingerprint(user)
-		wrench_floor_bolts(user, 0)
-		power_change()
-		return
-	return ..()
-
 
 
 /obj/machinery/jukebox/old

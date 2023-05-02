@@ -32,6 +32,9 @@ var/global/list/ticket_panels = list()
 
 /datum/ticket/proc/timeoutchecktaken()
 	if (status == TICKET_ASSIGNED)
+		if (is_active())
+			addtimer(new Callback(src, .proc/timeoutchecktaken), 30 MINUTES, TIMER_STOPPABLE)
+			return
 		for (var/datum/client_lite/C in assigned_admins)
 			to_chat(client_by_ckey(C.ckey), SPAN_NOTICE(SPAN_BOLD("Your ticket with [client_by_ckey(owner.ckey)] has timed out and auto-closed.")))
 		close(assigned_admins[1])
@@ -56,7 +59,7 @@ var/global/list/ticket_panels = list()
 		src.closed_by = closed_by
 		to_chat(client_by_ckey(src.owner.ckey), SPAN_NOTICE("<b>Your ticket has been closed by [closed_by.key].</b>"))
 		message_staff(SPAN_NOTICE("<b>[src.owner.key_name(0)]</b>'s ticket has been closed by <b>[closed_by.key]</b>."))
-		send2adminirc("[src.owner.key_name(0)]'s ticket has been closed by [closed_by.key].")
+		send_to_admin_discord(EXCOM_MSG_AHELP, "[src.owner.key_name(0)]'s ticket has been closed by [closed_by.key].")
 
 	update_ticket_panels()
 
@@ -79,7 +82,7 @@ var/global/list/ticket_panels = list()
 	src.status = TICKET_ASSIGNED
 
 	message_staff(SPAN_NOTICE("<b>[assigned_admin.key]</b> has assigned themself to <b>[src.owner.key_name(0)]'s</b> ticket."))
-	send2adminirc("[assigned_admin.key] has assigned themself to [src.owner.key_name(0)]'s ticket.")
+	send_to_admin_discord(EXCOM_MSG_AHELP, "[assigned_admin.key] has assigned themself to [src.owner.key_name(0)]'s ticket.")
 	to_chat(client_by_ckey(src.owner.ckey), SPAN_NOTICE("<b>[assigned_admin.key] has added themself to your ticket and should respond shortly. Thanks for your patience!</b>"))
 
 	update_ticket_panels()
@@ -100,6 +103,7 @@ var/global/list/ticket_panels = list()
 		. |= assigned_admin.key
 
 /proc/get_open_ticket_by_client(datum/client_lite/owner)
+	RETURN_TYPE(/datum/ticket)
 	for(var/datum/ticket/ticket in tickets)
 		if(ticket.owner.ckey == owner.ckey && (ticket.status == TICKET_OPEN || ticket.status == TICKET_ASSIGNED))
 			return ticket // there should only be one open ticket by a client at a time, so no need to keep looking

@@ -1,4 +1,5 @@
 /proc/get_archeological_find_by_findtype(find_type)
+	RETURN_TYPE(/obj/item/archaeological_find)
 	for(var/T in typesof(/obj/item/archaeological_find))
 		var/obj/item/archaeological_find/F = T
 		if(find_type == initial(F.find_type))
@@ -237,6 +238,7 @@
 	var/storage_amount = BASE_STORAGE_COST(new_box.max_w_class)
 	new_box.max_storage_space = rand(storage_amount, storage_amount * 10)
 	new_box.icon_state = "box"
+	new_box.foldable = null
 	if(prob(30))
 		apply_image_decorations = 1
 	return new_box
@@ -288,7 +290,7 @@
 
 /obj/item/archaeological_find/material/exotic
 	item_type = "rare material lump"
-	possible_materials = list(MATERIAL_ALIENALLOY, MATERIAL_PHORON, MATERIAL_HYDROGEN, MATERIAL_PHORON_GLASS)
+	possible_materials = list(MATERIAL_ALIENALLOY, MATERIAL_PHORON, MATERIAL_HYDROGEN, MATERIAL_BORON_GLASS)
 
 /obj/item/archaeological_find/crystal
 	item_type = "crystal"

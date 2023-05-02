@@ -47,7 +47,7 @@
 	if(amt <= 0 || !istype(sprayloc))
 		return
 	var/spraydir = pick(GLOB.alldirs)
-	amt = Ceil(amt/BLOOD_SPRAY_DISTANCE)
+	amt = ceil(amt/BLOOD_SPRAY_DISTANCE)
 	var/bled = 0
 	spawn(0)
 		for(var/i = 1 to BLOOD_SPRAY_DISTANCE)
@@ -211,6 +211,7 @@
 	return data
 
 /proc/blood_splatter(target,datum/reagent/blood/source,large,spray_dir)
+	RETURN_TYPE(/obj/effect/decal/cleanable/blood)
 
 	var/obj/effect/decal/cleanable/blood/B
 	var/decal_type = /obj/effect/decal/cleanable/blood/splatter

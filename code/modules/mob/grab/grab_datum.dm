@@ -282,6 +282,7 @@
 	var/skill_mod = clamp(affecting.get_skill_difference(SKILL_COMBAT, assailant), -1, 1)
 	var/break_strength = breakability + size_difference(affecting, assailant) + skill_mod
 	var/shock = affecting.get_shock()
+	var/ashock = assailant.get_shock()
 
 	if(affecting.incapacitated(INCAPACITATION_ALL))
 		break_strength--
@@ -298,11 +299,28 @@
 	if(shock >= 50)
 		break_strength--
 
+	if(assailant.confused)
+		break_strength++
+	if(assailant.eye_blind)
+		break_strength++
+	if(assailant.eye_blurry)
+		break_strength++
+	if(ashock >= 10)
+		break_strength++
+	if(ashock >= 30)
+		break_strength++
+	if(ashock >= 50)
+		break_strength++
+
 	if(break_strength < 1)
 		to_chat(G.affecting, SPAN_WARNING("You try to break free but feel that unless something changes, you'll never escape!"))
 		return
 
 	var/break_chance = break_chance_table[clamp(break_strength, 1, length(break_chance_table))]
+
+	if (assailant.incapacitated(INCAPACITATION_ALL))
+		let_go(G)
+
 	if(prob(break_chance))
 		if(can_downgrade_on_resist && !prob((break_chance+100)/2))
 			affecting.visible_message(SPAN_WARNING("[affecting] has loosened [assailant]'s grip!"))

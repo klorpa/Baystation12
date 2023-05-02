@@ -153,7 +153,7 @@
 			to_chat(user, SPAN_NOTICE("[src]'s motors resist your effort."))
 		return
 	if(istype(C, /obj/item/stack/material) && C.get_material_name() == MATERIAL_PLASTEEL)
-		var/amt = Ceil(get_damage_value() / 150)
+		var/amt = ceil(get_damage_value() / 150)
 		if(!amt)
 			to_chat(user, SPAN_NOTICE("\The [src] is already fully functional."))
 			return
@@ -267,7 +267,7 @@
 	block_air_zones = TRUE
 
 /obj/machinery/door/blast/regular/escape_pod
-	name = "Escape Pod release Door"
+	name = "escape pod release door"
 
 /obj/machinery/door/blast/regular/escape_pod/Process()
 	if(evacuation_controller.emergency_evacuation && evacuation_controller.state >= EVAC_LAUNCHING && src.icon_state == icon_state_closed)

@@ -194,7 +194,7 @@ var/global/list/channel_to_radio_key = new
 	// This is broadcast to all mobs with the language,
 	// irrespective of distance or anything else.
 	if(speaking && (speaking.flags & HIVEMIND))
-		speaking.broadcast(src,trim(message))
+		speaking.broadcast(src,trimtext(message))
 		return 1
 
 	if((is_muzzled()) && !(speaking && (speaking.flags & SIGNLANG)))
@@ -307,6 +307,9 @@ var/global/list/channel_to_radio_key = new
 			spawn(0)
 				if(O) //It's possible that it could be deleted in the meantime.
 					O.hear_talk(src, stars(message), verb, speaking)
+
+	if(mind)
+		mind.last_words = message
 
 	if(whispering)
 		log_whisper("[name]/[key] : [message]")

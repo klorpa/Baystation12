@@ -152,6 +152,7 @@
 
 /obj/item/rcd/borg
 	canRwall = 1
+	atom_flags = ATOM_FLAG_NO_TEMP_CHANGE | ATOM_FLAG_NO_TOOLS
 
 /obj/item/rcd/borg/useResource(amount, mob/user)
 	if(isrobot(user))
@@ -163,12 +164,12 @@
 				return 1
 	return 0
 
-/obj/item/rcd/borg/attackby()
-	return
-
 /obj/item/rcd/borg/can_use(mob/user,turf/T)
 	return (user.Adjacent(T) && !user.incapacitated())
 
+
+/obj/item/rcd/mounted
+	atom_flags = ATOM_FLAG_NO_TEMP_CHANGE | ATOM_FLAG_NO_TOOLS
 
 /obj/item/rcd/mounted/useResource(amount, mob/user)
 	var/cost = amount*20 // About 5 deconstructions of walls on a standard cell (1k), less if it involves airlocks.
@@ -182,9 +183,6 @@
 		cell.use(cost)
 		return 1
 	return 0
-
-/obj/item/rcd/mounted/attackby()
-	return
 
 /obj/item/rcd/mounted/can_use(mob/user,turf/T)
 	return (user.Adjacent(T) && !user.incapacitated())
@@ -228,7 +226,7 @@
 	var/result = get_work_result(target)
 	if(ispath(result,/turf))
 		var/turf/T = target
-		T.ChangeTurf(result)
+		T.ChangeTurf(result, keep_air = TRUE)
 	else if(result)
 		new result(target)
 	else
@@ -270,7 +268,7 @@
 /singleton/hierarchy/rcd_mode/floor_and_walls/base_turf
 	cost = 1
 	delay = 2 SECONDS
-	work_type = /turf/simulated/floor/airless
+	work_type = /turf/simulated/floor/plating
 
 /singleton/hierarchy/rcd_mode/floor_and_walls/base_turf/can_handle_work(rcd, turf/target)
 	var/area/A = get_area(target)

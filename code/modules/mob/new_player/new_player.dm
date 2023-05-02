@@ -21,8 +21,8 @@
 	virtual_mob = null // Hear no evil, speak no evil
 
 
-/mob/new_player/New()
-	..()
+/mob/new_player/Initialize(mapload)
+	. = ..()
 	verbs += /mob/proc/toggle_antag_pool
 
 
@@ -451,9 +451,10 @@
 
 	return chosen_species.name
 
-/mob/new_player/get_gender()
-	if(!client || !client.prefs) ..()
-	return client.prefs.gender
+/mob/new_player/choose_from_pronouns()
+	if(!client || !client.prefs)
+		return ..()
+	return client.prefs.pronouns
 
 /mob/new_player/is_ready()
 	return ready && ..()

@@ -315,3 +315,18 @@
 #define ATOM_FLOURESCENCE_NONE 0 // Not flourescent
 #define ATOM_FLOURESCENCE_INACTIVE 1 // Flourescent but not actively lit
 #define ATOM_FLOURESCENCE_ACTVE 2 // Flourescent and actively lit. Helps prevent repeated processing on a flourescent atom by multiple UV lights
+
+
+// Helper macro for generating stringified name text for IDs located inside objects, i.e. PDAs or wallets. Used for feedback and interaction messages.
+#define GET_ID_NAME(ID, HOLDER) (ID == HOLDER ? "\the [ID]" : "\the [ID] in \the [HOLDER]")
+
+
+// Flags for `use_sanity_check()`
+/// Do not display user feedback messages.
+#define SANITY_CHECK_SILENT FLAG(0)
+/// Verify the tool can be unequipped from user.
+#define SANITY_CHECK_TOOL_UNEQUIP FLAG(1)
+/// Verify the target can be unequipped from user. Includes `target.loc == src` check to allow items the user isn't holding.
+#define SANITY_CHECK_TARGET_UNEQUIP FLAG(2)
+/// Verify the target and tool are adjacent to eachother.
+#define SANITY_CHECK_BOTH_ADJACENT FLAG(3)

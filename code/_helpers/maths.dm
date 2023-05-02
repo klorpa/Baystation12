@@ -2,20 +2,12 @@
 #define Frand(low, high) ( rand() * ((high) - (low)) + (low) )
 
 
-/// Value or the next integer in a positive direction: Ceil(-1.5) = -1 , Ceil(1.5) = 2
-#define Ceil(value) ( -round(-(value)) )
-
-
 /// Value or the next multiple of divisor in a positive direction. Ceilm(-1.5, 0.3) = -1.5 , Ceilm(-1.5, 0.4) = -1.2
 #define Ceilm(value, divisor) ( -round(-(value) / (divisor)) * (divisor) )
 
 
 /// Value or the nearest power of power in a positive direction: Ceilp(3, 2) = 4 , Ceilp(5, 3) = 9
 #define Ceilp(value, power) ( (power) ** -round(-log((power), (value))) )
-
-
-/// Value or the next integer in a negative direction: Floor(-1.5) = -2 , Floor(1.5) = 1
-#define Floor(value) round(value)
 
 
 /// Value or the next multiple of divisor in a negative direction: Floorm(-1.5, 0.3) = -1.5 , Floorm(-1.5, 0.4) = -1.6
@@ -118,7 +110,7 @@
 /proc/Drand(x, y, normalize)
 	var/sum = 0
 	for (var/i = 1 to x)
-		sum += Floor(rand() * y)
+		sum += floor(rand() * y)
 	if (normalize)
 		return sum / ((x * y) - x)
 	return sum + x
@@ -130,6 +122,7 @@
 
 /// A circular random coordinate pair from 0, unit by default, scaled by radius, then rounded if round.
 /proc/CircularRandomCoordinate(radius = 1, round)
+	RETURN_TYPE(/list)
 	var/angle = rand(0, 359)
 	var/x = cos(angle) * radius
 	var/y = sin(angle) * radius
@@ -152,6 +145,7 @@
 * radius outside the scope of the proc, eg as BoundedCircularRandomCoordinate(Frand(1, 3), ...)
 */
 /proc/BoundedCircularRandomCoordinate(radius, center_x, center_y, low_x, low_y, high_x, high_y, round)
+	RETURN_TYPE(/list)
 	var/list/xy = CircularRandomCoordinate(radius, round)
 	var/dx = xy[1]
 	var/dy = xy[2]
@@ -169,12 +163,14 @@
 
 /// Pick a random turf using BoundedCircularRandomCoordinate about x,y on level z
 /proc/CircularRandomTurf(radius, z, center_x, center_y, low_x = 1, low_y = 1, high_x = world.maxx, high_y = world.maxy)
+	RETURN_TYPE(/turf)
 	var/list/xy = BoundedCircularRandomCoordinate(radius, center_x, center_y, low_x, low_y, high_x, high_y, TRUE)
 	return locate(xy[1], xy[2], z)
 
 
 /// Pick a random turf using BoundedCircularRandomCoordinate around the turf of target
 /proc/CircularRandomTurfAround(atom/target, radius, low_x = 1, low_y = 1, high_x = world.maxx, high_y = world.maxy)
+	RETURN_TYPE(/turf)
 	var/turf/turf = get_turf(target)
 	return CircularRandomTurf(radius, turf.z, turf.x, turf.y, low_x, low_y, high_x, high_y)
 

@@ -30,6 +30,8 @@
 		)
 
 	var/obj/item/wrapped = null // Item currently being held.
+	var/wrapped_offset_y = -8
+	var/wrapped_offset_x = 0
 
 // VEEEEERY limited version for mining borgs. Basically only for swapping cells and upgrading the drills.
 /obj/item/gripper/miner
@@ -110,7 +112,7 @@
 		/obj/item/disk/botany
 	)
 
-/obj/item/gripper/service //Used to handle food, drinks, and seeds.
+/obj/item/gripper/service //Used to handle food, drinks, seeds, and service fabricator items.
 	name = "service gripper"
 	icon_state = "gripper"
 	desc = "A simple grasping tool used to perform tasks in the service sector, such as handling food, drinks, and seeds."
@@ -118,7 +120,12 @@
 		/obj/item/reagent_containers/glass,
 		/obj/item/reagent_containers/food,
 		/obj/item/seeds,
-		/obj/item/glass_extra
+		/obj/item/glass_extra,
+		/obj/item/clothing/mask/smokable,
+		/obj/item/paper,
+		/obj/item/pen,
+		/obj/item/storage/pill_bottle/dice,
+		/obj/item/dice
 	)
 
 /obj/item/gripper/organ //Used to handle organs.
@@ -196,12 +203,13 @@
 
 	if(wrapped.loc != src)
 		wrapped = null
+		update_icon()
 		return
 
 	to_chat(src.loc, SPAN_WARNING("You drop \the [wrapped]."))
 	wrapped.dropInto(loc)
 	wrapped = null
-	//on_update_icon()
+	update_icon()
 
 /obj/item/gripper/attack(mob/living/carbon/M as mob, mob/living/carbon/user as mob)
 	// Don't fall through and smack people with gripper, instead just no-op
@@ -213,6 +221,7 @@
 	if(!wrapped)
 		for(var/obj/item/thing in src.contents)
 			wrapped = thing
+			update_icon()
 			break
 
 	if(wrapped) //Already have an item.
@@ -224,6 +233,7 @@
 			wrapped.dropInto(get_turf(target))
 			table.auto_align(wrapped, params)
 			wrapped = null
+			update_icon()
 			return
 
 		//The force of the wrapped obj gets set to zero during the attack() and afterattack().
@@ -259,6 +269,7 @@
 				I.forceMove(src)
 			to_chat(user, SPAN_NOTICE("You collect \the [I]."))
 			wrapped = I
+			update_icon()
 			return
 		else
 			to_chat(user, SPAN_DANGER("Your gripper cannot hold \the [target]."))
@@ -271,6 +282,7 @@
 			if(cell)
 				wrapped = cell
 				cell.forceMove(src)
+				update_icon()
 
 	else if(istype(target,/mob/living/silicon/robot))
 		var/mob/living/silicon/robot/A = target
@@ -284,6 +296,7 @@
 				A.cell = null
 				user.visible_message(SPAN_DANGER("[user] removes the power cell from [A]!"), "You remove the power cell.")
 				A.power_down()
+				update_icon()
 
 /obj/item/gripper/proc/finish_using(atom/target, mob/living/user, params, force_holder, resolved)
 
@@ -291,6 +304,7 @@
 		if (wrapped)
 			wrapped.forceMove(null)
 		wrapped = null
+		update_icon()
 		return
 
 	if(!resolved && wrapped && target)
@@ -304,6 +318,16 @@
 		wrapped.forceMove(src)
 	else
 		wrapped = null
+		update_icon()
+
+
+/obj/item/gripper/on_update_icon()
+	underlays.Cut()
+	SetName(initial(name))
+	if (wrapped)
+		underlays += image(wrapped.icon, wrapped.icon_state, pixel_x = wrapped_offset_x, pixel_y = wrapped_offset_y)
+		SetName("[name] ([wrapped.name])")
+
 
 //TODO: Matter decompiler.
 /obj/item/matter_decompiler

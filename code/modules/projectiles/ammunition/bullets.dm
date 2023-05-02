@@ -26,12 +26,12 @@
 /obj/item/ammo_casing/pistol/small/rubber
 	desc = "A small pistol rubber bullet casing."
 	projectile_type = /obj/item/projectile/bullet/pistol/rubber/holdout
-	icon_state = "pistolcasing_r"
+	icon_state = "smallcasing_r"
 
 /obj/item/ammo_casing/pistol/small/practice
 	desc = "A small pistol practice bullet casing."
 	projectile_type = /obj/item/projectile/bullet/pistol/practice
-	icon_state = "pistolcasing_p"
+	icon_state = "smallcasing_p"
 
 /obj/item/ammo_casing/pistol/magnum
 	desc = "A high-power pistol bullet casing."
@@ -138,6 +138,11 @@
 	icon_state = "riflecasing"
 	spent_icon = "riflecasing-spent"
 
+/obj/item/ammo_casing/rifle/practice
+	desc = "A rifle practice bullet casing."
+	projectile_type = /obj/item/projectile/bullet/rifle/practice
+	icon_state = "riflecasing_p"
+
 /obj/item/ammo_casing/shell
 	name = "shell casing"
 	desc = "An antimaterial shell casing."
@@ -155,9 +160,12 @@
 /obj/item/ammo_casing/rifle/military
 	desc = "A military rifle bullet casing."
 	caliber = CALIBER_RIFLE_MILITARY
-	projectile_type = /obj/item/projectile/bullet/rifle/military
 	icon_state = "rifle_mil"
 	spent_icon = "rifle_mil-spent"
+
+/obj/item/ammo_casing/rifle/military/light
+	desc = "A low-power military rifle bullet casing."
+	projectile_type = /obj/item/projectile/bullet/rifle/military
 
 /obj/item/ammo_casing/rifle/military/practice
 	desc = "A military rifle practice bullet casing."

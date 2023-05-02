@@ -147,7 +147,7 @@
 
 /obj/machinery/ex_act(severity)
 	..()
-	if (health_max)
+	if (get_max_health())
 		return
 	switch(severity)
 		if(EX_ACT_DEVASTATING)
@@ -262,6 +262,12 @@
 		return
 	if(CanUseTopic(user, DefaultTopicState()) > STATUS_CLOSE)
 		return interface_interact(user)
+
+
+/obj/machinery/post_anchor_change()
+	..()
+	power_change()
+
 
 /**
  * If you want to have interface interactions handled for you conveniently, use this.

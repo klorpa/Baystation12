@@ -109,6 +109,7 @@
 	plushes["mouse plush"] = /obj/item/toy/plushie/mouse
 	plushes["kitten plush"] = /obj/item/toy/plushie/kitten
 	plushes["lizard plush"] = /obj/item/toy/plushie/lizard
+	plushes["crow plush"] = /obj/item/toy/plushie/crow
 	plushes["spider plush"] = /obj/item/toy/plushie/spider
 	plushes["farwa plush"] = /obj/item/toy/plushie/farwa
 	plushes["golden carp plush"] = /obj/item/toy/plushie/carp_gold
@@ -208,12 +209,12 @@
 
 /datum/gear/cigscase
 	display_name = "fancy cigarette case"
-	path = /obj/item/storage/fancy/cigarettes/case
+	path = /obj/item/storage/fancy/smokable/case
 	cost = 2
 
 /datum/gear/cigars
 	display_name = "fancy cigar case"
-	path = /obj/item/storage/fancy/cigar
+	path = /obj/item/storage/fancy/smokable/cigar
 	cost = 2
 
 /datum/gear/cigar

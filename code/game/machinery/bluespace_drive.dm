@@ -8,7 +8,6 @@
 	pixel_y = -32
 	pixel_x = -32
 	idle_power_usage = 15 KILOWATTS
-	construct_state = /singleton/machine_construction/default/panel_closed
 	health_max = 1000
 	damage_hitsound = 'sound/machines/BSD_damaging.ogg'
 	health_min_damage = 10
@@ -66,15 +65,15 @@
 		playsound(loc, damage_hitsound, 80)
 
 
-/obj/machinery/bluespacedrive/post_health_change(health_mod, damage_type)
+/obj/machinery/bluespacedrive/post_health_change(health_mod, prior_health, damage_type)
 	. = ..()
 	var/damage_percentage = get_damage_percentage()
 	if (damage_percentage >= 50 && !(state & STATE_UNSTABLE))
 		state |= STATE_UNSTABLE
-		update_icon()
+		queue_icon_update()
 	else if (damage_percentage < 50 && (state & STATE_UNSTABLE))
 		state &= ~STATE_UNSTABLE
-		update_icon()
+		queue_icon_update()
 
 
 /obj/machinery/bluespacedrive/on_death()

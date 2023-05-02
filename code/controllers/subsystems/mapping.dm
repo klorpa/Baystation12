@@ -74,6 +74,7 @@ SUBSYSTEM_DEF(mapping)
 			away_sites_templates[MT.name] = MT
 
 /proc/generateMapList(filename)
+	RETURN_TYPE(/list)
 	var/list/potentialMaps = list()
 	var/list/Lines = world.file2list(filename)
 	if(!length(Lines))
@@ -81,7 +82,7 @@ SUBSYSTEM_DEF(mapping)
 	for (var/t in Lines)
 		if (!t)
 			continue
-		t = trim(t)
+		t = trimtext(t)
 		if (length(t) == 0)
 			continue
 		else if (copytext(t, 1, 2) == "#")

@@ -300,11 +300,11 @@ var/global/const/NO_EMAG_ACT = -50
 
 	id_card.registered_name = real_name
 
-	var/gender_term = "Unset"
-	var/datum/gender/G = gender_datums[get_sex()]
-	if(G)
-		gender_term = gender2text(G.formal_term)
-	id_card.sex = gender2text(gender_term)
+	var/pronouns = "Unset"
+	var/datum/pronouns/P = choose_from_pronouns()
+	if(P)
+		pronouns = P.formal_term
+	id_card.sex = pronouns
 	id_card.set_id_photo(src)
 
 	if(dna)
@@ -319,11 +319,16 @@ var/global/const/NO_EMAG_ACT = -50
 		id_card.military_branch = char_branch
 	if(GLOB.using_map.flags & MAP_HAS_RANK)
 		id_card.military_rank = char_rank
+		if (char_rank)
+			var/singleton/rank_category/category = char_rank.rank_category()
+			if(category)
+				for(var/add_access in category.add_accesses)
+					id_card.access.Add(add_access)
 
 /obj/item/card/id/proc/dat()
 	var/list/dat = list("<table><tr><td>")
 	dat += text("Name: []</A><BR>", "[formal_name_prefix][registered_name][formal_name_suffix]")
-	dat += text("Sex: []</A><BR>\n", sex)
+	dat += text("Pronouns: []</A><BR>\n", sex)
 	dat += text("Age: []</A><BR>\n", age)
 
 	if(GLOB.using_map.flags & MAP_HAS_BRANCH)

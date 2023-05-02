@@ -28,11 +28,20 @@
 	/// The icon height this movable expects to have by default.
 	var/icon_height = 32
 
+	/// Either [EMISSIVE_BLOCK_NONE], [EMISSIVE_BLOCK_GENERIC], or [EMISSIVE_BLOCK_UNIQUE]
+	var/blocks_emissive = EMISSIVE_BLOCK_NONE
+	///Internal holder for emissive blocker object, DO NOT USE DIRECTLY. Use blocks_emissive
+	var/mutable_appearance/em_block
 
 /atom/movable/Initialize()
 	if (!isnull(config.glide_size))
 		glide_size = config.glide_size
 	. = ..()
+	var/emissive_block = update_emissive_blocker()
+	if(emissive_block)
+		overlays += emissive_block
+		// Since this overlay is managed by the update_overlays proc
+		LAZYADD(managed_overlays, emissive_block)
 
 /atom/movable/Destroy()
 	if(!(atom_flags & ATOM_FLAG_INITIALIZED))
@@ -45,13 +54,15 @@
 		if (pulledby.pulling == src)
 			pulledby.pulling = null
 		pulledby = null
-	if(LAZYLEN(movement_handlers) && !ispath(movement_handlers[1]))
+	if (LAZYLEN(movement_handlers) && !ispath(movement_handlers[1]))
 		QDEL_NULL_LIST(movement_handlers)
 	if (bound_overlay)
 		QDEL_NULL(bound_overlay)
-	if(virtual_mob && !ispath(virtual_mob))
+	if (virtual_mob && !ispath(virtual_mob))
 		qdel(virtual_mob)
 		virtual_mob = null
+	if (em_block)
+		QDEL_NULL(em_block)
 	return ..()
 
 /atom/movable/Bump(atom/A, yes)
@@ -162,6 +173,29 @@
 
 	SSthrowing.processing[src] = TT
 
+/atom/movable/proc/update_emissive_blocker()
+	if (!blocks_emissive)
+		return
+	if (blocks_emissive == EMISSIVE_BLOCK_GENERIC)
+		return fast_emissive_blocker(src)
+	if (blocks_emissive == EMISSIVE_BLOCK_UNIQUE)
+		if (!em_block && !QDELETED(src))
+			appearance_flags |= KEEP_TOGETHER
+			render_target = ref(src)
+			var/mutable_appearance/gen_emissive_blocker = emissive_blocker(
+				icon = icon,
+				appearance_flags = appearance_flags,
+				source = render_target
+			)
+			em_block = gen_emissive_blocker
+		return em_block
+
+/atom/movable/update_overlays()
+	. = ..()
+	var/emissive_blocker = update_emissive_blocker()
+	if (emissive_blocker)
+		. += emissive_blocker
+
 //Overlays
 /atom/movable/overlay
 	var/atom/master = null
@@ -196,6 +230,23 @@
 	GLOB.dir_set_event.unregister(master, src)
 	master = null
 	. = ..()
+
+/atom/movable/overlay/use_grab(obj/item/grab/grab, list/click_params)
+	if (master)
+		return master.use_grab(grab, click_params)
+	return FALSE
+
+/atom/movable/overlay/use_weapon(obj/item/weapon, mob/user, list/click_params)
+	SHOULD_CALL_PARENT(FALSE)
+	if (master)
+		return master.use_weapon(weapon, user, click_params)
+	return FALSE
+
+/atom/movable/overlay/use_tool(obj/item/tool, mob/user, list/click_params)
+	SHOULD_CALL_PARENT(FALSE)
+	if (master)
+		return master.use_tool(tool, user, click_params)
+	return FALSE
 
 /atom/movable/overlay/attackby(obj/item/I, mob/user)
 	if (master)

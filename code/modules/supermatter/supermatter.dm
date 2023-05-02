@@ -147,7 +147,7 @@
 			var/area/A = get_area(src)
 			log_and_message_admins(message + " in [A.name]", null, src)
 			if(send_to_irc)
-				send2adminirc(message + " in [A.name]")
+				send_to_admin_discord(message + " in [A.name]")
 		return TRUE
 	else
 		return FALSE
@@ -672,7 +672,7 @@
 
 //Warning lights
 /obj/machinery/rotating_alarm/supermatter
-	name = "Supermatter alarm"
+	name = "supermatter alarm"
 	desc = "An industrial rotating alarm light. This one is used to monitor supermatter engines."
 
 	frame_type = /obj/item/frame/supermatter_alarm
