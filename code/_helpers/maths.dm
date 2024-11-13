@@ -196,3 +196,60 @@
 /proc/grand(min = 0, max = 1)
 	var/static/generator/gauss = generator("num", 0, 1, NORMAL_RAND)
 	return min + gauss.Rand() * (max - min)
+
+/proc/gaussian(mean=0, stddev=1)
+	var/u1 = rand()
+	var/u2 = rand()
+	var/z0 = sqrt(-2 * log(u1)) * cos(2 * PI * u2)
+	return z0 * stddev + mean
+
+
+/proc/rangedGaussian(min=0, max=1, mean=0, stddev=1)
+	var/final_temp = min + rand() * (max - min)
+
+	for (var/runs = 1 to 10)
+		var/temp = gaussian(mean, stddev)
+
+		if (temp < min || temp > max)
+			continue
+		final_temp = temp
+		break
+
+	return final_temp
+
+/proc/skewedGaussian(min=0, max=1, skew=1)
+	var/final_temp = min + rand() * (max - min)
+
+	for (var/runs = 1 to 10)
+		var/temp = gaussian() ** skew
+		temp = temp * (max - min) + min
+
+		if (temp < min || temp > max)
+			continue
+
+		final_temp = temp
+		break
+
+	return final_temp
+
+/proc/Wrap(val, min, max)
+	var/d = max - min
+	var/t = round((val - min) / d)
+	return val - (t * d)
+
+
+/proc/MakeGenerator(g_type, g_min, g_max, g_rand = UNIFORM_RAND)
+	switch (g_rand)
+		if (1)
+			g_rand = NORMAL_RAND
+		if (2)
+			g_rand = LINEAR_RAND
+		if (3)
+			g_rand = SQUARE_RAND
+		else
+			g_rand = UNIFORM_RAND
+
+	if (!isnum(g_min) || !isnum(g_max))
+		return null
+
+	return generator(g_type, g_min, g_max, g_rand)

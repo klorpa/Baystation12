@@ -59,7 +59,6 @@
 	var/obj/screen/gun/item/item_use_icon = null
 	var/obj/screen/gun/radio/radio_use_icon = null
 	var/obj/screen/gun/move/gun_move_icon = null
-	var/obj/screen/gun/run/gun_run_icon = null
 	var/obj/screen/gun/mode/gun_setting_icon = null
 
 	var/obj/screen/movable/ability_master/ability_master = null
@@ -89,7 +88,8 @@
 	var/bhunger = 0			//Carbon
 
 	var/druggy = 0			//Carbon
-	var/confused = 0		//Carbon
+	/// Positive Integer. The mob's current confusion level. Ticks down every `Fire()` in SSMobs. See `set_confused()`, `mod_confused()`, `clear_confused()`, and `is_confused()`.
+	VAR_PRIVATE/confused = 0
 	var/sleeping = 0		//Carbon
 	var/resting = FALSE			//Carbon
 	var/lying = 0
@@ -135,8 +135,6 @@
 	var/list/grabbed_by = list()
 
 	var/in_throw_mode = 0
-
-	var/inertia_dir = 0
 
 //	var/job = null//Living
 

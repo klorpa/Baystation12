@@ -1,7 +1,7 @@
 /obj/structure/catwalk
 	name = "catwalk"
 	desc = "Cats really don't like these things."
-	icon = 'icons/obj/catwalks.dmi'
+	icon = 'icons/obj/structures/catwalks.dmi'
 	icon_state = "catwalk"
 	density = FALSE
 	anchored = TRUE
@@ -32,17 +32,17 @@
 
 /obj/structure/catwalk/on_update_icon()
 	update_connections()
-	overlays.Cut()
+	ClearOverlays()
 	icon_state = ""
 	var/image/I
 	if(!hatch_open)
 		for(var/i = 1 to 4)
-			I = image('icons/obj/catwalks.dmi', "catwalk[connections[i]]", dir = SHIFTL(1, i - 1))
-			overlays += I
+			I = image('icons/obj/structures/catwalks.dmi', "catwalk[connections[i]]", dir = SHIFTL(1, i - 1))
+			AddOverlays(I)
 	if(plated_tile)
-		I = image('icons/obj/catwalks.dmi', "plated")
+		I = image('icons/obj/structures/catwalks.dmi', "plated")
 		I.color = plated_tile.color
-		overlays += I
+		AddOverlays(I)
 
 /obj/structure/catwalk/ex_act(severity)
 	switch(severity)
@@ -145,9 +145,9 @@
 /obj/structure/catwalk/refresh_neighbors()
 	return
 
-/obj/effect/catwalk_plated
+/obj/catwalk_plated
 	name = "plated catwalk spawner"
-	icon = 'icons/obj/catwalks.dmi'
+	icon = 'icons/obj/structures/catwalks.dmi'
 	icon_state = "catwalk_plated"
 	density = TRUE
 	anchored = TRUE
@@ -155,26 +155,26 @@
 	layer = CATWALK_LAYER
 	var/plating_type = /singleton/flooring/tiling/mono
 
-/obj/effect/catwalk_plated/Initialize(mapload)
+/obj/catwalk_plated/Initialize(mapload)
 	. = ..()
 	var/auto_activate = mapload || (GAME_STATE < RUNLEVEL_GAME)
 	if(auto_activate)
 		activate()
 		return INITIALIZE_HINT_QDEL
 
-/obj/effect/catwalk_plated/CanPass()
+/obj/catwalk_plated/CanPass()
 	return 0
 
-/obj/effect/catwalk_plated/attack_hand()
+/obj/catwalk_plated/attack_hand()
 	attack_generic()
 
-/obj/effect/catwalk_plated/attack_ghost()
+/obj/catwalk_plated/attack_ghost()
 	attack_generic()
 
-/obj/effect/catwalk_plated/attack_generic()
+/obj/catwalk_plated/attack_generic()
 	activate()
 
-/obj/effect/catwalk_plated/proc/activate()
+/obj/catwalk_plated/proc/activate()
 	if(activated) return
 
 	if(locate(/obj/structure/catwalk) in loc)
@@ -186,13 +186,13 @@
 		C.update_icon()
 	activated = 1
 	for(var/turf/T in orange(src, 1))
-		for(var/obj/effect/wallframe_spawn/other in T)
+		for(var/obj/wallframe_spawn/other in T)
 			if(!other.activated) other.activate()
 
-/obj/effect/catwalk_plated/dark
+/obj/catwalk_plated/dark
 	icon_state = "catwalk_plateddark"
 	plating_type = /singleton/flooring/tiling/mono/dark
 
-/obj/effect/catwalk_plated/white
+/obj/catwalk_plated/white
 	icon_state = "catwalk_platedwhite"
 	plating_type = /singleton/flooring/tiling/mono/white

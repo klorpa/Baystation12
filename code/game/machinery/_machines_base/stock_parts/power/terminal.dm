@@ -3,6 +3,7 @@
 /obj/item/stock_parts/power/terminal
 	name = "wired connection"
 	desc = "A power connection directly to the grid, via power cables."
+	icon = 'icons/obj/machines/apc.dmi'
 	icon_state = "terminal"
 	priority = 2
 	var/obj/machinery/power/terminal/terminal
@@ -114,7 +115,7 @@
 			to_chat(user, SPAN_NOTICE("There is already a terminal here."))
 			return TRUE
 
-/obj/item/stock_parts/power/terminal/attackby(obj/item/I, mob/user)
+/obj/item/stock_parts/power/terminal/use_tool(obj/item/I, mob/living/user, list/click_params)
 	var/obj/machinery/machine = loc
 	if(!istype(machine))
 		return ..()
@@ -141,7 +142,7 @@
 			if(C.can_use(10) && !terminal && (machine == loc) && machine.components_are_accessible(type) && !blocking_terminal_at_loc(machine, T, user))
 				var/obj/structure/cable/N = T.get_cable_node()
 				if (prob(50) && electrocute_mob(user, N, N))
-					var/datum/effect/effect/system/spark_spread/s = new /datum/effect/effect/system/spark_spread
+					var/datum/effect/spark_spread/s = new /datum/effect/spark_spread
 					s.set_up(5, 1, machine)
 					s.start()
 					if(user.stunned)
@@ -163,10 +164,10 @@
 		user.visible_message(SPAN_WARNING("\The [user] dismantles the power terminal from \the [machine]."), \
 							"You begin to cut the cables...")
 		playsound(src.loc, 'sound/items/Deconstruct.ogg', 50, 1)
-		if(do_after(user, 5 SECONDS, machine, DO_REPAIR_CONSTRUCT))
+		if(do_after(user, (I.toolspeed * 5) SECONDS, machine, DO_REPAIR_CONSTRUCT))
 			if(terminal && (machine == loc) && machine.components_are_accessible(type))
 				if (prob(50) && electrocute_mob(user, terminal.powernet, terminal))
-					var/datum/effect/effect/system/spark_spread/s = new /datum/effect/effect/system/spark_spread
+					var/datum/effect/spark_spread/s = new /datum/effect/spark_spread
 					s.set_up(5, 1, machine)
 					s.start()
 					if(user.stunned)
@@ -175,6 +176,7 @@
 				to_chat(user, SPAN_NOTICE("You cut the cables and dismantle the power terminal."))
 				qdel(terminal)
 		return TRUE
+	return ..()
 
 /obj/item/stock_parts/power/terminal/buildable
 	part_flags = PART_FLAG_HAND_REMOVE

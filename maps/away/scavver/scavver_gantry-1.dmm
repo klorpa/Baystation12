@@ -1,6 +1,6 @@
 //MAP CONVERTED BY dmm2tgm.py THIS HEADER COMMENT PREVENTS RECONVERSION, DO NOT REMOVE
 "aa" = (
-/obj/effect/shuttle_landmark/scavver_gantry/generic/aquila,
+/obj/shuttle_landmark/scavver_gantry/generic/aquila,
 /turf/space,
 /area/space)
 "ak" = (
@@ -11,14 +11,14 @@
 /area/scavver/calypso)
 "aL" = (
 /obj/machinery/optable,
-/obj/effect/floor_decal/corner/blue/mono,
+/obj/floor_decal/corner/blue/mono,
 /obj/machinery/light{
 	dir = 1
 	},
 /turf/simulated/floor/tiled/white/monotile,
 /area/scavver/calypso)
 "aO" = (
-/obj/effect/floor_decal/steeldecal/steel_decals_central7,
+/obj/floor_decal/steeldecal/steel_decals_central7,
 /turf/simulated/floor,
 /area/scavver/gantry/down2)
 "bq" = (
@@ -72,7 +72,7 @@
 /obj/machinery/mineral/stacking_machine{
 	input_turf = 2
 	},
-/obj/effect/floor_decal/industrial/outline/yellow,
+/obj/floor_decal/industrial/outline/yellow,
 /turf/simulated/floor{
 	map_airless = 1
 	},
@@ -107,7 +107,7 @@
 /area/scavver/yachtdown/thrusters)
 "cj" = (
 /obj/machinery/vitals_monitor,
-/obj/effect/floor_decal/corner/blue/mono,
+/obj/floor_decal/corner/blue/mono,
 /obj/machinery/alarm{
 	dir = 8;
 	locked = 0;
@@ -127,16 +127,11 @@
 /turf/simulated/floor,
 /area/scavver/yachtdown/thrusters)
 "cu" = (
-/obj/effect/floor_decal/steeldecal/steel_decals_central4{
+/obj/floor_decal/steeldecal/steel_decals_central4{
 	dir = 8
 	},
 /turf/simulated/floor,
 /area/scavver/gantry/down2)
-"cv" = (
-/obj/structure/lattice,
-/obj/machinery/light/navigation/delay5,
-/turf/space,
-/area/space)
 "cB" = (
 /obj/structure/railing/mapped{
 	dir = 8;
@@ -150,7 +145,7 @@
 /turf/simulated/floor,
 /area/scavver/gantry/down2)
 "cE" = (
-/obj/effect/floor_decal/steeldecal/steel_decals_central4{
+/obj/floor_decal/steeldecal/steel_decals_central4{
 	dir = 4
 	},
 /turf/simulated/floor,
@@ -161,17 +156,17 @@
 	icon_state = "railing0-1"
 	},
 /obj/machinery/shieldgen,
-/obj/effect/floor_decal/corner_steel_grid{
+/obj/floor_decal/corner_steel_grid{
 	dir = 8
 	},
 /turf/simulated/floor,
 /area/scavver/gantry/down2)
 "dk" = (
-/obj/effect/floor_decal/industrial/warning/corner{
+/obj/floor_decal/industrial/warning/corner{
 	dir = 8;
 	icon_state = "warningcorner"
 	},
-/obj/effect/floor_decal/corner_steel_grid{
+/obj/floor_decal/corner_steel_grid{
 	dir = 5
 	},
 /turf/simulated/floor,
@@ -229,7 +224,7 @@
 	},
 /area/scavver/calypso)
 "em" = (
-/obj/effect/shuttle_landmark/scavver_gantry/generic/three,
+/obj/shuttle_landmark/scavver_gantry/generic/three,
 /turf/space,
 /area/space)
 "es" = (
@@ -243,12 +238,12 @@
 /obj/machinery/atmospherics/pipe/simple/visible/fuel{
 	dir = 6
 	},
-/obj/effect/catwalk_plated/dark,
+/obj/catwalk_plated/dark,
 /turf/simulated/floor,
 /area/space)
 "eB" = (
 /obj/structure/lattice,
-/obj/machinery/light/navigation/delay2,
+/obj/machinery/nav_light,
 /turf/space,
 /area/space)
 "eC" = (
@@ -272,7 +267,7 @@
 /turf/simulated/floor,
 /area/scavver/gantry/down1)
 "eY" = (
-/obj/effect/floor_decal/corner_steel_grid{
+/obj/floor_decal/corner_steel_grid{
 	dir = 10
 	},
 /turf/simulated/floor,
@@ -293,7 +288,7 @@
 /area/scavver/gantry/down1)
 "fs" = (
 /obj/machinery/atmospherics/pipe/simple/hidden/blue,
-/obj/effect/floor_decal/corner/blue{
+/obj/floor_decal/corner/blue{
 	dir = 10
 	},
 /obj/machinery/atmospherics/pipe/simple/hidden/scrubbers,
@@ -327,7 +322,7 @@
 	},
 /area/scavver/calypso)
 "fE" = (
-/obj/effect/floor_decal/corner/blue/mono,
+/obj/floor_decal/corner/blue/mono,
 /obj/machinery/power/apc{
 	dir = 4;
 	locked = 0;
@@ -362,7 +357,7 @@
 /obj/item/stack/material/glass/fifty,
 /obj/item/stack/material/glass/fifty,
 /obj/item/stack/material/plasteel/fifty,
-/obj/effect/floor_decal/industrial/loading{
+/obj/floor_decal/industrial/loading{
 	dir = 8
 	},
 /turf/simulated/floor{
@@ -385,7 +380,7 @@
 /turf/simulated/floor,
 /area/scavver/yachtdown)
 "gs" = (
-/obj/effect/wallframe_spawn/reinforced/titanium,
+/obj/wallframe_spawn/reinforced/titanium,
 /turf/simulated/floor,
 /area/scavver/calypso)
 "gv" = (
@@ -432,7 +427,7 @@
 	d2 = 4;
 	icon_state = "1-4"
 	},
-/obj/effect/floor_decal/corner_steel_grid{
+/obj/floor_decal/corner_steel_grid{
 	dir = 6
 	},
 /turf/simulated/floor,
@@ -467,7 +462,7 @@
 	},
 /area/scavver/calypso)
 "hC" = (
-/obj/effect/floor_decal/corner/blue{
+/obj/floor_decal/corner/blue{
 	dir = 9
 	},
 /obj/machinery/atmospherics/pipe/simple/hidden/scrubbers,
@@ -495,7 +490,7 @@
 	d2 = 8;
 	icon_state = "4-8"
 	},
-/obj/effect/floor_decal/corner/blue{
+/obj/floor_decal/corner/blue{
 	dir = 6
 	},
 /turf/simulated/floor/tiled/white{
@@ -509,13 +504,13 @@
 /obj/item/storage/briefcase/inflatable,
 /obj/item/storage/briefcase/inflatable,
 /obj/item/storage/briefcase/inflatable,
-/obj/item/device/spaceflare,
+/obj/item/shuttle_beacon,
 /turf/simulated/floor,
 /area/scavver/gantry/down1)
 "iB" = (
 /obj/structure/cable,
 /obj/machinery/power/solar,
-/obj/effect/floor_decal/solarpanel,
+/obj/floor_decal/solarpanel,
 /turf/simulated/floor,
 /area/scavver/yachtdown)
 "iI" = (
@@ -533,7 +528,7 @@
 "iL" = (
 /obj/structure/railing/mapped,
 /obj/structure/ladder/up,
-/obj/effect/floor_decal/corner_steel_grid,
+/obj/floor_decal/corner_steel_grid,
 /obj/structure/cable,
 /obj/structure/cable{
 	d1 = 16;
@@ -551,7 +546,7 @@
 /obj/machinery/atmospherics/pipe/simple/visible/fuel{
 	dir = 9
 	},
-/obj/effect/catwalk_plated/dark,
+/obj/catwalk_plated/dark,
 /turf/simulated/floor,
 /area/scavver/gantry/down1)
 "jg" = (
@@ -572,7 +567,7 @@
 /turf/simulated/floor,
 /area/scavver/yachtdown)
 "jm" = (
-/obj/effect/shuttle_landmark/lift/gantry/bottom,
+/obj/shuttle_landmark/lift/gantry/bottom,
 /turf/simulated/floor,
 /area/scavver/gantry/down1)
 "jr" = (
@@ -600,11 +595,11 @@
 /area/scavver/gantry/down2)
 "jy" = (
 /obj/structure/railing/mapped,
-/obj/effect/catwalk_plated/dark,
+/obj/catwalk_plated/dark,
 /turf/simulated/floor,
 /area/space)
 "jz" = (
-/obj/effect/floor_decal/corner/blue{
+/obj/floor_decal/corner/blue{
 	dir = 6
 	},
 /obj/machinery/computer/cryopod{
@@ -616,7 +611,7 @@
 /obj/structure/railing/mapped{
 	dir = 4
 	},
-/obj/effect/catwalk_plated/dark,
+/obj/catwalk_plated/dark,
 /turf/simulated/floor,
 /area/space)
 "jJ" = (
@@ -624,7 +619,7 @@
 /obj/machinery/atmospherics/unary/vent_pump/on{
 	dir = 1
 	},
-/obj/effect/floor_decal/corner/blue{
+/obj/floor_decal/corner/blue{
 	dir = 10
 	},
 /turf/simulated/floor/tiled/white{
@@ -701,7 +696,7 @@
 	},
 /area/scavver/calypso)
 "kK" = (
-/obj/effect/floor_decal/corner/blue/mono,
+/obj/floor_decal/corner/blue/mono,
 /obj/random/loot,
 /obj/structure/table/steel_reinforced,
 /obj/item/device/radio/intercom/map_preset/scavver{
@@ -717,7 +712,7 @@
 	icon_state = "0-2"
 	},
 /obj/machinery/power/solar,
-/obj/effect/floor_decal/solarpanel,
+/obj/floor_decal/solarpanel,
 /turf/simulated/floor,
 /area/scavver/yachtdown)
 "kW" = (
@@ -775,11 +770,11 @@
 	icon_state = "railing0-1"
 	},
 /obj/random/loot,
-/obj/effect/catwalk_plated/dark,
+/obj/catwalk_plated/dark,
 /turf/simulated/floor,
 /area/space)
 "lV" = (
-/obj/effect/floor_decal/corner/blue{
+/obj/floor_decal/corner/blue{
 	dir = 9
 	},
 /obj/machinery/atmospherics/pipe/manifold/hidden/blue{
@@ -799,7 +794,7 @@
 	dir = 1;
 	icon_state = "railing0-1"
 	},
-/obj/effect/catwalk_plated/dark,
+/obj/catwalk_plated/dark,
 /turf/simulated/floor,
 /area/space)
 "mU" = (
@@ -811,7 +806,7 @@
 /obj/item/storage/firstaid/adv,
 /obj/item/roller_bed,
 /obj/item/storage/backpack/satchel/med,
-/obj/effect/floor_decal/corner/blue/mono,
+/obj/floor_decal/corner/blue/mono,
 /obj/random/firstaid,
 /obj/random/firstaid,
 /obj/random/firstaid,
@@ -838,19 +833,19 @@
 "np" = (
 /obj/structure/closet/crate/freezer,
 /obj/item/reagent_containers/ivbag/blood/human/oneg,
-/obj/effect/floor_decal/corner/blue/mono,
+/obj/floor_decal/corner/blue/mono,
 /obj/item/reagent_containers/food/drinks/cans/waterbottle,
 /obj/item/reagent_containers/food/drinks/cans/waterbottle,
 /obj/item/reagent_containers/ivbag,
 /obj/item/reagent_containers/ivbag,
-/obj/item/storage/box/gloves,
+/obj/item/storage/box/latexgloves,
 /turf/simulated/floor/tiled/white/monotile,
 /area/scavver/calypso)
 "ny" = (
 /turf/simulated/floor,
 /area/scavver/gantry/down1)
 "nC" = (
-/obj/effect/shuttle_landmark/scavver_gantry/six,
+/obj/shuttle_landmark/scavver_gantry/six,
 /turf/space,
 /area/space)
 "nT" = (
@@ -899,7 +894,7 @@
 /turf/simulated/floor,
 /area/scavver/gantry/down1)
 "oH" = (
-/obj/effect/floor_decal/corner/blue/mono,
+/obj/floor_decal/corner/blue/mono,
 /obj/machinery/computer/ship/navigation/telescreen{
 	pixel_x = 32
 	},
@@ -969,14 +964,14 @@
 	d2 = 2;
 	icon_state = "1-2"
 	},
-/obj/effect/floor_decal/corner_steel_grid{
+/obj/floor_decal/corner_steel_grid{
 	dir = 10
 	},
 /obj/machinery/atmospherics/pipe/cap/visible/fuel,
 /turf/simulated/floor,
 /area/scavver/gantry/down1)
 "pL" = (
-/obj/effect/shuttle_landmark/scavver_gantry/generic,
+/obj/shuttle_landmark/scavver_gantry/generic,
 /turf/space,
 /area/space)
 "pM" = (
@@ -984,7 +979,7 @@
 /obj/machinery/light{
 	dir = 1
 	},
-/obj/effect/floor_decal/corner/blue/mono,
+/obj/floor_decal/corner/blue/mono,
 /turf/simulated/floor/tiled/monotile,
 /area/scavver/calypso)
 "pQ" = (
@@ -1013,7 +1008,7 @@
 	icon_state = "railing0-1"
 	},
 /obj/structure/railing/mapped,
-/obj/effect/catwalk_plated/dark,
+/obj/catwalk_plated/dark,
 /turf/simulated/floor,
 /area/space)
 "qK" = (
@@ -1051,7 +1046,7 @@
 /obj/machinery/atmospherics/pipe/simple/hidden/blue{
 	dir = 10
 	},
-/obj/effect/floor_decal/corner/blue{
+/obj/floor_decal/corner/blue{
 	dir = 10
 	},
 /obj/machinery/atmospherics/pipe/simple/hidden/scrubbers,
@@ -1071,7 +1066,7 @@
 	d2 = 2;
 	icon_state = "0-2"
 	},
-/obj/effect/floor_decal/corner_steel_grid{
+/obj/floor_decal/corner_steel_grid{
 	dir = 5
 	},
 /obj/structure/cable{
@@ -1103,11 +1098,6 @@
 	},
 /turf/simulated/floor,
 /area/scavver/gantry/down1)
-"rW" = (
-/obj/structure/lattice,
-/obj/machinery/light/navigation,
-/turf/space,
-/area/space)
 "rZ" = (
 /obj/machinery/atmospherics/portables_connector{
 	dir = 8
@@ -1145,7 +1135,7 @@
 /area/scavver/yachtdown/thrusters)
 "sN" = (
 /obj/machinery/computer/ship/engines,
-/obj/effect/floor_decal/corner/blue/mono,
+/obj/floor_decal/corner/blue/mono,
 /turf/simulated/floor/tiled/monotile,
 /area/scavver/calypso)
 "sO" = (
@@ -1162,7 +1152,7 @@
 /obj/machinery/mineral/unloading_machine{
 	output_turf = 1
 	},
-/obj/effect/floor_decal/industrial/outline/yellow,
+/obj/floor_decal/industrial/outline/yellow,
 /obj/structure/railing/mapped,
 /turf/simulated/floor{
 	map_airless = 1
@@ -1178,7 +1168,7 @@
 /area/scavver/gantry/down2)
 "tE" = (
 /obj/machinery/atmospherics/pipe/simple/hidden/blue,
-/obj/effect/floor_decal/corner/blue{
+/obj/floor_decal/corner/blue{
 	dir = 5
 	},
 /obj/machinery/atmospherics/pipe/simple/hidden/scrubbers,
@@ -1219,12 +1209,12 @@
 /obj/machinery/atmospherics/pipe/manifold/visible/blue{
 	dir = 8
 	},
-/obj/effect/catwalk_plated,
+/obj/catwalk_plated,
 /turf/simulated/floor/plating,
 /area/scavver/calypso)
 "uB" = (
 /obj/machinery/computer/ship/sensors/spacer,
-/obj/effect/floor_decal/corner/blue/mono,
+/obj/floor_decal/corner/blue/mono,
 /turf/simulated/floor/tiled/monotile,
 /area/scavver/calypso)
 "uG" = (
@@ -1255,11 +1245,11 @@
 /obj/structure/railing/mapped{
 	dir = 4
 	},
-/obj/effect/floor_decal/industrial/hatch/yellow,
+/obj/floor_decal/industrial/hatch/yellow,
 /turf/simulated/floor,
 /area/scavver/calypso)
 "uR" = (
-/obj/effect/catwalk_plated/dark,
+/obj/catwalk_plated/dark,
 /turf/simulated/floor,
 /area/space)
 "uY" = (
@@ -1275,7 +1265,7 @@
 /turf/simulated/floor,
 /area/scavver/gantry/down2)
 "vf" = (
-/obj/effect/floor_decal/corner/blue{
+/obj/floor_decal/corner/blue{
 	dir = 6
 	},
 /turf/simulated/floor/tiled,
@@ -1326,7 +1316,7 @@
 /turf/space,
 /area/space)
 "vX" = (
-/obj/effect/floor_decal/corner/blue{
+/obj/floor_decal/corner/blue{
 	dir = 5
 	},
 /obj/machinery/atmospherics/unary/vent_scrubber/on{
@@ -1366,7 +1356,7 @@
 /turf/space,
 /area/scavver/calypso)
 "xa" = (
-/obj/effect/shuttle_landmark/scavver_gantry/generic/two,
+/obj/shuttle_landmark/scavver_gantry/generic/two,
 /turf/space,
 /area/space)
 "xe" = (
@@ -1408,7 +1398,7 @@
 	input_turf = 4;
 	output_turf = 1
 	},
-/obj/effect/floor_decal/industrial/outline/yellow,
+/obj/floor_decal/industrial/outline/yellow,
 /turf/simulated/floor{
 	map_airless = 1
 	},
@@ -1429,7 +1419,7 @@
 	icon_state = "railing0-1"
 	},
 /obj/machinery/portable_atmospherics/canister/oxygen,
-/obj/effect/floor_decal/corner_steel_grid{
+/obj/floor_decal/corner_steel_grid{
 	dir = 1
 	},
 /turf/simulated/floor,
@@ -1451,7 +1441,7 @@
 /obj/structure/bed/chair/shuttle/white{
 	dir = 8
 	},
-/obj/effect/floor_decal/corner/blue/mono,
+/obj/floor_decal/corner/blue/mono,
 /turf/simulated/floor/tiled/monotile,
 /area/scavver/calypso)
 "xQ" = (
@@ -1476,7 +1466,7 @@
 	},
 /area/scavver/calypso)
 "yo" = (
-/obj/effect/floor_decal/corner/blue{
+/obj/floor_decal/corner/blue{
 	dir = 5
 	},
 /turf/simulated/floor/tiled,
@@ -1487,11 +1477,11 @@
 	d2 = 2;
 	icon_state = "1-2"
 	},
-/obj/effect/catwalk_plated/dark,
+/obj/catwalk_plated/dark,
 /turf/simulated/floor,
 /area/scavver/yachtdown)
 "zf" = (
-/obj/effect/floor_decal/corner_steel_grid{
+/obj/floor_decal/corner_steel_grid{
 	dir = 6
 	},
 /obj/random/assembly,
@@ -1537,7 +1527,7 @@
 	pixel_x = -5
 	},
 /obj/item/device/robotanalyzer,
-/obj/effect/floor_decal/corner/blue/mono,
+/obj/floor_decal/corner/blue/mono,
 /obj/item/device/scanner/health,
 /obj/machinery/vending/wallmed1{
 	pixel_y = 32
@@ -1551,7 +1541,7 @@
 	master_tag = "scav_calypso";
 	pixel_y = -22
 	},
-/obj/effect/floor_decal/corner/blue/mono,
+/obj/floor_decal/corner/blue/mono,
 /obj/machinery/atmospherics/portables_connector{
 	dir = 1
 	},
@@ -1594,7 +1584,7 @@
 /turf/simulated/floor,
 /area/scavver/gantry/down1)
 "Ba" = (
-/obj/effect/floor_decal/industrial/loading{
+/obj/floor_decal/industrial/loading{
 	dir = 4
 	},
 /obj/structure/ore_box,
@@ -1609,11 +1599,11 @@
 	d2 = 2;
 	icon_state = "1-2"
 	},
-/obj/effect/floor_decal/steeldecal/steel_decals_central1,
+/obj/floor_decal/steeldecal/steel_decals_central1,
 /turf/simulated/floor,
 /area/scavver/gantry/down1)
 "Bi" = (
-/obj/effect/floor_decal/steeldecal/steel_decals_central1,
+/obj/floor_decal/steeldecal/steel_decals_central1,
 /obj/machinery/light/spot{
 	dir = 4
 	},
@@ -1622,7 +1612,7 @@
 "Br" = (
 /obj/machinery/atmospherics/pipe/manifold4w/visible/blue,
 /obj/machinery/meter,
-/obj/effect/catwalk_plated,
+/obj/catwalk_plated,
 /turf/simulated/floor/plating,
 /area/scavver/calypso)
 "Bt" = (
@@ -1703,7 +1693,7 @@
 	icon_state = "railing0-1"
 	},
 /obj/machinery/portable_atmospherics/powered/pump/filled,
-/obj/effect/floor_decal/corner_steel_grid{
+/obj/floor_decal/corner_steel_grid{
 	dir = 1
 	},
 /turf/simulated/floor,
@@ -1723,7 +1713,7 @@
 /area/scavver/yachtdown/thrusters)
 "Cz" = (
 /obj/machinery/atmospherics/pipe/simple/hidden/blue,
-/obj/effect/floor_decal/corner/blue{
+/obj/floor_decal/corner/blue{
 	dir = 9
 	},
 /obj/machinery/atmospherics/pipe/manifold/hidden/scrubbers{
@@ -1740,7 +1730,7 @@
 /turf/simulated/floor,
 /area/scavver/gantry/down2)
 "CE" = (
-/obj/effect/wallframe_spawn/reinforced/titanium,
+/obj/wallframe_spawn/reinforced/titanium,
 /turf/simulated/floor/plating,
 /area/scavver/calypso)
 "CM" = (
@@ -1762,14 +1752,14 @@
 /turf/simulated/floor,
 /area/scavver/yachtdown)
 "CZ" = (
-/obj/effect/paint/black,
+/obj/paint/black,
 /turf/simulated/wall,
 /area/scavver/gantry/down1)
 "DB" = (
-/obj/effect/floor_decal/corner/blue{
+/obj/floor_decal/corner/blue{
 	dir = 5
 	},
-/obj/effect/floor_decal/corner/blue{
+/obj/floor_decal/corner/blue{
 	dir = 10
 	},
 /obj/machinery/sleeper,
@@ -1783,7 +1773,7 @@
 	icon_state = "railing0-1"
 	},
 /obj/structure/ladder/up,
-/obj/effect/floor_decal/corner_steel_grid,
+/obj/floor_decal/corner_steel_grid,
 /turf/simulated/floor,
 /area/scavver/gantry/down2)
 "DK" = (
@@ -1797,7 +1787,7 @@
 "DW" = (
 /obj/structure/railing/mapped,
 /obj/machinery/portable_atmospherics/canister/air,
-/obj/effect/floor_decal/corner_steel_grid,
+/obj/floor_decal/corner_steel_grid,
 /turf/simulated/floor,
 /area/scavver/gantry/down1)
 "Ee" = (
@@ -1805,7 +1795,7 @@
 	dir = 8;
 	icon_state = "railing0-1"
 	},
-/obj/effect/floor_decal/industrial/warning{
+/obj/floor_decal/industrial/warning{
 	dir = 4
 	},
 /obj/machinery/light/spot,
@@ -1830,14 +1820,14 @@
 /area/scavver/yachtdown)
 "Es" = (
 /obj/item/towel/random,
-/obj/effect/decal/cleanable/dirt,
+/obj/decal/cleanable/dirt,
 /mob/living/simple_animal/hostile/rogue_drone{
 	desc = "A small robot. It looks angry. Someone has scratched 'See no Evil' onto the chassis. Odd."
 	},
 /turf/simulated/floor/tiled/freezer,
 /area/scavver/yachtdown)
 "EP" = (
-/obj/effect/floor_decal/industrial/hatch/yellow,
+/obj/floor_decal/industrial/hatch/yellow,
 /obj/structure/railing/mapped{
 	dir = 4
 	},
@@ -1900,7 +1890,7 @@
 /obj/structure/hygiene/shower{
 	pixel_y = 20
 	},
-/obj/effect/decal/cleanable/dirt,
+/obj/decal/cleanable/dirt,
 /obj/random/loot,
 /turf/simulated/floor/tiled/freezer,
 /area/scavver/yachtdown)
@@ -1946,7 +1936,7 @@
 /obj/machinery/atmospherics/unary/vent_pump/on{
 	dir = 4
 	},
-/obj/effect/floor_decal/corner/blue{
+/obj/floor_decal/corner/blue{
 	dir = 10
 	},
 /obj/machinery/light,
@@ -1980,7 +1970,7 @@
 /turf/simulated/floor,
 /area/scavver/gantry/down2)
 "GK" = (
-/obj/effect/floor_decal/industrial/warning{
+/obj/floor_decal/industrial/warning{
 	dir = 8
 	},
 /turf/simulated/floor,
@@ -1997,7 +1987,7 @@
 /area/scavver/gantry/down2)
 "Hn" = (
 /obj/machinery/computer/ship/helm,
-/obj/effect/floor_decal/corner/blue/mono,
+/obj/floor_decal/corner/blue/mono,
 /turf/simulated/floor/tiled/monotile,
 /area/scavver/calypso)
 "Hq" = (
@@ -2054,7 +2044,7 @@
 /turf/simulated/floor,
 /area/scavver/yachtdown)
 "HY" = (
-/obj/effect/floor_decal/corner/blue{
+/obj/floor_decal/corner/blue{
 	dir = 6
 	},
 /obj/machinery/atmospherics/unary/vent_scrubber/on{
@@ -2071,7 +2061,7 @@
 	dir = 1;
 	icon_state = "railing0-1"
 	},
-/obj/effect/catwalk_plated/dark,
+/obj/catwalk_plated/dark,
 /turf/simulated/floor,
 /area/space)
 "IF" = (
@@ -2083,14 +2073,14 @@
 	dir = 1;
 	icon_state = "railing0-1"
 	},
-/obj/effect/catwalk_plated/dark,
+/obj/catwalk_plated/dark,
 /turf/simulated/floor,
 /area/space)
 "IJ" = (
 /obj/machinery/air_sensor{
 	id_tag = "scavver_burn_sensor"
 	},
-/obj/effect/decal/cleanable/liquid_fuel,
+/obj/decal/cleanable/liquid_fuel,
 /obj/machinery/atmospherics/pipe/simple/heat_exchanging{
 	dir = 5
 	},
@@ -2098,7 +2088,7 @@
 /area/scavver/yachtdown)
 "IV" = (
 /obj/structure/lattice,
-/obj/effect/catwalk_plated/dark,
+/obj/catwalk_plated/dark,
 /obj/structure/railing/mapped{
 	dir = 4;
 	icon_state = "railing0-1"
@@ -2141,7 +2131,7 @@
 	icon_state = "railing0-1"
 	},
 /obj/random/gloves,
-/obj/effect/catwalk_plated/dark,
+/obj/catwalk_plated/dark,
 /turf/simulated/floor,
 /area/space)
 "Ke" = (
@@ -2153,7 +2143,7 @@
 "Kv" = (
 /obj/structure/table/rack,
 /obj/structure/railing/mapped,
-/obj/effect/floor_decal/industrial/warning/corner{
+/obj/floor_decal/industrial/warning/corner{
 	dir = 1
 	},
 /obj/random/powercell,
@@ -2164,11 +2154,11 @@
 "KL" = (
 /obj/random/loot,
 /obj/structure/railing/mapped,
-/obj/effect/catwalk_plated/dark,
+/obj/catwalk_plated/dark,
 /turf/simulated/floor,
 /area/space)
 "KP" = (
-/obj/effect/catwalk_plated/dark,
+/obj/catwalk_plated/dark,
 /obj/structure/cable{
 	d1 = 1;
 	d2 = 2;
@@ -2243,7 +2233,7 @@
 	d2 = 8;
 	icon_state = "1-8"
 	},
-/obj/effect/floor_decal/corner_steel_grid{
+/obj/floor_decal/corner_steel_grid{
 	dir = 1
 	},
 /turf/simulated/floor,
@@ -2267,7 +2257,7 @@
 /obj/structure/hygiene/toilet{
 	dir = 8
 	},
-/obj/effect/decal/cleanable/dirt,
+/obj/decal/cleanable/dirt,
 /mob/living/simple_animal/hostile/rogue_drone{
 	desc = "A small robot. It looks angry. Someone has scratched 'Speak no Evil' onto the chassis. Odd."
 	},
@@ -2296,7 +2286,7 @@
 /turf/simulated/floor,
 /area/scavver/yachtdown)
 "Om" = (
-/obj/effect/floor_decal/corner/blue/mono,
+/obj/floor_decal/corner/blue/mono,
 /obj/machinery/pointdefense_control{
 	initial_id_tag = "Salvage_Gantry";
 	name = "Point Defense Controller"
@@ -2339,14 +2329,14 @@
 	d2 = 8;
 	icon_state = "4-8"
 	},
-/obj/effect/catwalk_plated/dark,
+/obj/catwalk_plated/dark,
 /turf/simulated/floor,
 /area/scavver/gantry/down1)
 "PA" = (
 /obj/structure/bed/chair/shuttle/white{
 	dir = 1
 	},
-/obj/effect/floor_decal/corner/blue{
+/obj/floor_decal/corner/blue{
 	dir = 5
 	},
 /obj/machinery/atmospherics/pipe/simple/hidden/scrubbers{
@@ -2371,7 +2361,7 @@
 	},
 /area/scavver/calypso)
 "PO" = (
-/obj/effect/decal/cleanable/liquid_fuel,
+/obj/decal/cleanable/liquid_fuel,
 /obj/machinery/atmospherics/pipe/simple/heat_exchanging{
 	dir = 4
 	},
@@ -2400,7 +2390,7 @@
 /turf/simulated/floor/reinforced,
 /area/scavver/yachtdown)
 "QD" = (
-/obj/effect/floor_decal/industrial/warning{
+/obj/floor_decal/industrial/warning{
 	dir = 8
 	},
 /obj/item/device/flashlight/lantern,
@@ -2427,7 +2417,7 @@
 	dir = 8;
 	icon_state = "railing0-1"
 	},
-/obj/effect/catwalk_plated/dark,
+/obj/catwalk_plated/dark,
 /turf/simulated/floor,
 /area/space)
 "QR" = (
@@ -2440,7 +2430,7 @@
 	d2 = 8;
 	icon_state = "2-8"
 	},
-/obj/effect/floor_decal/corner_steel_grid,
+/obj/floor_decal/corner_steel_grid,
 /turf/simulated/floor,
 /area/scavver/gantry/down1)
 "Rc" = (
@@ -2455,7 +2445,7 @@
 /area/scavver/yachtdown)
 "RC" = (
 /obj/machinery/atmospherics/binary/pump/on,
-/obj/effect/floor_decal/corner/blue/mono,
+/obj/floor_decal/corner/blue/mono,
 /obj/machinery/portable_atmospherics/canister/oxygen,
 /turf/simulated/floor/tiled/monotile,
 /area/scavver/calypso)
@@ -2472,7 +2462,7 @@
 	icon_state = "railing0-1"
 	},
 /obj/machinery/floodlight,
-/obj/effect/floor_decal/corner_steel_grid{
+/obj/floor_decal/corner_steel_grid{
 	dir = 1
 	},
 /turf/simulated/floor,
@@ -2486,7 +2476,7 @@
 /obj/item/clothing/gloves/insulated,
 /obj/item/clothing/gloves/insulated,
 /obj/item/device/multitool,
-/obj/effect/floor_decal/corner/blue/mono,
+/obj/floor_decal/corner/blue/mono,
 /obj/machinery/alarm{
 	dir = 4;
 	locked = 0;
@@ -2528,10 +2518,10 @@
 	},
 /area/scavver/calypso)
 "St" = (
-/obj/effect/floor_decal/corner/blue{
+/obj/floor_decal/corner/blue{
 	dir = 9
 	},
-/obj/effect/floor_decal/corner/blue{
+/obj/floor_decal/corner/blue{
 	dir = 6
 	},
 /obj/machinery/atmospherics/pipe/manifold/hidden/blue{
@@ -2641,7 +2631,7 @@
 /turf/simulated/floor/wood/yew,
 /area/scavver/yachtdown/thrusters)
 "TZ" = (
-/obj/effect/floor_decal/steeldecal/steel_decals_central1,
+/obj/floor_decal/steeldecal/steel_decals_central1,
 /turf/simulated/floor,
 /area/scavver/gantry/down1)
 "Uh" = (
@@ -2682,7 +2672,7 @@
 /turf/simulated/floor,
 /area/scavver/yachtdown)
 "UH" = (
-/obj/effect/floor_decal/corner_steel_grid{
+/obj/floor_decal/corner_steel_grid{
 	dir = 9
 	},
 /turf/simulated/floor,
@@ -2774,7 +2764,7 @@
 	id_tag = "scavver";
 	pixel_x = -18
 	},
-/obj/effect/decal/cleanable/liquid_fuel,
+/obj/decal/cleanable/liquid_fuel,
 /obj/machinery/atmospherics/pipe/simple/heat_exchanging{
 	dir = 6
 	},
@@ -2814,7 +2804,7 @@
 /obj/machinery/atmospherics/pipe/simple/heat_exchanging/junction{
 	dir = 8
 	},
-/obj/effect/decal/cleanable/liquid_fuel,
+/obj/decal/cleanable/liquid_fuel,
 /turf/simulated/floor/reinforced,
 /area/scavver/yachtdown)
 "Xb" = (
@@ -2825,7 +2815,7 @@
 	pixel_y = 20
 	},
 /obj/item/bikehorn/rubberducky,
-/obj/effect/decal/cleanable/dirt,
+/obj/decal/cleanable/dirt,
 /obj/random/soap,
 /mob/living/simple_animal/hostile/rogue_drone{
 	desc = "A small robot. It looks angry. Someone has scratched 'Hear no Evil' onto the chassis. Odd."
@@ -2845,7 +2835,7 @@
 	dir = 4;
 	icon_state = "railing0-1"
 	},
-/obj/effect/catwalk_plated/dark,
+/obj/catwalk_plated/dark,
 /turf/simulated/floor,
 /area/space)
 "XC" = (
@@ -2882,7 +2872,7 @@
 /area/scavver/gantry/down1)
 "XN" = (
 /obj/machinery/atmospherics/pipe/simple/hidden/blue,
-/obj/effect/floor_decal/corner/blue{
+/obj/floor_decal/corner/blue{
 	dir = 9
 	},
 /obj/machinery/atmospherics/pipe/simple/hidden/scrubbers,
@@ -2909,7 +2899,7 @@
 /obj/machinery/atmospherics/unary/vent_pump/on{
 	dir = 8
 	},
-/obj/effect/floor_decal/corner/blue{
+/obj/floor_decal/corner/blue{
 	dir = 6
 	},
 /turf/simulated/floor/tiled,
@@ -2920,11 +2910,11 @@
 	icon_state = "railing0-1"
 	},
 /obj/random/tech_supply,
-/obj/effect/catwalk_plated/dark,
+/obj/catwalk_plated/dark,
 /turf/simulated/floor,
 /area/space)
 "YV" = (
-/obj/effect/paint/black,
+/obj/paint/black,
 /turf/simulated/wall,
 /area/scavver/gantry/down2)
 "Zg" = (
@@ -2964,7 +2954,7 @@
 	dir = 8;
 	icon_state = "railing0-1"
 	},
-/obj/effect/floor_decal/industrial/warning{
+/obj/floor_decal/industrial/warning{
 	dir = 4
 	},
 /turf/simulated/floor,
@@ -11727,7 +11717,7 @@ JP
 UM
 vM
 UM
-rW
+eB
 UM
 UM
 UM
@@ -12035,7 +12025,7 @@ ZS
 Ee
 CZ
 vM
-rW
+eB
 jy
 UM
 UM
@@ -12795,7 +12785,7 @@ ny
 ny
 xQ
 vM
-rW
+eB
 jy
 UM
 UM
@@ -13548,7 +13538,7 @@ UM
 UM
 UM
 mo
-rW
+eB
 JF
 CZ
 ny
@@ -13707,7 +13697,7 @@ rS
 ny
 CZ
 Sw
-rW
+eB
 jy
 vM
 vM
@@ -13998,7 +13988,7 @@ UM
 UM
 UM
 UM
-rW
+eB
 UM
 uR
 UM
@@ -14467,7 +14457,7 @@ AV
 ny
 CZ
 vM
-rW
+eB
 jy
 UM
 qC
@@ -15204,7 +15194,7 @@ UM
 UM
 UM
 vM
-rW
+eB
 UM
 uR
 UM
@@ -15217,7 +15207,7 @@ UM
 UM
 UM
 UM
-cv
+eB
 UM
 UM
 UM

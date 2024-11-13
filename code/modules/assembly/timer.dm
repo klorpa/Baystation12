@@ -24,8 +24,8 @@
 	return 0
 
 
-/obj/item/device/assembly/timer/toggle_secure()
-	secured = !secured
+/obj/item/device/assembly/timer/set_secure(make_secure)
+	..()
 	if(secured)
 		START_PROCESSING(SSobj, src)
 	else
@@ -58,10 +58,10 @@
 
 
 /obj/item/device/assembly/timer/on_update_icon()
-	overlays.Cut()
+	ClearOverlays()
 	attached_overlays = list()
 	if(timing)
-		overlays += "timer_timing"
+		AddOverlays("timer_timing")
 		attached_overlays += "timer_timing"
 	if(holder)
 		holder.update_icon()

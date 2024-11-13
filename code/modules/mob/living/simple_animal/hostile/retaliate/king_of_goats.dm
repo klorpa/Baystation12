@@ -42,11 +42,11 @@
 /datum/ai_holder/simple_animal/goat/king/engage_target()
 	. = ..()
 	var/mob/living/simple_animal/hostile/retaliate/goat/king/G = holder
-	if(isliving(G.target_mob))
-		var/mob/living/L = G.target_mob
+	if(isliving(target))
+		var/mob/living/L = target
 		if(prob(G.stun_chance))
 			L.Weaken(0.5)
-			L.confused += 1
+			L.mod_confused(1)
 			G.visible_message(SPAN_WARNING("\The [L] is bowled over by the impact of [G]'s attack!"))
 
 /datum/ai_holder/simple_animal/goat/king/react_to_attack(atom/movable/attacker)
@@ -127,9 +127,10 @@
 
 /obj/item/natural_weapon/goatking
 	name = "giant horns"
-	attack_verb = list("brutalized")
+	attack_verb = list("brutalized", "impaled", "stabbed")
 	force = 40
 	sharp = TRUE
+	show_in_message = TRUE
 
 /obj/item/natural_weapon/goatking/fire
 	name = "burning horns"
@@ -194,6 +195,7 @@
 	attack_verb = list("impaled", "stabbed")
 	force = 15
 	sharp = TRUE
+	show_in_message = TRUE
 
 /mob/living/simple_animal/hostile/retaliate/goat/guard/master
 	name = "master of the guard"
@@ -254,7 +256,7 @@
 	QDEL_NULL(boss_theme)
 	. = ..()
 
-/mob/living/simple_animal/hostile/retaliate/goat/king/Allow_Spacemove(check_drift = 0)
+/mob/living/simple_animal/hostile/retaliate/goat/king/Process_Spacemove()
 	return 1
 
 /datum/say_list/goat/king

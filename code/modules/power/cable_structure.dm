@@ -27,7 +27,7 @@ By design, d1 is the smallest direction and d2 is the highest
 	anchored = TRUE
 	name = "power cable"
 	desc = "A flexible superconducting cable for heavy-duty power transfer."
-	icon = 'icons/obj/power_cond_white.dmi'
+	icon = 'icons/obj/machines/power/power_cond_white.dmi'
 	icon_state = "0-1"
 	layer = EXPOSED_WIRE_LAYER
 	color = COLOR_MAROON
@@ -100,8 +100,7 @@ By design, d1 is the smallest direction and d2 is the highest
 // Ghost examining the cable -> tells him the power
 /obj/structure/cable/attack_ghost(mob/user)
 	if(user.client && user.client.inquisitive_ghost)
-		user.examinate(src)
-		// following code taken from attackby (multitool)
+		examinate(user, src)
 		if(powernet && (powernet.avail > 0))
 			to_chat(user, SPAN_WARNING("[get_wattage()] in power network."))
 		else
@@ -122,7 +121,7 @@ By design, d1 is the smallest direction and d2 is the highest
 //If underfloor, hide the cable
 /obj/structure/cable/hide(i)
 	if(istype(loc, /turf))
-		set_invisibility(i ? 101 : 0)
+		set_invisibility(i ? INVISIBILITY_ABSTRACT : 0)
 	update_icon()
 
 /obj/structure/cable/hides_under_flooring()
@@ -215,7 +214,7 @@ By design, d1 is the smallest direction and d2 is the highest
 	if(!prob(prb))
 		return 0
 	if (electrocute_mob(user, powernet, src, siemens_coeff))
-		var/datum/effect/effect/system/spark_spread/s = new /datum/effect/effect/system/spark_spread
+		var/datum/effect/spark_spread/s = new /datum/effect/spark_spread
 		s.set_up(5, 1, src)
 		s.start()
 		if(usr.stunned)

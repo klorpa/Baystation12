@@ -12,7 +12,7 @@
 	var/obj/item/holding = null
 	var/obj/item/device/bot_controller/controller = null
 
-/mob/living/bot/remotebot/movement_delay()
+/mob/living/bot/remotebot/movement_delay(singleton/move_intent/using_intent = move_intent)
 	var/tally = ..()
 	tally += speed
 	if(holding)
@@ -26,7 +26,7 @@
 
 /mob/living/bot/remotebot/explode()
 	on = 0
-	new /obj/effect/decal/cleanable/blood/oil(get_turf(src.loc))
+	new /obj/decal/cleanable/blood/oil(get_turf(src.loc))
 	visible_message(SPAN_DANGER("[src] blows apart!"))
 	if(controller)
 		controller.bot = null
@@ -36,7 +36,7 @@
 		if(prob(50))
 			C.forceMove(get_step(src, pick(GLOB.alldirs)))
 
-	var/datum/effect/effect/system/spark_spread/s = new /datum/effect/effect/system/spark_spread
+	var/datum/effect/spark_spread/s = new /datum/effect/spark_spread
 	s.set_up(3, 1, src)
 	s.start()
 	qdel(src)
@@ -118,7 +118,7 @@
 /obj/item/device/bot_controller
 	name = "remote control"
 	desc = "Used to control something remotely. Even has a tiny screen!"
-	icon = 'icons/obj/surgery.dmi'
+	icon = 'icons/obj/surgery_tools.dmi'
 	icon_state = "autopsy_scanner"
 	w_class = ITEM_SIZE_SMALL
 	slot_flags = SLOT_BELT
@@ -182,7 +182,7 @@
 /obj/item/device/bot_kit
 	name = "Remote-Bot Kit"
 	desc = "The cover says 'control your own cardboard nuclear powered robot. Comes with real plutonium!"
-	icon = 'icons/obj/storage.dmi'
+	icon = 'icons/obj/boxes.dmi'
 	icon_state = "remotebot"
 
 /obj/item/device/bot_kit/attack_self(mob/living/user)

@@ -55,7 +55,7 @@
 	name = "alien visor"
 	icon_state = "vox-carapace"
 	desc = "A glowing visor. The light slowly pulses, and seems to follow you."
-	light_overlay = "invis_light"
+	light_overlay = "helmet_light_alt"
 
 /obj/item/clothing/suit/space/vox/carapace
 	name = "alien carapace armor"
@@ -66,7 +66,7 @@
 	name = "alien stealth helmet"
 	icon_state = "vox-stealth"
 	desc = "A smoothly contoured, matte-black alien helmet."
-	light_overlay = "invis_light"
+	light_overlay = "helmet_light_alt"
 
 /obj/item/clothing/suit/space/vox/stealth
 	name = "alien stealth suit"
@@ -77,7 +77,7 @@
 	name = "alien goggled helmet"
 	icon_state = "vox-medic"
 	desc = "An alien helmet with enormous goggled lenses."
-	light_overlay = "invis_light"
+	light_overlay = "helmet_light_alt"
 
 /obj/item/clothing/suit/space/vox/medic
 	name = "alien armor"

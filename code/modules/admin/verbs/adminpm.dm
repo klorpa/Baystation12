@@ -105,7 +105,7 @@
 		recieve_message = "[SPAN_CLASS("pm", "[SPAN_CLASS("howto", "<b>-- Click the [recieve_pm_type]'s name to reply --</b>")]")]\n"
 		if(C.adminhelped)
 			to_chat(C, recieve_message)
-			C.adminhelped = 0
+			C.adminhelped = FALSE
 
 	var/sender_message = "[create_text_tag("pm_out_alt", "PM", src)] to [SPAN_CLASS("name", get_options_bar(C, holder ? 1 : 0, holder ? 1 : 0, 1))]"
 	if(holder)
@@ -128,11 +128,12 @@
 	//play the receiving admin the adminhelp sound (if they have them enabled)
 	//non-admins shouldn't be able to disable this
 	if(C.get_preference_value(/datum/client_preference/staff/play_adminhelp_ping) == GLOB.PREF_HEAR)
-		sound_to(C, 'sound/ui/pm-notify.ogg')
+		sound_to(C, sound('sound/ui/pm-notify.ogg', volume = 70))
 
 	log_admin("PM: [key_name(src)]->[key_name(C)]: [msg]")
 	send_to_admin_discord(EXCOM_MSG_AHELP, "PM: [key_name(src, highlight_special_characters = FALSE)]->[key_name(C, highlight_special_characters = FALSE)]:[html_decode(msg)]")
 
+	ticket.last_message_time = world.time
 	ticket.msgs += new /datum/ticket_msg(src.ckey, C.ckey, msg)
 	update_ticket_panels()
 

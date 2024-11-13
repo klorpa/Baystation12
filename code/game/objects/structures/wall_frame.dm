@@ -4,7 +4,7 @@
 /obj/structure/wall_frame
 	name = "low wall"
 	desc = "A low wall section which serves as the base of windows, amongst other things."
-	icon = 'icons/obj/wall_frame.dmi'
+	icon = 'icons/obj/structures/wall_frame.dmi'
 	icon_state = "frame"
 
 	atom_flags = ATOM_FLAG_NO_TEMP_CHANGE | ATOM_FLAG_CLIMBABLE | ATOM_FLAG_CAN_BE_PAINTED | ATOM_FLAG_ADJACENT_EXCEPTION
@@ -93,7 +93,7 @@
 			SPAN_NOTICE("\The [user] starts dismantling \the [src] with \a [tool]."),
 			SPAN_NOTICE("You start dismantling \the [src] with \the [tool].")
 		)
-		if (!user.do_skilled(4 SECONDS, SKILL_CONSTRUCTION, src, do_flags = DO_REPAIR_CONSTRUCT) || !user.use_sanity_check(src, tool))
+		if (!user.do_skilled((tool.toolspeed * 4) SECONDS, SKILL_CONSTRUCTION, src, do_flags = DO_REPAIR_CONSTRUCT) || !user.use_sanity_check(src, tool))
 			return TRUE
 		playsound(src, 'sound/items/Ratchet.ogg', 50, TRUE)
 		user.visible_message(
@@ -113,7 +113,7 @@
 			SPAN_NOTICE("\The [user] starts slicing \the [src] apart with \a [tool]."),
 			SPAN_NOTICE("You start slicing \the [src] apart with \the [tool].")
 		)
-		if (!user.do_skilled(2 SECONDS, SKILL_CONSTRUCTION, src, do_flags = DO_REPAIR_CONSTRUCT) || !user.use_sanity_check(src, tool))
+		if (!user.do_skilled((tool.toolspeed * 2) SECONDS, SKILL_CONSTRUCTION, src, do_flags = DO_REPAIR_CONSTRUCT) || !user.use_sanity_check(src, tool))
 			return TRUE
 		playsound(src, 'sound/items/Welder.ogg', 50, TRUE)
 		user.visible_message(
@@ -136,7 +136,7 @@
 // icon related
 
 /obj/structure/wall_frame/on_update_icon()
-	overlays.Cut()
+	ClearOverlays()
 	var/image/I
 
 	var/new_color = (paint_color ? paint_color : material.icon_colour)
@@ -144,19 +144,19 @@
 
 	for(var/i = 1 to 4)
 		if(other_connections[i] != "0")
-			I = image('icons/obj/wall_frame.dmi', "frame_other[connections[i]]", dir = SHIFTL(1, i - 1))
+			I = image('icons/obj/structures/wall_frame.dmi', "frame_other[connections[i]]", dir = SHIFTL(1, i - 1))
 		else
-			I = image('icons/obj/wall_frame.dmi', "frame[connections[i]]", dir = SHIFTL(1, i - 1))
-		overlays += I
+			I = image('icons/obj/structures/wall_frame.dmi', "frame[connections[i]]", dir = SHIFTL(1, i - 1))
+		AddOverlays(I)
 
 	if(stripe_color)
 		for(var/i = 1 to 4)
 			if(other_connections[i] != "0")
-				I = image('icons/obj/wall_frame.dmi', "stripe_other[connections[i]]", dir = SHIFTL(1, i - 1))
+				I = image('icons/obj/structures/wall_frame.dmi', "stripe_other[connections[i]]", dir = SHIFTL(1, i - 1))
 			else
-				I = image('icons/obj/wall_frame.dmi', "stripe[connections[i]]", dir = SHIFTL(1, i - 1))
+				I = image('icons/obj/structures/wall_frame.dmi', "stripe[connections[i]]", dir = SHIFTL(1, i - 1))
 			I.color = stripe_color
-			overlays += I
+			AddOverlays(I)
 
 /obj/structure/wall_frame/hull/Initialize()
 	. = ..()
@@ -193,6 +193,9 @@
 
 /obj/structure/wall_frame/titanium
 	material = MATERIAL_TITANIUM
+
+/obj/structure/wall_frame/ocp
+	material = MATERIAL_OSMIUM_CARBIDE_PLASTEEL
 
 /obj/structure/wall_frame/hull
 	paint_color = COLOR_SOL

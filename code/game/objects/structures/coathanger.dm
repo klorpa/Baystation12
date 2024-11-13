@@ -1,7 +1,7 @@
 /obj/structure/coatrack
 	name = "coat rack"
 	desc = "Rack that holds coats."
-	icon = 'icons/obj/coatrack.dmi'
+	icon = 'icons/obj/structures/coatrack.dmi'
 	icon_state = "coatrack0"
 	var/obj/item/clothing/suit/coat
 	var/list/allowed = list(/obj/item/clothing/suit/storage/toggle/labcoat, /obj/item/clothing/suit/storage/det_trench)
@@ -50,10 +50,10 @@
 		return 1
 
 /obj/structure/coatrack/on_update_icon()
-	overlays.Cut()
+	ClearOverlays()
 	if (istype(coat, /obj/item/clothing/suit/storage/toggle/labcoat))
-		overlays += image(icon, icon_state = "coat_lab")
+		AddOverlays(image(icon, icon_state = "coat_lab"))
 	if (istype(coat, /obj/item/clothing/suit/storage/toggle/labcoat/cmo))
-		overlays += image(icon, icon_state = "coat_cmo")
+		AddOverlays(image(icon, icon_state = "coat_cmo"))
 	if (istype(coat, /obj/item/clothing/suit/storage/det_trench))
-		overlays += image(icon, icon_state = "coat_det")
+		AddOverlays(image(icon, icon_state = "coat_det"))

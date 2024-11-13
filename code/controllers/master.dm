@@ -70,7 +70,6 @@ var/global/datum/controller/master/Master = new
 		global.diary = file("data/logs/[time2text(world.timeofday, "YYYY/MM/DD", -world.timezone)].log")
 	if (!config)
 		config = new
-		world.fps = config.fps
 	total_run_times = list()
 	// Highlander-style: there can only be one! Kill off the old and replace it with the new.
 	var/list/_subsystems = list()
@@ -202,6 +201,7 @@ var/global/datum/controller/master/Master = new
 
 	if (!current_runlevel)
 		sound_to(world, sound('sound/ui/lobby-notify.ogg', volume = 40))
+		callHook("game_ready")
 		SetRunLevel(RUNLEVEL_LOBBY)
 
 	// Sort subsystems by display setting for easy access.
@@ -589,13 +589,20 @@ var/global/datum/controller/master/Master = new
 	if (PreventUpdateStat(time))
 		return ..()
 	..({"\
-		Hub: [config.hub_visible ? "Y" : "N"]  \
-		FPS: [world.fps]  \
-		Ticks: [world.time / world.tick_lag]  \
 		Alive: [Master.processing ? "Y" : "N"]  \
+		Ticks: [world.time / world.tick_lag]  \
 		Cycle: [Master.iteration]  \
-		Drift: [Round(Master.tickdrift)] | [Percent(Master.tickdrift, world.time / world.tick_lag, 1)]%
-	"})
+		Drift: [Round(Master.tickdrift)] | [Percent(Master.tickdrift, world.time / world.tick_lag, 1)]%\n\
+		FPS: [world.fps]  \
+		CPU: [round(world.cpu, 0.1)]%  \
+		MAP: [round(world.map_cpu, 0.1)]%  \
+		Atoms: [length(world.contents)]\n\
+		Server: [world.byond_version].[world.byond_build]  \
+		World Size: <[world.maxx],[world.maxy],[world.maxz]>\n\
+		Hub: [config.hub_visible ? "Y" : "N"]  \
+		Reachable: [world.reachable ? "Y" : "N"]  \
+		Address: [world.internet_address]:[world.port]\
+	"}) //515: add 'Compiler: [BYOND_VERSION].[BYOND_BUILD]' after Server
 
 
 /datum/controller/master/StartLoadingMap()

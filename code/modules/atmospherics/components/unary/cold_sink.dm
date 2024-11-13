@@ -4,8 +4,8 @@
 /obj/machinery/atmospherics/unary/freezer
 	name = "gas cooling system"
 	desc = "Cools gas when connected to a pipe network."
-	icon = 'icons/obj/Cryogenic2.dmi'
-	icon_state = "freezer_0"
+	icon = 'icons/obj/atmospherics/temperature_machines.dmi'
+	icon_state = "freezer"
 	density = TRUE
 	anchored = TRUE
 	use_power = POWER_USE_OFF
@@ -49,14 +49,19 @@
 	update_icon()
 
 /obj/machinery/atmospherics/unary/freezer/on_update_icon()
-	if(node)
-		if(use_power && cooling)
-			icon_state = "freezer_1"
-		else
-			icon_state = "freezer"
-	else
-		icon_state = "freezer_0"
-	return
+	ClearOverlays()
+	if(panel_open)
+		AddOverlays("[icon_state]_panel")
+	if(is_powered())
+		AddOverlays(emissive_appearance(icon, "[icon_state]_lights"))
+		AddOverlays("[icon_state]_lights")
+		if(node)
+			if(use_power && cooling)
+				AddOverlays(emissive_appearance(icon, "[icon_state]_lights_working"))
+				AddOverlays("[icon_state]_lights_working")
+			else
+				AddOverlays(emissive_appearance(icon, "[icon_state]_lights_standby"))
+				AddOverlays("[icon_state]_lights_standby")
 
 /obj/machinery/atmospherics/unary/freezer/interface_interact(mob/user)
 	ui_interact(user)

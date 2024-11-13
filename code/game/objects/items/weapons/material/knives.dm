@@ -2,7 +2,7 @@
 /obj/item/material/knife //master obj
 	name = "the concept of a knife"
 	desc = "You call that a knife? This is a master item - berate the admin or mapper who spawned this!"
-	icon = 'icons/obj/knife.dmi'
+	icon = 'icons/obj/weapons/knife.dmi'
 	icon_state = "knife"
 	item_state = "knife"
 	max_force = 15
@@ -16,18 +16,6 @@
 	sharp = TRUE
 	edge = TRUE
 	item_flags = ITEM_FLAG_CAN_HIDE_IN_SHOES
-
-/obj/item/material/knife/attack(mob/living/carbon/M, mob/living/carbon/user, target_zone)
-	if(!istype(M))
-		return ..()
-
-	if(user.a_intent != I_HELP)
-		if(target_zone == BP_EYES)
-			if((MUTATION_CLUMSY in user.mutations) && prob(50))
-				M = user
-			return eyestab(M, user)
-
-	return ..()
 
 //table knives
 /obj/item/material/knife/table
@@ -97,7 +85,7 @@
 /obj/item/material/knife/ritual
 	name = "ritual knife"
 	desc = "The unearthly energies that once powered this blade are now dormant."
-	icon = 'icons/obj/wizard.dmi'
+	icon = 'icons/obj/cult.dmi'
 	icon_state = "render"
 	base_parry_chance = 30
 	applies_material_colour = FALSE

@@ -66,7 +66,7 @@ GLOBAL_LIST_INIT(rpd_pipe_selection_skilled, list(
 /obj/item/rpd
 	name = "rapid piping device"
 	desc = "Portable, complex and deceptively heavy, it's the cousin of the RCD, use to dispense piping on the move."
-	icon = 'icons/obj/tools.dmi'//Needs proper icon
+	icon = 'icons/obj/tools/rpd.dmi'//Needs proper icon
 	icon_state = "rpd"
 	force = 12
 	throwforce = 15
@@ -75,14 +75,14 @@ GLOBAL_LIST_INIT(rpd_pipe_selection_skilled, list(
 	w_class = ITEM_SIZE_NORMAL
 	origin_tech = list(TECH_ENGINEERING = 5, TECH_MATERIAL = 4)
 
-	var/datum/effect/effect/system/spark_spread/spark_system
+	var/datum/effect/spark_spread/spark_system
 	var/datum/pipe/P
 	var/pipe_color = "white"
 	var/datum/browser/popup
 
 /obj/item/rpd/Initialize()
 	. = ..()
-	spark_system = new /datum/effect/effect/system/spark_spread
+	spark_system = new /datum/effect/spark_spread
 	spark_system.set_up(5, 0, src)
 	spark_system.attach(src)
 	var/list/L = GLOB.rpd_pipe_selection[GLOB.rpd_pipe_selection[1]]
@@ -108,7 +108,7 @@ GLOBAL_LIST_INIT(rpd_pipe_selection_skilled, list(
 
 /obj/item/rpd/interact(mob/user)
 	popup = new (user, "Pipe List", "[src] menu")
-	popup.set_content(get_console_data(user.skill_check(SKILL_ATMOS,SKILL_EXPERT) ? GLOB.rpd_pipe_selection_skilled : GLOB.rpd_pipe_selection, TRUE))
+	popup.set_content(get_console_data(user.skill_check(SKILL_ATMOS,SKILL_EXPERIENCED) ? GLOB.rpd_pipe_selection_skilled : GLOB.rpd_pipe_selection, TRUE))
 	popup.open()
 
 /obj/item/rpd/OnTopic(user, list/href_list)
@@ -131,26 +131,29 @@ GLOBAL_LIST_INIT(rpd_pipe_selection_skilled, list(
 	if(popup)
 		popup.close()
 
-/obj/item/rpd/afterattack(atom/A, mob/user, proximity)
-	if(!proximity) return
-	if(istype(A, /obj/item/pipe))
+/obj/item/rpd/use_after(atom/A, mob/living/user, click_parameters)
+	if (istype(A, /obj/item/pipe))
 		recycle(A,user)
+		return TRUE
 	else
-		if(user.skill_fail_prob(SKILL_ATMOS, 80, SKILL_ADEPT))
+		if (user.skill_fail_prob(SKILL_ATMOS, 80, SKILL_TRAINED))
 			var/C = pick(GLOB.rpd_pipe_selection)
 			P = pick(GLOB.rpd_pipe_selection[C])
-			user.visible_message(SPAN_WARNING("[user] cluelessly fumbles with \the [src]."))
+			user.visible_message(SPAN_WARNING("\The [user] cluelessly fumbles with \the [src]."))
 		var/turf/T = get_turf(A)
-		if(!T.Adjacent(src.loc)) return		//checks so it can't pipe through window and such
+		if (!T.Adjacent(loc))
+			return TRUE
 
 		playsound(get_turf(user), 'sound/machines/click.ogg', 50, 1)
-		if(T.is_wall())	//pipe through walls!
-			if(!do_after(user, 3 SECONDS, T, DO_PUBLIC_UNIQUE))
-				return
-			playsound(get_turf(user), 'sound/items/Deconstruct.ogg', 50, 1)
+		if (T.is_wall())
+			if (!do_after(user, 3 SECONDS, T, DO_PUBLIC_UNIQUE))
+				return TRUE
+			playsound (get_turf(user), 'sound/items/Deconstruct.ogg', 50, 1)
 
 		P.Build(P, T, pipe_colors[pipe_color])
-		if(prob(20)) src.spark_system.start()
+		if (prob(20))
+			spark_system.start()
+		return TRUE
 
 /obj/item/rpd/examine(mob/user, distance)
 	. = ..()
@@ -164,13 +167,14 @@ GLOBAL_LIST_INIT(rpd_pipe_selection_skilled, list(
 	interact(user)
 	add_fingerprint(user)
 
-/obj/item/rpd/attackby(obj/item/W, mob/user)
-	if(istype(W, /obj/item/pipe))
-		if(!user.unEquip(W))
-			return
-		recycle(W,user)
-		return
-	..()
+/obj/item/rpd/use_tool(obj/item/item, mob/living/user, list/click_params)
+	if(istype(item, /obj/item/pipe))
+		if(!user.unEquip(item))
+			FEEDBACK_UNEQUIP_FAILURE(user, item)
+			return TRUE
+		recycle(item,user)
+		return TRUE
+	return ..()
 
 /obj/item/rpd/proc/recycle(obj/item/W,mob/user)
 	if(!user.skill_check(SKILL_ATMOS,SKILL_BASIC))

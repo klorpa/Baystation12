@@ -27,11 +27,11 @@
 /obj/machinery/power/supermatter
 	name = "supermatter core"
 	desc = "A strangely translucent and iridescent crystal. <span class='danger'>You get headaches just from looking at it.</span>"
-	icon = 'icons/obj/supermatter.dmi'
+	icon = 'icons/obj/machines/power/supermatter.dmi'
 	icon_state = "supermatter"
 	density = TRUE
 	anchored = FALSE
-	light_outer_range = 4
+	light_range = 4
 
 	layer = ABOVE_HUMAN_LAYER
 
@@ -105,7 +105,7 @@
 	var/aw_delam = FALSE
 	var/aw_EPR = FALSE
 
-	var/list/threshholds = list( // List of lists defining the amber/red labeling threshholds in readouts. Numbers are minimum red and amber and maximum amber and red, in that order
+	var/list/threshholds = list( // List of lists defining the amber/red labeling thresholds in readouts. Numbers are minimum red and amber and maximum amber and red, in that order
 		list("name" = SUPERMATTER_DATA_EER,         "min_h" = -1, "min_l" = -1,  "max_l" = 150,  "max_h" = 300),
 		list("name" = SUPERMATTER_DATA_TEMPERATURE, "min_h" = -1, "min_l" = -1,  "max_l" = 4000, "max_h" = 5000),
 		list("name" = SUPERMATTER_DATA_PRESSURE,    "min_h" = -1, "min_l" = -1,  "max_l" = 5000, "max_h" = 10000),
@@ -192,7 +192,7 @@
 	if(exploded)
 		return
 
-	log_and_message_admins("Supermatter delaminating at [x] [y] [z]")
+	log_and_message_admins("Supermatter delaminating at [x] [y] [z]", null, src)
 	anchored = TRUE
 	grav_pulling = 1
 	exploded = 1
@@ -256,7 +256,7 @@
 
 /obj/machinery/power/supermatter/examine(mob/user)
 	. = ..()
-	if(user.skill_check(SKILL_ENGINES, SKILL_EXPERT))
+	if(user.skill_check(SKILL_ENGINES, SKILL_EXPERIENCED))
 		var/integrity_message
 		switch(get_integrity())
 			if(0 to 30)
@@ -266,7 +266,7 @@
 			else
 				integrity_message = "At a glance, it seems to be in sound shape."
 		to_chat(user, integrity_message)
-		if(user.skill_check(SKILL_ENGINES, SKILL_PROF))
+		if(user.skill_check(SKILL_ENGINES, SKILL_MASTER))
 			var/display_power = power
 			display_power *= (0.85 + 0.3 * rand())
 			display_power = round(display_power, 20)
@@ -274,8 +274,8 @@
 
 //Changes color and luminosity of the light to these values if they were not already set
 /obj/machinery/power/supermatter/proc/shift_light(lum, clr)
-	if(lum != light_outer_range || clr != light_color)
-		set_light(1, 0.1, lum, l_color = clr)
+	if(lum != light_range || clr != light_color)
+		set_light(lum, 1, l_color = clr)
 
 /obj/machinery/power/supermatter/proc/get_integrity()
 	var/integrity = damage / explosion_point
@@ -475,8 +475,9 @@
 	ui_interact(user)
 
 /obj/machinery/power/supermatter/attack_hand(mob/user as mob)
+	var/datum/pronouns/pronouns = user.choose_from_pronouns()
 	user.visible_message(
-		SPAN_WARNING("\The [user] reaches out and touches \the [src], inducing a resonance. For a brief instant, \his body glows brilliantly, then flashes into ash."),
+		SPAN_WARNING("\The [user] reaches out and touches \the [src], inducing a resonance. For a brief instant, [pronouns.his] body glows brilliantly, then flashes into ash."),
 		SPAN_DANGER(FONT_LARGE("You reach out and touch \the [src]. Instantly, you feel a curious sensation as your body turns into new and exciting forms of plasma. That was not a wise decision.")),
 		SPAN_WARNING("You hear an unearthly ringing, then what sounds like a shrilling kettle as you are washed with a wave of heat.")
 	)
@@ -510,7 +511,7 @@
 		ui.set_auto_update(1)
 
 
-/obj/machinery/power/supermatter/attackby(obj/item/W as obj, mob/living/user as mob)
+/obj/machinery/power/supermatter/use_tool(obj/item/W, mob/living/user, list/click_params)
 	if(istype(W, /obj/item/tape_roll))
 		to_chat(user, SPAN_NOTICE("You repair some of the damage to \the [src] with \the [W]."))
 		damage = max(damage - 10, 0)
@@ -522,18 +523,21 @@
 		SPAN_WARNING("For a brief moment, you hear an oppressive, unnatural silence.")
 	)
 
+	user.apply_damage(150, DAMAGE_RADIATION, damage_flags = DAMAGE_FLAG_DISPERSED)
 	if (user.drop_from_inventory(W))
 		Consume(W)
-
-	user.apply_damage(150, DAMAGE_RADIATION, damage_flags = DAMAGE_FLAG_DISPERSED)
+		return TRUE
+	return ..()
 
 
 /obj/machinery/power/supermatter/Bumped(atom/AM as mob|obj)
 	if(istype(AM, /obj/effect))
 		return
 	if(istype(AM, /mob/living))
+		var/mob/victim = AM
+		var/datum/pronouns/pronouns = victim.choose_from_pronouns()
 		AM.visible_message(
-			SPAN_WARNING("\The [AM] slams into \the [src], inducing a resonance. For a brief instant, \his body glows brilliantly, then flashes into ash."),
+			SPAN_WARNING("\The [AM] slams into \the [src], inducing a resonance. For a brief instant, [pronouns.his] body glows brilliantly, then flashes into ash."),
 			SPAN_DANGER(FONT_LARGE("You slam into \the [src], and your mind fills with unearthly shrieking. Your vision floods with light as your body instantly dissolves into dust.")),
 			SPAN_WARNING("You hear an unearthly ringing, then what sounds like a shrilling kettle as you are washed with a wave of heat.")
 		)
@@ -584,7 +588,7 @@
 			power *= 3
 		if(EX_ACT_LIGHT)
 			power *= 2
-	log_and_message_admins("WARN: Explosion near the Supermatter! New EER: [power].")
+	log_and_message_admins("WARN: Explosion near the Supermatter! New EER: [power].", null, src)
 
 /obj/machinery/power/supermatter/shard //Small subtype, less efficient and more sensitive, but less boom.
 	name = "supermatter shard"
@@ -612,7 +616,7 @@
 
 /obj/machinery/power/supermatter/randomsample/Initialize()
 	. = ..()
-	nitrogen_retardation_factor = rand(0.01, 1)	//Higher == N2 slows reaction more
+	nitrogen_retardation_factor = Frand(0.01, 1)	//Higher == N2 slows reaction more
 	thermal_release_modifier = rand(100, 1000000)		//Higher == more heat released during reaction
 	phoron_release_modifier = rand(0, 100000)		//Higher == less phoron released by reaction
 	oxygen_release_modifier = rand(0, 100000)		//Higher == less oxygen released at high temperature/power

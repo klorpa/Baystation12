@@ -1,15 +1,3 @@
-/*
- * A large number of misc global procs.
- */
-
-/proc/subtypesof(datum/thing)
-	RETURN_TYPE(/list)
-	if (ispath(thing))
-		return typesof(thing) - thing
-	if (istype(thing))
-		return typesof(thing) - thing.type
-	return list()
-
 //Checks if all high bits in req_mask are set in bitfield
 #define BIT_TEST_ALL(bitfield, req_mask) ((~(bitfield) & (req_mask)) == 0)
 
@@ -160,7 +148,7 @@ Turf and target are separate in case you want to teleport some distance from a t
 
 
 /proc/LinkBlocked(turf/A, turf/B)
-	if(A == null || B == null) return 1
+	if(isnull(A) || isnull(B)) return 1
 	var/adir = get_dir(A,B)
 	var/rdir = get_dir(B,A)
 	if((adir & (NORTH|SOUTH)) && (adir & (EAST|WEST)))	//	diagonal
@@ -631,7 +619,7 @@ Turf and target are separate in case you want to teleport some distance from a t
 		var/area/areatemp = areatype
 		areatype = areatemp.type
 
-	var/list/areas = new/list()
+	var/list/areas = list()
 	for(var/area/N in world)
 		if(istype(N, areatype)) areas += N
 	return areas
@@ -648,7 +636,7 @@ Turf and target are separate in case you want to teleport some distance from a t
 	if(!ispath(areatype, /area))
 		return null
 
-	var/list/atoms = new/list()
+	var/list/atoms = list()
 	for(var/area/N in world)
 		if(istype(N, areatype))
 			for(var/atom/A in N)
@@ -689,7 +677,8 @@ GLOBAL_LIST_INIT(duplicate_object_disallowed_vars, list(
 	"key",
 	"group",
 	"ai_holder",
-	"natural_weapon"
+	"natural_weapon",
+	"extensions"
 ))
 
 
@@ -763,7 +752,6 @@ GLOBAL_LIST_INIT(duplicate_object_disallowed_vars, list(
 					var/old_dir1 = source_turf.dir
 					var/old_icon_state1 = source_turf.icon_state
 					var/old_icon1 = source_turf.icon
-					var/old_overlays = source_turf.overlays.Copy()
 					var/old_underlays = source_turf.underlays.Copy()
 					if (plating_required)
 						if (istype(target_turf, get_base_turf_by_area(target_turf)))
@@ -773,7 +761,7 @@ GLOBAL_LIST_INIT(duplicate_object_disallowed_vars, list(
 					temp_target_turf.set_dir(old_dir1)
 					temp_target_turf.icon_state = old_icon_state1
 					temp_target_turf.icon = old_icon1
-					temp_target_turf.overlays = old_overlays
+					temp_target_turf.CopyOverlays(source_turf)
 					temp_target_turf.underlays = old_underlays
 					for (var/obj/obj in source_turf)
 						if (!obj.simulated)
@@ -797,9 +785,6 @@ GLOBAL_LIST_INIT(duplicate_object_disallowed_vars, list(
 	var/dy = abs(B.y - A.y)
 	return get_dir(A, B) & (rand() * (dx+dy) < dy ? 3 : 12)
 
-//chances are 1:value. anyprob(1) will always return true
-/proc/anyprob(value)
-	return (rand(1,value)==value)
 
 /proc/view_or_range(distance = world.view , center = usr , type)
 	RETURN_TYPE(/list)
@@ -901,31 +886,23 @@ GLOBAL_LIST_INIT(duplicate_object_disallowed_vars, list(
 	return 0
 
 
-//For items that can puncture e.g. thick plastic but aren't necessarily sharp
-//Returns 1 if the given item is capable of popping things like balloons, inflatable barriers, or cutting police tape.
+/**
+ * For items that can puncture e.g. thick plastic but aren't necessarily sharp.
+ *
+ * Returns TRUE if the given item is capable of popping things like balloons, inflatable barriers, or cutting police tape. Also used to determine what items can eyestab.
+ */
 /obj/item/proc/can_puncture()
-	return src.sharp
-
-/obj/item/screwdriver/can_puncture()
-	return 1
-
-/obj/item/pen/can_puncture()
-	return 1
+	if(sharp || puncture) return TRUE
+	return FALSE
 
 /obj/item/weldingtool/can_puncture()
-	return 1
-
-/obj/item/screwdriver/can_puncture()
-	return 1
-
-/obj/item/shovel/can_puncture() //includes spades
-	return 1
+	return welding
 
 /obj/item/flame/can_puncture()
-	return src.lit
+	return lit
 
 /obj/item/clothing/mask/smokable/cigarette/can_puncture()
-	return src.lit
+	return lit
 
 //check if mob is lying down on something we can operate him on.
 /proc/can_operate(mob/living/carbon/M, mob/living/carbon/user)
@@ -938,7 +915,7 @@ GLOBAL_LIST_INIT(duplicate_object_disallowed_vars, list(
 		. = TRUE
 	if(locate(/obj/structure/table, T))
 		. = TRUE
-	if(locate(/obj/effect/rune, T))
+	if(locate(/obj/rune, T))
 		. = TRUE
 
 	if(M == user)
@@ -1048,23 +1025,9 @@ GLOBAL_DATUM_INIT(dview_mob, /mob/dview, new)
 	. = view(range, GLOB.dview_mob)
 	GLOB.dview_mob.loc = null
 
-/mob/dview
-	invisibility = 101
-	density = FALSE
-
-	anchored = TRUE
-	simulated = FALSE
-
-	see_in_dark = 1e6
-
-	virtual_mob = null
-
-/mob/dview/Destroy(forced)
-	if(forced)
-		GLOB.dview_mob = new/mob/dview()
-		return ..()
-	crash_with("Prevented attempt to delete dview mob: [log_info_line(src)]")
-	return QDEL_HINT_LETMELIVE // Prevents destruction
+/mob/dview/Destroy()
+	SHOULD_CALL_PARENT(FALSE)
+	return QDEL_HINT_LETMELIVE
 
 /**
  * Sets the atom's color and light values to those of `origin`.
@@ -1077,7 +1040,7 @@ GLOBAL_DATUM_INIT(dview_mob, /mob/dview, new)
 /atom/proc/get_light_and_color(atom/origin)
 	if(origin)
 		color = origin.color
-		set_light(origin.light_max_bright, origin.light_inner_range, origin.light_outer_range, origin.light_falloff_curve)
+		set_light(origin.light_range, origin.light_power)
 
 
 // call to generate a stack trace and print to runtime logs

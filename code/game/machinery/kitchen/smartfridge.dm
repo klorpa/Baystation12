@@ -3,7 +3,7 @@
 */
 /obj/machinery/smartfridge
 	name = "\improper SmartFridge"
-	icon = 'icons/obj/vending.dmi'
+	icon = 'icons/obj/machines/vending.dmi'
 	icon_state = "fridge_sci"
 	layer = BELOW_OBJ_LAYER
 	density = TRUE
@@ -155,7 +155,7 @@
 		update_icon()
 
 /obj/machinery/smartfridge/drying_rack/on_update_icon()
-	overlays.Cut()
+	ClearOverlays()
 	if(inoperable())
 		if(length(contents))
 			icon_state = "drying_rack-plant-off"
@@ -215,17 +215,17 @@
 		src.throw_item()
 
 /obj/machinery/smartfridge/on_update_icon()
-	overlays.Cut()
+	ClearOverlays()
 	if(inoperable())
 		icon_state = "[icon_base]-off"
 	else
 		icon_state = icon_base
 
 	if(is_secure)
-		overlays += image(icon, "[icon_base]-sidepanel")
+		AddOverlays(image(icon, "[icon_base]-sidepanel"))
 
 	if(panel_open)
-		overlays += image(icon, "[icon_base]-panel")
+		AddOverlays(image(icon, "[icon_base]-panel"))
 
 	var/image/I
 	var/is_off = ""
@@ -244,41 +244,42 @@
 			I = image(icon, "[icon_contents]-3[is_off]")
 		else
 			I = image(icon, "[icon_contents]-4[is_off]")
-	overlays += I
+	AddOverlays(I)
 
 	// Fridge top
 	I = image(icon, "[icon_base]-top")
 	I.pixel_z = 32
 	I.layer = ABOVE_WINDOW_LAYER
-	overlays += I
+	AddOverlays(I)
 
 /*******************
 *   Item Adding
 ********************/
 
-/obj/machinery/smartfridge/attackby(obj/item/O as obj, mob/user as mob)
+/obj/machinery/smartfridge/use_tool(obj/item/O, mob/living/user, list/click_params)
 	if(isScrewdriver(O))
 		panel_open = !panel_open
 		user.visible_message("[user] [panel_open ? "opens" : "closes"] the maintenance panel of \the [src].", "You [panel_open ? "open" : "close"] the maintenance panel of \the [src].")
 		update_icon()
 		SSnano.update_uis(src)
-		return
+		return TRUE
 
 	if(isMultitool(O) || isWirecutter(O))
 		if(panel_open)
 			attack_hand(user)
-		return
+		return TRUE
 
 	if(!is_powered())
 		to_chat(user, SPAN_NOTICE("\The [src] is unpowered and useless."))
-		return
+		return TRUE
 
 	if(accept_check(O))
 		if(!user.unEquip(O))
-			return
+			return TRUE
 		stock_item(O)
 		user.visible_message(SPAN_NOTICE("\The [user] has added \the [O] to \the [src]."), SPAN_NOTICE("You add \the [O] to \the [src]."))
 		update_icon()
+		return TRUE
 
 	else if(istype(O, /obj/item/storage))
 		var/obj/item/storage/bag/P = O
@@ -293,13 +294,8 @@
 			user.visible_message(SPAN_NOTICE("\The [user] loads \the [src] with the contents of \the [P]."), SPAN_NOTICE("You load \the [src] with the contents of \the [P]."))
 			if(length(P.contents) > 0)
 				to_chat(user, SPAN_NOTICE("Some items were refused."))
-
-	else if ((obj_flags & OBJ_FLAG_ANCHORABLE) && isWrench(O))
-		return ..()
-
-	else
-		to_chat(user, SPAN_NOTICE("\The [src] smartly refuses [O]."))
-	return 1
+		return TRUE
+	return ..()
 
 /obj/machinery/smartfridge/secure/emag_act(remaining_charges, mob/user)
 	if(!emagged)

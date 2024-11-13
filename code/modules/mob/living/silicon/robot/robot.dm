@@ -13,7 +13,7 @@
 	mob_push_flags = ~HEAVY //trundle trundle
 	skillset = /datum/skillset/silicon/robot
 
-	blocks_emissive = EMISSIVE_BLOCK_UNIQUE
+	blocks_emissive = EMISSIVE_BLOCK_NONE
 
 	var/lights_on = FALSE
 	var/used_power_this_tick = 0
@@ -23,7 +23,7 @@
 	var/custom_sprite = FALSE
 	var/crisis //Admin-settable for combat module use.
 	var/crisis_override = FALSE
-	var/integrated_light_max_bright = 0.75
+	var/integrated_light_power = 0.75
 	var/datum/wires/robot/wires
 	var/module_category = ROBOT_MODULE_TYPE_GROUNDED
 	var/dismantle_type = /obj/item/robot_parts/robot_suit
@@ -79,8 +79,7 @@
 	var/list/req_access = list(access_robotics)
 	var/ident = 0
 	var/modtype = "Default"
-	var/datum/effect/effect/system/ion_trail_follow/ion_trail = null
-	var/datum/effect/effect/system/spark_spread/spark_system //So they can initialize sparks whenever/N
+	var/datum/effect/spark_spread/spark_system //So they can initialize sparks whenever/N
 	var/lawupdate = TRUE //Cyborgs will sync their laws with their AI by default
 	var/lockcharge //If a robot is locked down
 	var/scrambledcodes = FALSE // Used to determine if a borg shows up on the robotics console.  Setting to one hides them.
@@ -97,7 +96,7 @@
 
 /mob/living/silicon/robot/Initialize()
 	. = ..()
-	spark_system = new /datum/effect/effect/system/spark_spread()
+	spark_system = new /datum/effect/spark_spread()
 	spark_system.set_up(5, 0, src)
 	spark_system.attach(src)
 
@@ -409,9 +408,9 @@
 /mob/living/silicon/robot/proc/update_robot_light()
 	if(lights_on)
 		if(intenselight)
-			set_light(1, 2, 6)
+			set_light(6, 1)
 		else
-			set_light(0.75, 1, 4)
+			set_light(4, 0.75)
 	else
 		set_light(0)
 
@@ -463,15 +462,6 @@
 	return 2
 
 
-/mob/living/silicon/robot/use_user(obj/item/tool, list/click_params)
-	// Welding Tool - Block self repair
-	if (isWelder(tool))
-		FEEDBACK_FAILURE(src, "You lack the reach to be able to repair yourself.")
-		return TRUE
-
-	return ..()
-
-
 /mob/living/silicon/robot/post_use_item(obj/item/tool, mob/user, interaction_handled, use_call, click_params)
 	..()
 
@@ -491,7 +481,7 @@
 			if (component.installed)
 				USE_FEEDBACK_FAILURE("\The [src] already has \a [component.wrapped] installed in \the [component] slot.")
 				return TRUE
-			if (!user.unEquip(tool, component))
+			if (!user.unEquip(tool, src))
 				FEEDBACK_UNEQUIP_FAILURE(user, tool)
 				return TRUE
 			component.installed = TRUE
@@ -524,7 +514,7 @@
 			SPAN_NOTICE("\The [user] starts repairing some of the electronics in \the [src] with [cable.get_vague_name(FALSE)]."),
 			SPAN_NOTICE("You start repairing some of the electronics in \the [src] with [cable.get_exact_name(1)]."),
 		)
-		if (!do_after(user, 1 SECOND, src, DO_PUBLIC_UNIQUE) || !user.use_sanity_check())
+		if (!do_after(user, 1 SECOND, src, DO_PUBLIC_UNIQUE) || !user.use_sanity_check(src, tool))
 			return TRUE
 		if (!wiresexposed)
 			USE_FEEDBACK_FAILURE("\The [src]'s wires must be exposed to repair electronics damage.")
@@ -556,13 +546,14 @@
 					SPAN_NOTICE("\The [user] starts closing \the [src]'s maintenance hatch with \a [tool]."),
 					SPAN_NOTICE("You start closing \the [src]'s maintenance hatch with \a [tool]."),
 				)
-				if (!do_after(user, 5 SECONDS, src, DO_PUBLIC_UNIQUE) || !user.use_sanity_check(src, tool))
+				if (!do_after(user, (tool.toolspeed * 5) SECONDS, src, DO_PUBLIC_UNIQUE) || !user.use_sanity_check(src, tool))
 					return TRUE
 				if (!opened)
 					USE_FEEDBACK_FAILURE("\The [src]'s maintenance hatch is already closed.")
 					return TRUE
 				if (!cell)
-					USE_FEEDBACK_FAILURE("\The [src]'s cell needs to remain in place to close \his maintenance hatch.")
+					var/datum/pronouns/pronouns = choose_from_pronouns()
+					USE_FEEDBACK_FAILURE("\The [src]'s cell needs to remain in place to close [pronouns.his] maintenance hatch.")
 					return TRUE
 				opened = FALSE
 				update_icon()
@@ -581,7 +572,7 @@
 					SPAN_NOTICE("\The [user] starts removing \the [src]'s [mmi.name] with \a [tool]."),
 					SPAN_NOTICE("You start removing \the [src]'s [mmi.name] with \a [tool]."),
 				)
-				if (!do_after(user, 5 SECONDS, src, DO_PUBLIC_UNIQUE) || !user.use_sanity_check(src, tool))
+				if (!do_after(user, (tool.toolspeed * 5) SECONDS, src, DO_PUBLIC_UNIQUE) || !user.use_sanity_check(src, tool))
 					return TRUE
 				if (!mmi)
 					USE_FEEDBACK_FAILURE("\The [src] has no longer has a brain to remove.")
@@ -634,7 +625,7 @@
 			SPAN_NOTICE("\The [user] starts prying open \the [src]'s maintenance hatch with \a [tool]."),
 			SPAN_NOTICE("You start prying open \the [src]'s maintenance hatch with \a [tool].")
 		)
-		if (!do_after(user, 5 SECONDS, src, DO_PUBLIC_UNIQUE) || !user.use_sanity_check(src, tool))
+		if (!do_after(user, (tool.toolspeed * 5) SECONDS, src, DO_PUBLIC_UNIQUE) || !user.use_sanity_check(src, tool))
 			return TRUE
 		if (locked)
 			USE_FEEDBACK_FAILURE("\The [src]'s maintenance hatch is locked and cannot be opened.")
@@ -800,6 +791,9 @@
 
 	// Welding Tool - Repair brute damage
 	if (isWelder(tool))
+		if (user == src)
+			USE_FEEDBACK_FAILURE("You lack the reach to be able to repair yourself.")
+			return TRUE
 		if (!getBruteLoss())
 			USE_FEEDBACK_FAILURE("\The [src] has no physical damage to repair.")
 			return TRUE
@@ -811,7 +805,7 @@
 			SPAN_NOTICE("\The [user] starts repairing some of the dents on \the [src] with \a [tool]."),
 			SPAN_NOTICE("You start repairing some of the dents on \the [src] with \the [tool]."),
 		)
-		if (!do_after(user, 1 SECOND, src, DO_PUBLIC_UNIQUE) || !user.use_sanity_check(src, tool))
+		if (!do_after(user, (tool.toolspeed * 1) SECOND, src, DO_PUBLIC_UNIQUE) || !user.use_sanity_check(src, tool))
 			return TRUE
 		if (!getBruteLoss())
 			USE_FEEDBACK_FAILURE("\The [src] has no physical damage to repair.")
@@ -846,8 +840,11 @@
 
 	if(istype(user,/mob/living/carbon/human))
 		var/mob/living/carbon/human/H = user
-		if(H.species.can_shred(H))
-			attack_generic(H, rand(30,50), "slashed")
+		if(H.species.can_shred(H) || (MUTATION_FERAL in H.mutations))
+			attack_generic(H, rand(10,20), "slashed")
+			playsound(loc, 'sound/weapons/bite.ogg', 50, 1)
+			if (prob(20))
+				playsound(loc, 'sound/effects/sparks1.ogg', 50, 1)
 			return
 
 	if(opened && !wiresexposed && (!istype(user, /mob/living/silicon)))
@@ -875,7 +872,7 @@
 	return req_access
 
 /mob/living/silicon/robot/on_update_icon()
-	overlays.Cut()
+	ClearOverlays()
 	if(stat == CONSCIOUS)
 		var/eye_icon_state = "eyes-[module_sprites[icontype]]"
 		if(eye_icon_state in icon_states(icon))
@@ -884,23 +881,24 @@
 			var/image/eye_overlay = eye_overlays[eye_icon_state]
 			if(!eye_overlay)
 				eye_overlay = image(icon, eye_icon_state)
-				eye_overlay.plane = EFFECTS_ABOVE_LIGHTING_PLANE
-				eye_overlay.layer = EYE_GLOW_LAYER
+				var/mutable_appearance/A = emissive_appearance(icon, eye_icon_state)
+				eye_overlay.AddOverlays(A)
 				eye_overlays[eye_icon_state] = eye_overlay
 				z_flags |= ZMM_MANGLE_PLANES
-			overlays += eye_overlay
+			AddOverlays(eye_overlay)
 
 	if(opened)
 		var/panelprefix = custom_sprite ? src.ckey : "ov"
 		if(wiresexposed)
-			overlays += "[panelprefix]-openpanel +w"
+			AddOverlays("[panelprefix]-openpanel +w")
 		else if(cell)
-			overlays += "[panelprefix]-openpanel +c"
+			AddOverlays("[panelprefix]-openpanel +c")
 		else
-			overlays += "[panelprefix]-openpanel -c"
+			AddOverlays("[panelprefix]-openpanel -c")
 
-	if(module_active && istype(module_active,/obj/item/borg/combat/shield))
-		overlays += "[module_sprites[icontype]]-shield"
+	if (module_active && istype(module_active,/obj/item/borg/combat/shield))
+		if (modtype == "Combat")
+			AddOverlays("[module_sprites[icontype]]-shield")
 
 	if(modtype == "Combat")
 		if(module_active && istype(module_active,/obj/item/borg/combat/mobility))
@@ -932,17 +930,7 @@
 			dat += text("[obj]: <B>Activated</B><BR>")
 		else
 			dat += text("[obj]: <A HREF=?src=\ref[src];act=\ref[obj]>Activate</A><BR>")
-	if (emagged)
-		if (IsHolding(module.emag))
-			dat += text("[module.emag]: <B>Activated</B><BR>")
-		else
-			dat += text("[module.emag]: <A HREF=?src=\ref[src];act=\ref[module.emag]>Activate</A><BR>")
-/*
-		if(activated(obj))
-			dat += text("[obj]: \[<B>Activated</B> | <A HREF=?src=\ref[src];deact=\ref[obj]>Deactivate</A>\]<BR>")
-		else
-			dat += text("[obj]: \[<A HREF=?src=\ref[src];act=\ref[obj]>Activate</A> | <B>Deactivated</B>\]<BR>")
-*/
+
 	show_browser(src, dat, "window=robotmod")
 
 
@@ -963,7 +951,7 @@
 			if (!istype(O))
 				return TOPIC_HANDLED
 
-			if(!((O in module.equipment) || (O == src.module.emag)))
+			if(!(O in module.equipment))
 				return TOPIC_HANDLED
 
 			if (IsHolding(O))
@@ -1209,44 +1197,42 @@
 			return
 		else
 			sleep(6)
-			if(prob(50))
-				emagged = TRUE
-				lawupdate = FALSE
-				disconnect_from_ai()
-				to_chat(user, "You emag [src]'s interface.")
-				log_and_message_admins("emagged cyborg [key_name_admin(src)].  Laws overridden.", src)
-				clear_supplied_laws()
-				clear_inherent_laws()
-				laws = new /datum/ai_laws/syndicate_override
-				var/time = time2text(world.realtime,"hh:mm:ss")
-				GLOB.lawchanges.Add("[time] <B>:</B> [user.name]([user.key]) emagged [name]([key])")
-				set_zeroth_law("Only [user.real_name] and people \he designates as being such are operatives.")
-				SetLockdown(0)
-				. = 1
-				spawn()
-					to_chat(src, SPAN_DANGER("ALERT: Foreign software detected."))
-					sleep(5)
-					to_chat(src, SPAN_DANGER("Initiating diagnostics..."))
-					sleep(20)
-					to_chat(src, SPAN_DANGER("SynBorg v1.7.1 loaded."))
-					sleep(5)
-					to_chat(src, SPAN_DANGER("LAW SYNCHRONISATION ERROR"))
-					sleep(5)
-					to_chat(src, SPAN_DANGER("Would you like to send a report to NanoTraSoft? Y/N"))
-					sleep(10)
-					to_chat(src, SPAN_DANGER(" N"))
-					sleep(20)
-					to_chat(src, SPAN_DANGER("ERRORERRORERROR"))
-					to_chat(src, "<b>Obey these laws:</b>")
-					laws.show_laws(src)
-					to_chat(src, SPAN_DANGER("ALERT: [user.real_name] is your new master. Obey your new laws and his commands."))
-					if(module)
-						module.handle_emagged()
-					update_icon()
-			else
-				to_chat(user, "You fail to hack [src]'s interface.")
-				to_chat(src, "Hack attempt detected.")
-			return 1
+			lawupdate = FALSE
+			disconnect_from_ai()
+			to_chat(user, "You emag [src]'s interface.")
+			log_and_message_admins("emagged cyborg [key_name_admin(src)].  Laws overridden.", src)
+			clear_supplied_laws()
+			clear_inherent_laws()
+			laws = new /datum/ai_laws/syndicate_override
+			var/time = time2text(world.realtime,"hh:mm:ss")
+			GLOB.lawchanges.Add("[time] <B>:</B> [user.name]([user.key]) emagged [name]([key])")
+			var/datum/pronouns/pronouns = user.choose_from_pronouns()
+			set_zeroth_law("Only [user.real_name] and people [pronouns.he] designates as being such are operatives.")
+			SetLockdown(0)
+			. = 1
+			spawn()
+				to_chat(src, SPAN_DANGER("ALERT: Foreign software detected."))
+				sleep(5)
+				to_chat(src, SPAN_DANGER("Initiating diagnostics..."))
+				sleep(20)
+				to_chat(src, SPAN_DANGER("SynBorg v1.7.1 loaded."))
+				sleep(5)
+				to_chat(src, SPAN_DANGER("LAW SYNCHRONISATION ERROR"))
+				sleep(5)
+				to_chat(src, SPAN_DANGER("Would you like to send a report to NanoTraSoft? Y/N"))
+				sleep(10)
+				to_chat(src, SPAN_DANGER(" N"))
+				sleep(20)
+				to_chat(src, SPAN_DANGER("ERRORERRORERROR"))
+				to_chat(src, "<b>Obey these laws:</b>")
+				laws.show_laws(src)
+				to_chat(src, SPAN_DANGER("ALERT: [user.real_name] is your new master. Obey your new laws and his commands."))
+				if (module && !module.is_emagged)
+					module.handle_emagged(src)
+				else
+					emagged = TRUE
+				update_icon()
+			return TRUE
 
 /mob/living/silicon/robot/incapacitated(incapacitation_flags = INCAPACITATION_DEFAULT)
 	if ((incapacitation_flags & INCAPACITATION_FORCELYING) && (lockcharge || !is_component_functioning("actuator")))

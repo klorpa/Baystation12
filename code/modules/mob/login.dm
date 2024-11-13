@@ -52,7 +52,7 @@
 	if(check_rights((R_ADMIN|R_MOD),0,C))
 		to_chat(C,"[SPAN_CLASS("staffwarn", "StaffWarn: [client.ckey] [action]")]<br>[SPAN_NOTICE("[client.staffwarn]")]")
 		if(noise && C.get_preference_value(/datum/client_preference/staff/play_adminhelp_ping) == GLOB.PREF_HEAR)
-			sound_to(C, 'sound/ui/pm-notify.ogg')
+			sound_to(C, sound('sound/ui/pm-notify.ogg', volume = 25))
 
 /mob
 	var/client/my_client // Need to keep track of this ourselves, since by the time Logout() is called the client has already been nulled
@@ -76,7 +76,8 @@
 
 	next_move = 1
 	set_sight(sight|SEE_SELF)
-	..()
+
+	client.statobj = src
 
 	my_client = client
 	logout_time = null
@@ -91,10 +92,10 @@
 	if(eyeobj)
 		eyeobj.possess(src)
 
-	l_general = new()
-	client.screen += l_general
+	darksight = new()
+	client.screen += darksight
 
-	CreateRenderers()
+	AddDefaultRenderers()
 
 	refresh_client_images()
 	reload_fullscreen() // Reload any fullscreen overlays this mob has.
@@ -111,3 +112,10 @@
 	. = ..()
 	if(internals && internal)
 		internals.icon_state = "internal1"
+
+/mob/observer/ghost/Login()
+	. = ..()
+	if(darksight)
+		darksight.icon_state = "ghost"
+		darksight.alpha = 127
+		darksight.SetTransform(2) //Max darksight

@@ -26,8 +26,8 @@
 	return 0
 
 
-/obj/item/device/assembly/prox_sensor/toggle_secure()
-	secured = !secured
+/obj/item/device/assembly/prox_sensor/set_secure(make_secure)
+	..()
 	if(secured)
 		START_PROCESSING(SSobj, src)
 	else
@@ -41,7 +41,7 @@
 /obj/item/device/assembly/prox_sensor/HasProximity(atom/movable/movable)
 	if (ismob(movable) && !isliving(movable))
 		return
-	if (istype(movable, /obj/effect/beam))
+	if (istype(movable, /obj/beam))
 		return
 	if (movable.move_speed < 12)
 		sense()
@@ -92,13 +92,13 @@
 
 
 /obj/item/device/assembly/prox_sensor/on_update_icon()
-	overlays.Cut()
+	ClearOverlays()
 	attached_overlays = list()
 	if(timing)
-		overlays += "prox_timing"
+		AddOverlays("prox_timing")
 		attached_overlays += "prox_timing"
 	if(scanning)
-		overlays += "prox_scanning"
+		AddOverlays("prox_scanning")
 		attached_overlays += "prox_scanning"
 	if(holder)
 		holder.update_icon()

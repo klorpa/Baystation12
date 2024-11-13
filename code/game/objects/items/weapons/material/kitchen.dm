@@ -1,5 +1,5 @@
 /obj/item/material/kitchen
-	icon = 'icons/obj/kitchen.dmi'
+	icon = 'icons/obj/machines/kitchen.dmi'
 	worth_multiplier = 1.1
 
 /*
@@ -13,6 +13,7 @@
 	max_force = 5
 	force_multiplier = 0.1 // 6 when wielded with hardness 60 (steel)
 	thrown_force_multiplier = 0.25 // 5 when thrown with weight 20 (steel)
+	puncture = TRUE
 	default_material = MATERIAL_ALUMINIUM
 
 	var/loaded      //Descriptive string for currently loaded food object.
@@ -25,22 +26,14 @@
 	create_reagents(5)
 	return
 
-/obj/item/material/kitchen/utensil/attack(mob/living/carbon/M as mob, mob/living/carbon/user as mob)
-	if(!istype(M))
-		return ..()
-
-	if(user.a_intent != I_HELP)
-		if(user.zone_sel.selecting == BP_HEAD || user.zone_sel.selecting == BP_EYES)
-			if((MUTATION_CLUMSY in user.mutations) && prob(50))
-				M = user
-			return eyestab(M,user)
-		else
-			return ..()
+/obj/item/material/kitchen/utensil/use_after(mob/living/carbon/M as mob, mob/living/carbon/user as mob)
+	if (!istype(M))
+		return FALSE
 
 	if (reagents.total_volume > 0)
 		if(M == user)
 			if(!M.can_eat(loaded))
-				return
+				return TRUE
 			switch(M.get_fullness())
 				if (0 to 50)
 					to_chat(M, SPAN_DANGER("You ravenously stick \the [src] into your mouth and gobble the food!"))
@@ -52,23 +45,23 @@
 					to_chat(M, SPAN_NOTICE("You unwillingly chew the food on \the [src]."))
 				if (550 to INFINITY)
 					to_chat(M, SPAN_WARNING("You cannot take one more bite from \the [src]!"))
-					return
+					return TRUE
 
 		else
 			user.visible_message(SPAN_WARNING("\The [user] begins to feed \the [M]!"))
-			if(!M.can_force_feed(user, loaded) || !do_after(user, 5 SECONDS, M, DO_PUBLIC_UNIQUE))
-				return
+			if (!M.can_force_feed(user, loaded) || !do_after(user, 5 SECONDS, M, DO_PUBLIC_UNIQUE))
+				return TRUE
 
 			if (user.get_active_hand() != src)
-				return
+				return TRUE
 			M.visible_message(SPAN_NOTICE("\The [user] feeds some [loaded] to \the [M] with \the [src]."))
 		reagents.trans_to_mob(M, reagents.total_volume, CHEM_INGEST)
 		playsound(M.loc,'sound/items/eatfood.ogg', rand(10,40), 1)
-		overlays.Cut()
-		return
+		ClearOverlays()
+		return TRUE
 	else
-		to_chat(user, SPAN_WARNING("You don't have anything on \the [src]."))//if we have help intent and no food scooped up DON'T STAB OURSELVES WITH THE FORK
-		return
+		to_chat(user, SPAN_WARNING("You don't have anything on \the [src]."))
+		return TRUE
 
 
 /obj/item/material/kitchen/utensil/fork
@@ -139,14 +132,15 @@
 /obj/item/material/kitchen/rollingpin/aluminium/default_material = MATERIAL_ALUMINIUM
 
 
-/obj/item/material/kitchen/rollingpin/attack(mob/living/target, mob/living/user)
+/obj/item/material/kitchen/rollingpin/use_before(mob/living/target, mob/living/user)
+	. = FALSE
 	if ((MUTATION_CLUMSY in user.mutations) && prob(50) && user.unEquip(src))
+		var/datum/pronouns/pronouns = user.choose_from_pronouns()
 		user.visible_message(
-			SPAN_WARNING("\The [user] manages to hit \himself on the head with \the [src]!"),
+			SPAN_WARNING("\The [user] manages to hit [pronouns.self] on the head with \the [src]!"),
 			SPAN_WARNING("\The [src] slips out of your hand and hits your head!"),
 			SPAN_WARNING("Bonk!")
 		)
 		user.take_organ_damage(10, 0)
 		user.Paralyse(2)
-		return
-	return ..()
+		return TRUE

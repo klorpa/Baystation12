@@ -23,7 +23,7 @@
 	w_class = ITEM_SIZE_NORMAL
 	slot_flags = SLOT_BELT|SLOT_HOLSTER
 	icon = 'icons/obj/guns/skrell_pistol.dmi'
-	icon_state = "skrell_pistol_stun_100"
+	icon_state = "skrell_pistol_stun100"
 	max_shots = 10
 	fire_delay = 6
 	one_hand_penalty = 1
@@ -134,14 +134,14 @@
 			return "nucgun-kill"
 
 /obj/item/gun/energy/gun/nuclear/on_update_icon()
-	overlays.Cut()
-	overlays += get_charge_overlay()
-	overlays += get_reactor_overlay()
-	overlays += get_mode_overlay()
+	ClearOverlays()
+	AddOverlays(get_charge_overlay())
+	AddOverlays(get_reactor_overlay())
+	AddOverlays(get_mode_overlay())
 	item_state = get_mode_overlay()
 
 	// Safety
 	if (ismob(loc))
 		var/mob/M = loc
 		if (M.skill_check(SKILL_WEAPONS, SKILL_BASIC))
-			overlays += image('icons/obj/guns/gui.dmi', "safety[safety()]")
+			AddOverlays(image('icons/obj/guns/gui.dmi', "safety[safety()]"))

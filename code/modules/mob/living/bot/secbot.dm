@@ -238,7 +238,7 @@
 	else
 		a_intent = I_GRAB
 
-	stun_baton.attack(M, src, BP_CHEST) //robots and turrets aim for center of mass
+	stun_baton.resolve_attackby(M, src)
 	flick(attack_state, src)
 
 /mob/living/bot/secbot/explode()
@@ -249,11 +249,11 @@
 	if(prob(50))
 		new /obj/item/robot_parts/l_arm(Tsec)
 
-	var/datum/effect/effect/system/spark_spread/s = new /datum/effect/effect/system/spark_spread
+	var/datum/effect/spark_spread/s = new /datum/effect/spark_spread
 	s.set_up(3, 1, src)
 	s.start()
 
-	new /obj/effect/decal/cleanable/blood/oil(Tsec)
+	new /obj/decal/cleanable/blood/oil(Tsec)
 	qdel(src)
 
 /mob/living/bot/secbot/proc/target_name(mob/living/T)

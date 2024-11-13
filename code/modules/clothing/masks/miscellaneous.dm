@@ -45,14 +45,31 @@
 	down_icon_state = "steriledown"
 	pull_mask = 1
 
+
 /obj/item/clothing/mask/fakemoustache
 	name = "fake moustache"
 	desc = "Warning: moustache is fake."
 	icon_state = "fake-moustache"
 	item_state = "fake-moustache"
 	flags_inv = HIDEFACE
-	body_parts_covered = 0
+	body_parts_covered = EMPTY_BITFIELD
 	visible_name = "Scoundrel"
+	w_class = ITEM_SIZE_SMALL
+
+
+/obj/item/clothing/mask/fakemoustache/verb/ChangeVisibleName()
+	set name = "Change Visible Name"
+	set src in usr
+	if (usr.incapacitated())
+		return
+	var/response = input(usr, null, "Change Visible Name", visible_name) as null | text
+	response = sanitizeName(response, MAX_NAME_LEN, TRUE, FALSE)
+	if (!response)
+		return
+	if (usr.incapacitated() || !(src in usr))
+		return
+	visible_name = response
+
 
 /obj/item/clothing/mask/snorkel
 	name = "snorkel"
@@ -100,7 +117,7 @@
 	body_parts_covered = FACE|EYES
 	action_button_name = "Toggle MUI"
 	origin_tech = list(TECH_DATA = 5, TECH_ENGINEERING = 5)
-	var/active = FALSE
+	active = FALSE
 	var/mob/observer/eye/cameranet/eye
 
 /obj/item/clothing/mask/ai/New()
@@ -223,13 +240,13 @@
 
 // Bandanas below
 /obj/item/clothing/mask/bandana
-	name = "black bandana"
-	desc = "A fine bandana with nanotech lining. Can be worn on the head or face."
+	name = "bandana"
+	desc = "A soft piece of cloth. Can be worn on the head or face."
 	flags_inv = HIDEFACE
 	slot_flags = SLOT_MASK|SLOT_HEAD
 	body_parts_covered = FACE
-	icon_state = "bandblack"
-	item_state = "bandblack"
+	icon_state = "bandana"
+	item_state = "bandana"
 	item_flags = ITEM_FLAG_FLEXIBLEMATERIAL | ITEM_FLAG_WASHER_ALLOWED
 	w_class = ITEM_SIZE_SMALL
 
@@ -255,47 +272,37 @@
 	return ..()
 
 /obj/item/clothing/mask/bandana/red
-	name = "red bandana"
-	icon_state = "bandred"
-	item_state = "bandred"
+	color = COLOR_MAROON
 
 /obj/item/clothing/mask/bandana/blue
-	name = "blue bandana"
-	icon_state = "bandblue"
-	item_state = "bandblue"
+	color = COLOR_NAVY_BLUE
 
-/obj/item/clothing/mask/bandana/green
-	name = "green bandana"
-	icon_state = "bandgreen"
-	item_state = "bandgreen"
+/obj/item/clothing/mask/bandana/yellow
+	color = COLOR_YELLOW_GRAY
 
-/obj/item/clothing/mask/bandana/gold
-	name = "gold bandana"
-	icon_state = "bandgold"
-	item_state = "bandgold"
+/obj/item/clothing/mask/bandana/black
+	color = COLOR_GRAY20
 
-/obj/item/clothing/mask/bandana/orange
-	name = "orange bandana"
+/obj/item/clothing/mask/bandana/engi
+	name = "engineering bandana"
 	icon_state = "bandorange"
 	item_state = "bandorange"
-
-/obj/item/clothing/mask/bandana/purple
-	name = "purple bandana"
-	icon_state = "bandpurple"
-	item_state = "bandpurple"
+	desc = "A soft piece of cloth that can be worn on the head or face. This one is orange and yellow."
 
 /obj/item/clothing/mask/bandana/botany
 	name = "botany bandana"
 	icon_state = "bandbotany"
 	item_state = "bandbotany"
+	desc = "A soft piece of cloth that can be worn on the head or face. This one is green and blue."
 
 /obj/item/clothing/mask/bandana/camo
 	name = "camo bandana"
 	icon_state = "bandcamo"
 	item_state = "bandcamo"
+	desc = "A soft piece of cloth that can be worn on the head or face. This one is camo."
 
 /obj/item/clothing/mask/bandana/skull
 	name = "skull bandana"
-	desc = "A fine black bandana with nanotech lining and a skull emblem. Can be worn on the head or face."
 	icon_state = "bandskull"
 	item_state = "bandskull"
+	desc = "A soft piece of cloth that can be worn on the head or face. This one is black with a skull on it."

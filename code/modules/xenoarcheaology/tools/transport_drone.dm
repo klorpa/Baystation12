@@ -1,7 +1,7 @@
 /obj/item/device/drone_designator
 	name = "drone telemetry designator"
 	desc = "A small, handheld tool used to transmit location data to a transport drone."
-	icon = 'icons/obj/landing_pad.dmi'
+	icon = 'icons/obj/tools/drone_control.dmi'
 	icon_state = "pad_designator"
 	var/network = null
 	w_class = ITEM_SIZE_SMALL
@@ -18,7 +18,7 @@
 /obj/item/device/drone_designator/proc/recursive_validate_contents(atom/A, depth = 1)
 	if(depth >= 4)
 		return TRUE
-	if(istype(A, /obj/structure/stasis_cage))
+	if(istype(A, /obj/machinery/stasis_cage))
 		return TRUE //This is fine
 	if(istype(A,/mob/living))
 		return FALSE
@@ -67,8 +67,8 @@
 		to_chat(user, SPAN_WARNING("You should probably try to use this outside."))
 		return
 	if (validate_target(target, user))
-		var/datum/beam/B = user.Beam(BeamTarget = T, icon_state = "n_beam", maxdistance = get_dist(user, T), beam_type = /obj/effect/ebeam)
-		user.visible_message(SPAN_NOTICE("\The [user] points \the [src] at \the target."))
+		var/datum/beam/B = user.Beam(BeamTarget = T, icon_state = "n_beam", maxdistance = get_dist(user, T), beam_type = /obj/ebeam)
+		user.visible_message(SPAN_NOTICE("\The [user] points \the [src] at \the [target]."))
 		playsound(src,'sound/effects/scanbeep.ogg',30,0)
 		if(do_after(user, 2 SECONDS, target, (DO_PUBLIC_UNIQUE & ~DO_USER_SAME_HAND) | DO_MOVE_CHECKS_TURFS))
 			QDEL_NULL(B)
@@ -87,7 +87,7 @@
 /obj/machinery/drone_pad
 	name = "transport drone landing pad"
 	desc = "A small pad for transport drones to deposit their payloads at."
-	icon = 'icons/obj/landing_pad.dmi'
+	icon = 'icons/obj/machines/landing_pad.dmi'
 	icon_state = "pad_base"
 	anchored = TRUE
 	density = FALSE
@@ -116,19 +116,20 @@
 		QDEL_NULL(current_flight)
 
 /obj/machinery/drone_pad/on_update_icon()
-	. = ..()
-	overlays.Cut()
+	ClearOverlays()
 	if (current_flight)
-		overlays += emissive_appearance(icon, "pad_incoming") //we cut the hole, and...
-		overlays += image(icon, "pad_incoming") // add the actual image
+		AddOverlays(list(
+			emissive_appearance(icon, "pad_incoming"),
+			image(icon, "pad_incoming")
+		))
 	else
 		var/datum/extension/local_network_member/transport = get_extension(src, /datum/extension/local_network_member)
 		var/network = transport ? transport.id_tag : null
 		if (network && operable())
-			overlays += emissive_appearance(icon, "pad_waiting")
-			overlays += image(icon, "pad_waiting")
+			AddOverlays(emissive_appearance(icon, "pad_waiting"))
+			AddOverlays(image(icon, "pad_waiting"))
 	if(panel_open)
-		overlays += image(icon, "pad_maintenance")
+		AddOverlays(image(icon, "pad_maintenance"))
 
 /obj/machinery/drone_pad/examine(mob/user, distance)
 	. = ..()
@@ -146,7 +147,7 @@
 	var/image/object = new
 	object.appearance = target
 	object.loc = target.loc
-	var/image/drone = image('icons/obj/landing_pad.dmi', target.loc, "pad_drone")
+	var/image/drone = image('icons/obj/machines/landing_pad.dmi', target.loc, "pad_drone")
 	drone.plane = DEFAULT_PLANE
 	drone.layer = ABOVE_PROJECTILE_LAYER
 	drone.alpha = 10
@@ -211,8 +212,8 @@
 		return FALSE
 	else
 		//Overmap travel necessary?
-		var/obj/effect/overmap/visitable/other = map_sectors["[target.z]"]
-		var/obj/effect/overmap/visitable/self = map_sectors["[src.z]"]
+		var/obj/overmap/visitable/other = map_sectors["[target.z]"]
+		var/obj/overmap/visitable/self = map_sectors["[src.z]"]
 		//Start animation
 		pickup_animation(target)
 
@@ -223,7 +224,7 @@
 		var/flight_time = 10 SECONDS //At least 10 seconds to get there, regardless
 
 		if (other && self && (other.z == self.z)) //Can visitables even not be in same overmap level?
-			flight_time += get_dist(other, self) * 15 SECONDS
+			flight_time += get_dist(other, self) * tile_travel_time
 		current_flight.time_of_arrival = world.time +  flight_time
 
 		designator.audible_message(SPAN_NOTICE("<b>\The [designator]</b> pings, Request acknowledged. Drone en route. Delivery expected in T - [ (flight_time) / (1 SECOND)] seconds."))
@@ -262,9 +263,9 @@
 			to_chat(user, SPAN_NOTICE("\The [tool] was synchronized with the [transport.id_tag] network."))
 			designator.network = transport.id_tag
 			playsound(src.loc, 'sound/machines/twobeep.ogg', 50, 1, -3)
+		update_icon()
 		return TRUE
 
-	update_icon()
 	return ..()
 
 /obj/machinery/drone_pad/RefreshParts()

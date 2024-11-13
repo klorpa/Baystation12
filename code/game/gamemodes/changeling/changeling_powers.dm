@@ -248,7 +248,7 @@ var/global/list/possible_changeling_IDs = list("Alpha","Beta","Gamma","Delta","E
 	changeling.isabsorbing = 0
 
 	T.death(0)
-	T.Drain()
+	T.ChangeToHusk()
 	return 1
 
 
@@ -374,9 +374,9 @@ var/global/list/possible_changeling_IDs = list("Alpha","Beta","Gamma","Delta","E
 
 	ADD_TRANSFORMATION_MOVEMENT_HANDLER(C)
 	C.icon = null
-	C.overlays.Cut()
-	C.set_invisibility(101)
-	var/atom/movable/overlay/animation = new /atom/movable/overlay(src)
+	C.ClearOverlays()
+	C.set_invisibility(INVISIBILITY_ABSTRACT)
+	var/atom/movable/fake_overlay/animation = new /atom/movable/fake_overlay(src)
 	animation.icon_state = "blank"
 	animation.icon = 'icons/mob/mob.dmi'
 	flick("monkey2h", animation)

@@ -71,7 +71,7 @@ Robots and antags can instruct.
 	if(!..())
 		return
 	for(var/singleton/hierarchy/skill/S in GLOB.skills)
-		if(skillset.owner.skill_check(S.type, SKILL_EXPERT))
+		if(skillset.owner.skill_check(S.type, SKILL_EXPERIENCED))
 			return 1
 
 /mob/proc/instruct(mob/living/carbon/human/target as mob in oview(2))
@@ -90,12 +90,12 @@ Robots and antags can instruct.
 		return
 
 	if(target.too_many_buffs(/datum/skill_buff/instruct))
-		to_chat(src, SPAN_NOTICE("\The [target] exhausted from all the training \he recieved."))
+		to_chat(src, SPAN_NOTICE("\The [target] has had too many lessons and can't receive any more training today."))
 		return
 
 	var/options = list()
 	for(var/singleton/hierarchy/skill/S in GLOB.skills)
-		if(!target.skill_check(S.type, SKILL_BASIC) && skill_check(S.type, SKILL_EXPERT))
+		if(!target.skill_check(S.type, SKILL_BASIC) && skill_check(S.type, SKILL_EXPERIENCED))
 			options[S.name] = S
 	if(!length(options))
 		to_chat(src, SPAN_NOTICE("There is nothing you can teach \the [target]."))
@@ -110,12 +110,12 @@ Robots and antags can instruct.
 		to_chat(src, SPAN_NOTICE("[incapacitated() ? "You are in no state to teach right now!" : "\the [target] is in no state to be taught right now!"]"))
 		return
 	if(target.too_many_buffs(/datum/skill_buff/instruct))
-		to_chat(src, SPAN_NOTICE("\The [target] exhausted from all the training \he recieved."))
+		to_chat(src, SPAN_NOTICE("\The [target] has had too many lessons and can't receive any more training today."))
 		return
 	if(target.skill_check(skill.type, SKILL_BASIC))
 		to_chat(src, SPAN_NOTICE("\The [target] is too skilled to gain any benefit from a short lesson."))
 		return
-	if(!skill_check(skill.type, SKILL_EXPERT))
+	if(!skill_check(skill.type, SKILL_EXPERIENCED))
 		return
 
 	target.buff_skill(list(skill.type = 1), buff_type = /datum/skill_buff/instruct)
@@ -181,9 +181,9 @@ The Appraise verb. Used on objects to estimate their value.
 	switch(skill)
 		if(SKILL_MAX)
 			return 5
-		if(SKILL_EXPERT)
+		if(SKILL_EXPERIENCED)
 			return 10
-		if(SKILL_ADEPT)
+		if(SKILL_TRAINED)
 			return 20
 		else
 			return 50
@@ -201,7 +201,7 @@ The Appraise verb. Used on objects to estimate their value.
 /datum/skill_verb/noirvision/should_see_verb()
 	if(!..())
 		return
-	if(!skillset.owner.skill_check(SKILL_FORENSICS, SKILL_PROF))
+	if(!skillset.owner.skill_check(SKILL_FORENSICS, SKILL_MASTER))
 		return
 	return 1
 
@@ -209,13 +209,12 @@ The Appraise verb. Used on objects to estimate their value.
 	set category = "IC"
 	set name = "Detective instinct"
 	set src = usr
-	set popup_menu = 0
-
-	if(incapacitated())
+	set popup_menu = FALSE
+	if (incapacitated())
 		return
-
-	if(!remove_client_color(/datum/client_color/noir))
-		to_chat(src, "You clear your mind and focus on the scene before you.")
-		add_client_color(/datum/client_color/noir)
-	else
+	if (has_client_color(/datum/client_color/noir))
+		remove_client_color(/datum/client_color/noir)
 		to_chat(src, "You stop looking for clues.")
+	else
+		add_client_color(/datum/client_color/noir)
+		to_chat(src, "You clear your mind and focus on the scene before you.")

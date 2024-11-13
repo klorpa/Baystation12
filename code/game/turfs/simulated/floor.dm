@@ -58,9 +58,9 @@
 //This proc auto corrects the grass tiles' siding.
 /turf/simulated/floor/proc/make_plating(place_product, defer_icon_update)
 
-	overlays.Cut()
+	ClearOverlays()
 
-	for(var/obj/effect/decal/writing/W in src)
+	for(var/obj/decal/writing/W in src)
 		qdel(W)
 
 	SetName(base_name)
@@ -115,4 +115,4 @@
 	if(turf_fire)
 		turf_fire.AddPower(power)
 		return
-	new /obj/effect/turf_fire(src, power, fire_colour)
+	new /obj/turf_fire(src, power, fire_colour)

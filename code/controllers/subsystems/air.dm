@@ -191,7 +191,7 @@ Geometry processing completed in [(Uptime() - start_uptime)/10] seconds!
 		T.post_update_air_properties()
 		T.needs_air_update = 0
 		#ifdef ZASDBG
-		T.overlays -= mark
+		T.CutOverlays(mark)
 		updated++
 		#endif
 
@@ -208,7 +208,7 @@ Geometry processing completed in [(Uptime() - start_uptime)/10] seconds!
 		T.post_update_air_properties()
 		T.needs_air_update = 0
 		#ifdef ZASDBG
-		T.overlays -= mark
+		T.CutOverlays(mark)
 		updated++
 		#endif
 
@@ -268,6 +268,15 @@ Geometry processing completed in [(Uptime() - start_uptime)/10] seconds!
 			CHECK_TICK
 		else if (MC_TICK_CHECK)
 			return
+
+
+/datum/controller/subsystem/air/StartLoadingMap()
+	suspend()
+
+
+/datum/controller/subsystem/air/StopLoadingMap()
+	wake()
+
 
 /datum/controller/subsystem/air/proc/add_zone(zone/z)
 	zones += z
@@ -357,7 +366,7 @@ Geometry processing completed in [(Uptime() - start_uptime)/10] seconds!
 		return
 	tiles_to_update += T
 	#ifdef ZASDBG
-	T.overlays += mark
+	T.AddOverlays(mark)
 	#endif
 	T.needs_air_update = 1
 

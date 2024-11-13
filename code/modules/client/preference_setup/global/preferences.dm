@@ -217,6 +217,10 @@ var/global/list/_client_preferences_by_type
 	description = "Draw gun based on intent"
 	key = "HOLSTER_ON_INTENT"
 
+/datum/client_preference/safety_toggle_on_intent
+	description = "Ignore safety on harm intent"
+	key = "SAFETY_ON_INTENT"
+
 /datum/client_preference/show_credits
 	description = "Show End Titles"
 	key = "SHOW_CREDITS"
@@ -267,9 +271,9 @@ var/global/list/_client_preferences_by_type
 	default_value = GLOB.PREF_HIGH
 
 /datum/client_preference/graphics_quality/changed(mob/preference_mob, new_value)
-	if(preference_mob?.client)
-		for(var/atom/movable/renderer/R as anything in preference_mob.renderers)
-			R.GraphicsUpdate()
+	if (preference_mob?.client)
+		for (var/atom/movable/renderer/renderer as anything in preference_mob.rdr_to_plane)
+			renderer.GraphicsUpdate()
 
 /datum/client_preference/goonchat
 	description = "Use Goon Chat"
@@ -291,6 +295,14 @@ var/global/list/_client_preferences_by_type
 	key = "GHOST_TRAP"
 	options = list(GLOB.PREF_YES, GLOB.PREF_NO)
 	default_value = GLOB.PREF_YES
+
+
+/datum/client_preference/surgery_skip_radial
+	description = "Skip the radial menu for single-option surgeries."
+	key = "SURGERY_SKIP_RADIAL"
+	options = list(GLOB.PREF_YES, GLOB.PREF_NO)
+	default_value = GLOB.PREF_NO
+
 
 /********************
 * General Staff Preferences *

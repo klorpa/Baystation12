@@ -75,8 +75,8 @@
 	and some of the best engineers Humanity has to offer."
 	capital = "Government Zone, Ceres Station"
 
-/singleton/cultural_info/location/human/pluto
-	name = HOME_SYSTEM_PLUTO
+/singleton/cultural_info/location/human/kuiper_belt
+	name = HOME_SYSTEM_KUIPERB
 	distance = "45AU"
 	description = "Pluto, nominally a Democratic Republic, is a small planet in the Sol system. Pluto has a fairly small population compared \
 	to many other planets in the SCG, with much of it being centered around only two cities, both of which are in desperate need of modernization \
@@ -88,6 +88,16 @@
 	manage to escape rarely wish to return, though often possess a looser set of morals as a result of their time on the planet."
 	capital = "New Santa Domingo"
 	economic_power = 0.8
+	secondary_langs = list(LANGUAGE_GUTTER)
+
+/singleton/cultural_info/location/human/kuiper_interdust
+	name = HOME_SYSTEM_KUIPERD
+	distance = "45AU"
+	description = "The Kuiper Special Economic Zone's region beyond the confines of administration's population centers contains the Interdust, with a variety of industrial, military and economic \
+	infrastructure still kept in function. While residential slots are lesser than those in the Belt, a fair amount of inhabitants call it their home in isolated asteroid settlements. \
+	With policing actions a far less stringent ordeal in this sector of the SEZ, crime has found much success in certain hotspots of the interdust regions of the Kuiper belt."
+	capital = "Kuiper Administrative Zone, Pluto"
+	economic_power = 0.7
 	secondary_langs = list(LANGUAGE_GUTTER)
 
 /singleton/cultural_info/location/human/cetiepsilon
@@ -190,7 +200,7 @@
 	description = "Gaia is the sole planet in the Galilei system, serving as the DMZ between the SCG and the GCC. \
 	It is an agricultural world, though the recent Gaia Conflict has left the planet's surface scarred. The planet is divided into the \
 	Sol-Controlled <b>Gaian Administrative Area</b> and Independent-Backed <b>Protectorate of Gaia</b>, with the International City of New Venice remaining a neutral zone inside the DMZ. \
-	The planet's population remain divided even 10 years after the Gaian Conflict. While Gaia is divided \the current Mayor of New Venice serves as a vital mediator between both sides. \
+	The planet's population remain divided even 10 years after the Gaian Conflict. While Gaia is divided the current Mayor of New Venice serves as a vital mediator between both sides. \
 	<br><br> The Gaian People are tired of war, and are growing bitter to their present situation.  They suffered hard twenty years prior, and won't let themselves suffer again."
 	capital = "New Venice"
 	economic_power = 1.0
@@ -198,14 +208,16 @@
 /singleton/cultural_info/location/human/magnitka
 	name = HOME_SYSTEM_MAGNITKA
 	distance = "24 light years"
-	description = "Magnitka is an independent, industrialized mining and ore processing colony located in the Ursa system. \
-	Ruled by an authoritarian government heavily associated with the corporations that founded it, Magnitka's recent history is marked by civil war. Even today, a large number of rebel groups populate the planet. \
-	Founded by German companies in the 2300s, the overwhelming majority of Magnitka's population is descended from Eastern European laborers and their German managers. \
-	Unfortunately, Magnitka's economy is in a decline as its principle export, iron, grows cheaper by the day. The primary careers available to Magnitkans are military service, mining, or organized crime.  \
-	Though historically relatively isolationist, today Magnitka finds itself more and more closely associated with the Gilgamesh Colonial Confederation, in an effort to offset its economic decline."
-	capital = "Labortown"
-	economic_power = 0.8
-	ruling_body = "Magnitka"
+	description = "Once an independent, industrialized mining and ore processing colony located in the Ursa system, Magnitka is now its own nation-state with various (albeit limited) sectors of economy and product. \
+	Ruled by an oligarchic administrative body with politicians often being freshly retired service members, Magnitka's history \
+	is marked by civil war, up until the 2260s, wherein the civil environment has stabilized for the sake of the planet's cohesion. Even today, a number of rebel groups populate the planet. \
+	Founded by corporations in the 2200s, the overwhelming majority of Magnitka's population is descended from the settlers of a joint-corporate colonization effort from Earth. \
+	Having been on a recovering spiral from its economy downturn, Magnitka tends to have a strict domestic economy \
+	specializing in ore processing, arms manufacturing and skilled outsourced labour. While Magnitka has been historically isolationist, with a tendency towards the culture of the Gilgameshi - \
+	more recently a new, uniquely Magnitkan identity has arisen; severe, pragmatic, and unified in their newfound independence."
+	capital = "Neueifel"
+	economic_power = 0.9
+	ruling_body = "Magnitkan Independence Coalition"
 
 /singleton/cultural_info/location/human/castilla
 	name = HOME_SYSTEM_CASTILLA

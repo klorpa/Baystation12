@@ -6,8 +6,8 @@
 	icon_living = "carrier"
 	icon_dead = "carrier_dead"
 
-	maxHealth = 100
-	health = 100
+	maxHealth = 60
+	health = 60
 
 	natural_weapon = /obj/item/natural_weapon/bite/spider/carrier
 
@@ -16,8 +16,10 @@
 
 	movement_cooldown = 8
 
+	mob_size = MOB_LARGE
+
 	var/spiderling_count = 0
-	var/spiderling_type = /obj/effect/spider/spiderling
+	var/spiderling_type = /obj/spider/spiderling
 	var/swarmling_type = /mob/living/simple_animal/hostile/giant_spider/hunter
 	var/swarmling_faction = "spiders"
 	/// Odds that a spiderling will be a swarmling instead.

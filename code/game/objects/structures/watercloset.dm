@@ -46,7 +46,7 @@
 			SPAN_NOTICE("\The [user] strives valiantly to unclog \the [src] with \a [tool]!"),
 			SPAN_NOTICE("You attempt to unclog \the [src] with \the [tool].")
 		)
-		if (!do_after(user, 4.5 SECONDS, src, DO_PUBLIC_UNIQUE) || !user.use_sanity_check(src, tool))
+		if (!do_after(user, (tool.toolspeed * 4.5) SECONDS, src, DO_PUBLIC_UNIQUE) || !user.use_sanity_check(src, tool))
 			return TRUE
 		if (!clogged)
 			USE_FEEDBACK_FAILURE("\The [src] isn't clogged.")
@@ -80,7 +80,7 @@
 	if(flood_amt)
 		var/turf/T = loc
 		if(istype(T))
-			var/obj/effect/fluid/F = locate() in T
+			var/obj/fluid/F = locate() in T
 			if(!F) F = new(loc)
 			T.show_bubbles()
 			if(world.time > next_gurgle)
@@ -106,7 +106,7 @@
 /obj/structure/hygiene/toilet
 	name = "toilet"
 	desc = "The HT-451, a torque rotation-based, waste disposal unit for small matter. This one seems remarkably clean."
-	icon = 'icons/obj/watercloset.dmi'
+	icon = 'icons/obj/structures/toilets.dmi'
 	icon_state = "toilet00"
 	density = FALSE
 	anchored = TRUE
@@ -185,7 +185,7 @@
 		VISIBLE_MESSAGE,
 		SPAN_DANGER("You feel your head being dunked in cold water!")
 	)
-	if (!do_after(grab.assailant, 3 SECONDS, src, DO_PUBLIC_UNIQUE) || !grab?.assailant.use_sanity_check(src, grab.affecting))
+	if (!do_after(grab.assailant, 3 SECONDS, src, DO_PUBLIC_UNIQUE) || !grab.use_sanity_check(src))
 		return TRUE
 	grab.assailant.visible_message(
 		SPAN_WARNING("\The [grab.assailant] gives \the [grab.affecting] a swirlie in \the [src]!"),
@@ -209,7 +209,7 @@
 			SPAN_NOTICE("\The [user] starts to [cistern ? "lift" : "replace"] \the [src]'s cistern with \a [tool]."),
 			SPAN_NOTICE("You start to [cistern ? "lift" : "replace"] \the [src]'s cistern with \the [tool].")
 		)
-		if (!do_after(user, 3 SECONDS, src, DO_REPAIR_CONSTRUCT) || !user.use_sanity_check(src, tool))
+		if (!do_after(user, (tool.toolspeed * 3) SECONDS, src, DO_REPAIR_CONSTRUCT) || !user.use_sanity_check(src, tool))
 			return TRUE
 		playsound(loc, 'sound/effects/stonedoor_openclose.ogg', 50, TRUE)
 		user.visible_message(
@@ -245,7 +245,7 @@
 /obj/structure/hygiene/urinal
 	name = "urinal"
 	desc = "The HU-452, an experimental urinal."
-	icon = 'icons/obj/watercloset.dmi'
+	icon = 'icons/obj/structures/toilets.dmi'
 	icon_state = "urinal"
 	density = FALSE
 	anchored = TRUE
@@ -274,7 +274,7 @@
 /obj/structure/hygiene/shower
 	name = "shower"
 	desc = "The HS-451. Installed in the 2200s by the Hygiene Division."
-	icon = 'icons/obj/watercloset.dmi'
+	icon = 'icons/obj/showers.dmi'
 	icon_state = "shower"
 	density = FALSE
 	anchored = TRUE
@@ -283,21 +283,36 @@
 	drainage = 0.2 			//showers are tiny, drain a little slower
 
 	var/on = 0
-	var/obj/effect/mist/mymist = null
+	var/obj/mist/mymist = null
 	var/ismist = 0				//needs a var so we can make it linger~
 	var/watertemp = "normal"	//freezing, normal, or boiling
 	var/is_washing = 0
 	var/list/temperature_settings = list("normal" = 310, "boiling" = T0C+100, "freezing" = T0C)
+	var/working_sound = 'sound/machines/shower.ogg'
+	var/datum/sound_token/sound_token
+	var/sound_id
 
 /obj/structure/hygiene/shower/New()
 	..()
 	create_reagents(50)
 
+/obj/structure/hygiene/shower/proc/update_sound()
+	if(!working_sound)
+		return
+	if(!sound_id)
+		sound_id = "[type]_[sequential_id(/obj/structure/hygiene/shower)]"
+	if(on)
+		var/volume = 20
+		if(!sound_token)
+			sound_token = GLOB.sound_player.PlayLoopingSound(src, sound_id, working_sound, volume = volume, range = 10)
+		sound_token.SetVolume(volume)
+	else if(sound_token)
+		QDEL_NULL(sound_token)
 //add heat controls? when emagged, you can freeze to death in it?
 
-/obj/effect/mist
+/obj/mist
 	name = "mist"
-	icon = 'icons/obj/watercloset.dmi'
+	icon = 'icons/obj/showers.dmi'
 	icon_state = "mist"
 	layer = MOB_LAYER + 1
 	anchored = TRUE
@@ -306,6 +321,7 @@
 /obj/structure/hygiene/shower/attack_hand(mob/M)
 	on = !on
 	update_icon()
+	update_sound()
 	if(on)
 		if (M.loc == loc)
 			wash(M)
@@ -333,7 +349,7 @@
 			SPAN_NOTICE("\The [user] starts adjusting \the [src]'s temperature with \a [tool]."),
 			SPAN_NOTICE("You start adjusting \the [src]'s temperature with \the [tool].")
 		)
-		if (!do_after(user, 5 SECONDS, src, DO_REPAIR_CONSTRUCT) || !user.use_sanity_check(src, tool))
+		if (!do_after(user, (tool.toolspeed * 5) SECONDS, src, DO_REPAIR_CONSTRUCT) || !user.use_sanity_check(src, tool))
 			return TRUE
 		watertemp = input
 		playsound(src, 'sound/items/Ratchet.ogg', 50, TRUE)
@@ -347,26 +363,26 @@
 
 
 /obj/structure/hygiene/shower/on_update_icon()	//this is terribly unreadable, but basically it makes the shower mist up
-	overlays.Cut()					//once it's been on for a while, in addition to handling the water overlay.
+	ClearOverlays()					//once it's been on for a while, in addition to handling the water overlay.
 	if(mymist)
 		qdel(mymist)
 		mymist = null
 
 	if(on)
-		overlays += image('icons/obj/watercloset.dmi', src, "water", MOB_LAYER + 1, dir)
+		AddOverlays(image('icons/obj/showers.dmi', src, "water", MOB_LAYER + 1, dir))
 		if(temperature_settings[watertemp] < T20C)
 			return //no mist for cold water
 		if(!ismist)
 			spawn(50)
 				if(src && on)
 					ismist = 1
-					mymist = new /obj/effect/mist(loc)
+					mymist = new /obj/mist(loc)
 		else
 			ismist = 1
-			mymist = new /obj/effect/mist(loc)
+			mymist = new /obj/mist(loc)
 	else if(ismist)
 		ismist = 1
-		mymist = new /obj/effect/mist(loc)
+		mymist = new /obj/mist(loc)
 		spawn(250)
 			if(src && !on)
 				qdel(mymist)
@@ -379,8 +395,8 @@
 		wash_mob(washing)
 		if(isturf(loc))
 			var/turf/tile = loc
-			for(var/obj/effect/E in tile)
-				if(istype(E,/obj/effect/decal/cleanable) || istype(E,/obj/effect/overlay))
+			for(var/obj/E in tile)
+				if(istype(E,/obj/decal/cleanable) || istype(E,/obj/overlay))
 					qdel(E)
 		reagents.splash(washing, 10)
 
@@ -425,13 +441,13 @@
 /obj/item/bikehorn/rubberducky
 	name = "rubber ducky"
 	desc = "Rubber ducky you're so fine, you make bathtime lots of fuuun. Rubber ducky I'm awfully fooooond of yooooouuuu~"	//thanks doohl
-	icon = 'icons/obj/watercloset.dmi'
+	icon = 'icons/obj/toy.dmi'
 	icon_state = "rubberducky"
 	item_state = "rubberducky"
 
 /obj/structure/hygiene/sink
 	name = "sink"
-	icon = 'icons/obj/watercloset.dmi'
+	icon = 'icons/obj/sinks.dmi'
 	icon_state = "sink"
 	desc = "A sink used for washing one's hands and face."
 	anchored = TRUE
@@ -599,7 +615,7 @@
 
 /obj/item/taperoll/bog
 	name = "toilet paper roll"
-	icon = 'icons/obj/watercloset.dmi'
+	icon = 'icons/obj/bog.dmi'
 	desc = "A unbranded roll of standard issue two ply toilet paper. Refined from carefully rendered down sea shells due to SolGov's 'Abuse Of The Trees Act'."
 	tape_type = /obj/item/tape/bog
 	icon_state = "bogroll"
@@ -648,12 +664,12 @@
 /obj/item/paper/crumpled/bog
 	name = "sheet of toilet paper"
 	desc = "A single sheet of toilet paper. Two ply."
-	icon = 'icons/obj/watercloset.dmi'
+	icon = 'icons/obj/bog.dmi'
 	icon_state = "bogroll_sheet"
 
 /obj/structure/hygiene/faucet
 	name = "faucet"
-	icon = 'icons/obj/watercloset.dmi'
+	icon = 'icons/obj/structures/faucets.dmi'
 	icon_state = "faucet"
 	desc = "An outlet for liquids. Water you waiting for?"
 	anchored = TRUE
@@ -694,18 +710,17 @@
 	update_icon()
 
 /obj/structure/hygiene/faucet/on_update_icon()
-	. = ..()
 	icon_state = icon_state = "[initial(icon_state)][open ? "-on" : ""]"
 
 /obj/item/faucet
 	name = "faucet"
 	desc = "An outlet for liquids. Water you waiting for?"
-	icon = 'icons/obj/watercloset.dmi'
+	icon = 'icons/obj/structures/faucets.dmi'
 	icon_state = "faucet-item"
 	obj_flags = OBJ_FLAG_ROTATABLE
 	var/constructed_type = /obj/structure/hygiene/faucet
 
-/obj/item/faucet/attackby(obj/item/thing, mob/user)
+/obj/item/faucet/use_tool(obj/item/thing, mob/living/user, list/click_params)
 	if(isWrench(thing))
 		var/turf/simulated/floor/F = loc
 		if (istype(F) && istype(F.flooring, /singleton/flooring/pool))

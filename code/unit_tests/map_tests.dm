@@ -347,14 +347,14 @@
 	var/space_landmarks = 0
 
 	for(var/lm in landmarks_list)
-		var/obj/effect/landmark/landmark = lm
-		if(istype(landmark, /obj/effect/landmark/test/safe_turf))
+		var/obj/landmark/landmark = lm
+		if(istype(landmark, /obj/landmark/test/safe_turf))
 			log_debug("Safe landmark found: [log_info_line(landmark)]")
 			safe_landmarks++
-		else if(istype(landmark, /obj/effect/landmark/test/space_turf))
+		else if(istype(landmark, /obj/landmark/test/space_turf))
 			log_debug("Space landmark found: [log_info_line(landmark)]")
 			space_landmarks++
-		else if(istype(landmark, /obj/effect/landmark/test))
+		else if(istype(landmark, /obj/landmark/test))
 			log_debug("Test landmark with unknown tag found: [log_info_line(landmark)]")
 
 	if(safe_landmarks != 1 || space_landmarks != 1)
@@ -663,10 +663,13 @@
 			target_turf = get_step(C, dir)
 
 		var/connected = FALSE
-		for(var/obj/structure/cable/revC in target_turf)
-			if(revC.d1 == rev_dir || revC.d2 == rev_dir)
-				connected = TRUE
-				break
+		if (dir != UP & dir != DOWN && (locate(/obj/machinery/power/breakerbox) in target_turf))
+			connected = TRUE
+		else
+			for(var/obj/structure/cable/revC in target_turf)
+				if(revC.d1 == rev_dir || revC.d2 == rev_dir)
+					connected = TRUE
+					break
 
 		if(!connected)
 			log_bad("Disconnected wire: [dir2text(dir)] - [log_info_line(C)]")

@@ -12,6 +12,7 @@
 	response_harm   = "kicks"
 	faction = "goat"
 	health = 40
+	maxHealth = 40
 	natural_weapon = /obj/item/natural_weapon/hooves
 
 	meat_type = /obj/item/reagent_containers/food/snacks/meat/goat
@@ -60,8 +61,8 @@
 			if(udder && prob(5))
 				udder.add_reagent(/datum/reagent/drink/milk, rand(5, 10))
 
-		if(locate(/obj/effect/vine) in loc)
-			var/obj/effect/vine/SV = locate() in loc
+		if(locate(/obj/vine) in loc)
+			var/obj/vine/SV = locate() in loc
 			if(prob(60))
 				src.visible_message(SPAN_NOTICE("\The [src] eats the plants."))
 				SV.kill_health(1)
@@ -73,8 +74,8 @@
 			return
 
 		if(!pulledby)
-			var/obj/effect/vine/food
-			food = locate(/obj/effect/vine) in oview(5,loc)
+			var/obj/vine/food
+			food = locate(/obj/vine) in oview(5,loc)
 			if(food)
 				var/step = get_step_to(src, food, 0)
 				Move(step)
@@ -126,6 +127,7 @@
 	response_disarm = "gently pushes aside"
 	response_harm   = "kicks"
 	health = 50
+	maxHealth = 50
 
 	meat_type = /obj/item/reagent_containers/food/snacks/meat/beef
 	meat_amount = 6
@@ -260,6 +262,7 @@ var/global/chicken_count = 0
 	response_disarm = "gently pushes aside"
 	response_harm   = "kicks"
 	health = 10
+	maxHealth = 10
 	pass_flags = PASS_FLAG_TABLE
 	holder_type = /obj/item/holder
 	mob_size = MOB_SMALL
@@ -406,6 +409,7 @@ var/global/chicken_count = 0
 	response_disarm = "gently pushes aside"
 	response_harm   = "kicks"
 	health = 100
+	maxHealth = 100
 
 	meat_type = /obj/item/reagent_containers/food/snacks/meat/thoom
 	meat_amount = 10

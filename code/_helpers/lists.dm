@@ -253,6 +253,11 @@ Checks if a list has the same entries and values as an element of big.
 		. = list[last_index]
 		LIST_DEC(list)
 
+/// Returns the first element from the list and removes it from the list
+/proc/popleft(list/L)
+	if (length(L))
+		. = L[1]
+		L.Cut(1,2)
 
 //Returns the next element in parameter list after first appearance of parameter element. If it is the last element of the list or not present in list, returns first element.
 /proc/next_in_list(element, list/L)
@@ -274,17 +279,19 @@ Checks if a list has the same entries and values as an element of big.
 			output += L[i]
 	return output
 
-//Randomize: Return the list in a random order
-/proc/shuffle(list/L)
+
+/// Returns a Fisher-Yates shuffled copy of list, or list itself if in_place.
+/proc/shuffle(list/list, in_place)
 	RETURN_TYPE(/list)
-	if(!L)
+	if (!islist(list))
 		return
+	if (!in_place)
+		list = list.Copy()
+	var/size = length(list)
+	for (var/i = 1 to size)
+		list.Swap(i, rand(i, size))
+	return list
 
-	L = L.Copy()
-
-	for(var/i=1; i<length(L); i++)
-		L.Swap(i, rand(i,length(L)))
-	return L
 
 //Return a list with no duplicate entries
 /proc/uniquelist(list/L)
@@ -706,11 +713,6 @@ Checks if a list has the same entries and values as an element of big.
 		else
 			checked += value
 
-/proc/assoc_by_proc(list/plain_list, get_initial_value)
-	RETURN_TYPE(/list)
-	. = list()
-	for(var/entry in plain_list)
-		.[call(get_initial_value)(entry)] = entry
 
 /proc/get_initial_name(atom/atom_type)
 	var/atom/A = atom_type
@@ -841,3 +843,37 @@ Checks if a list has the same entries and values as an element of big.
 					for(var/T in typesof(P))
 						L[T] = TRUE
 		return L
+
+
+/// Convert list to a map by calling handler per entry. Map may be supplied as a reference. Handlers should implement a no-params clear.
+/proc/list_to_map(list/list, handler, list/map)
+	RETURN_TYPE(/list)
+	call(handler)()
+	if (!islist(map))
+		map = list()
+	for (var/entry in list)
+		call(handler)(map, entry)
+	call(handler)()
+	return map
+
+
+/// Entry handler for list_to_map. Produces a "name"=ref map, overwriting duplicate names in encounter order.
+/proc/ltm_by_atom_name(list/map, atom/entry)
+	if (!map)
+		return
+	map[entry.name] = entry
+
+
+/// Entry handler for list_to_map. Produces a "name"=ref map, suffixing a count to name for duplicate names.
+/proc/ltm_by_atom_name_numbered(list/map, atom/entry)
+	var/static/list/names_seen
+	if (!map)
+		names_seen = null
+		return
+	if (!names_seen)
+		names_seen = list()
+	var/index = ++names_seen[entry.name]
+	if (index > 1)
+		map["[entry.name] [index]"] = entry
+	else
+		map[entry.name] = entry

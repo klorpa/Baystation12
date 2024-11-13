@@ -42,7 +42,7 @@
 
 
 /mob/living/carbon/is_species(datum/species/S)
-	if (!S) return FALSE
+	if (!S || !species) return FALSE
 	if (istext(S)) return species.name == S
 	if (ispath(S)) return species.name == initial(S.name)
 	return species.name == S.name
@@ -59,6 +59,12 @@
 		if (G.force_danger())
 			return TRUE
 
+///Remove all grabs applied to target mob. Useful when mob is entering a compartment where they're not supposed to be grabbed.
+/mob/proc/remove_grabs_and_pulls()
+	for (var/obj/item/grab/G in grabbed_by)
+		G.current_grab.let_go(G)
+	if(pulledby)
+		pulledby.stop_pulling()
 
 /proc/isdeaf(mob/living/M)
 	return istype(M) && (M.ear_deaf || M.sdisabilities & DEAFENED)
@@ -87,6 +93,8 @@
 //The base miss chance for the different defence zones
 var/global/list/base_miss_chance = list(
 	BP_HEAD = 70,
+	BP_EYES = 70,
+	BP_MOUTH = 70,
 	BP_CHEST = 10,
 	BP_GROIN = 20,
 	BP_L_LEG = 60,
@@ -151,22 +159,19 @@ var/global/list/organ_rel_size = list(
 
 	return ran_zone
 
-// Emulates targetting a specific body part, and miss chances
-// May return null if missed
-// miss_chance_mod may be negative.
+///Emulates targetting a specific body part, and miss chances
+/// May return null if missed. Miss_chance_mod may be negative.
+///In order to make this proc compatible with melee and projectile attacks, only return projectile compatible zones if not point blank.
 /proc/get_zone_with_miss_chance(zone, mob/target, miss_chance_mod = 0, ranged_attack=0)
-	zone = check_zone(zone)
-
-	if(!ranged_attack)
-		// target isn't trying to fight
-		if(target.a_intent == I_HELP)
+	if (ranged_attack)
+		zone = check_zone(zone)
+	else
+		if (target.a_intent == I_HELP)
 			return zone
-		// you cannot miss if your target is prone or restrained
-		if(target.buckled || target.lying)
+		if (target.buckled || target.lying)
 			return zone
-		// if your target is being grabbed aggressively by someone you cannot miss either
-		for(var/obj/item/grab/G in target.grabbed_by)
-			if(G.stop_move())
+		for (var/obj/item/grab/G in target.grabbed_by)
+			if (G.stop_move())
 				return zone
 
 	var/miss_chance = 10
@@ -362,7 +367,7 @@ var/global/list/intents = list(I_HELP,I_DISARM,I_GRAB,I_HURT)
 		if(hud_used && hud_used.action_intent)
 			hud_used.action_intent.icon_state = "intent_[a_intent]"
 
-	else if(isrobot(src))
+	else if(isrobot(src) || ispAI(src))
 		switch(input)
 			if(I_HELP)
 				a_intent = I_HELP

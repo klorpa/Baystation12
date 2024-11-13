@@ -1,5 +1,9 @@
 //This file was auto-corrected by findeclaration.exe on 25.5.2012 20:42:31
 
+#define IS_SUBTYPE(child_type, parent_type) (child_type != parent_type && istype(child_type, parent_type))
+
+#define IS_SUBPATH(child_path, parent_path) (child_path != parent_path && ispath(child_path, parent_path))
+
 /proc/is_on_same_plane_or_station(z1, z2)
 	if(z1 == z2)
 		return 1
@@ -26,20 +30,13 @@
 					return TRUE
 	return FALSE
 
-/proc/get_area(O)
-	RETURN_TYPE(/area)
-	var/turf/loc = get_turf(O)
-	if(loc)
-		var/area/res = loc.loc
-		.= res
-
 /proc/get_area_name(N) //get area by its name
 	RETURN_TYPE(/area)
 	for(var/area/A in world)
 		if(A.name == N)
 			return A
 
-/proc/get_area_master(const/O)
+/proc/get_area_master(O)
 	RETURN_TYPE(/area)
 	var/area/A = get_area(O)
 	if (isarea(A))
@@ -89,7 +86,7 @@
 	RETURN_TYPE(/list)
 
 	var/turf/centerturf = get_turf(center)
-	var/list/turfs = new/list()
+	var/list/turfs = list()
 	var/rsq = radius * (radius+0.5)
 
 	for(var/atom/T in range(radius, centerturf))
@@ -105,7 +102,7 @@
 	RETURN_TYPE(/list)
 
 	var/turf/centerturf = get_turf(center)
-	var/list/atoms = new/list()
+	var/list/atoms = list()
 	var/rsq = radius * (radius+0.5)
 
 	for(var/atom/A in view(radius, centerturf))
@@ -134,6 +131,12 @@
 
 	return dist
 
+/proc/get_bearing(atom/source, atom/destination)
+	var/bearing = round(90 - Atan2(destination.x - source.x, destination.y - source.y),5)
+	if(bearing < 0)
+		bearing += 360
+	return bearing
+
 /proc/circlerangeturfs(center=usr,radius=3)
 	RETURN_TYPE(/list)
 	var/turf/centerturf = get_turf(center)
@@ -153,7 +156,7 @@
 	RETURN_TYPE(/list)
 
 	var/turf/centerturf = get_turf(center)
-	var/list/turfs = new/list()
+	var/list/turfs = list()
 	var/rsq = radius * (radius+0.5)
 
 	for(var/turf/T in view(radius, centerturf))
@@ -263,7 +266,8 @@
 
 /proc/get_mobs_and_objs_in_view_fast(turf/T, range, list/mobs, list/objs, checkghosts = null)
 
-	var/list/hear = dview(range,T,INVISIBILITY_MAXIMUM)
+	var/list/hear = list()
+	DVIEW(hear, range, T, INVISIBILITY_MAXIMUM)
 	var/list/hearturfs = list()
 
 	for(var/atom/movable/AM in hear)
@@ -406,7 +410,7 @@
 	var/dest_y
 
 /datum/projectile_data/New(src_x, src_y, time, distance, \
-						   var/power_x, var/power_y, var/dest_x, var/dest_y)
+						   power_x, power_y, dest_x, dest_y)
 	src.src_x = src_x
 	src.src_y = src_y
 	src.time = time
@@ -434,16 +438,16 @@
 
 	return new /datum/projectile_data(src_x, src_y, time, distance, power_x, power_y, dest_x, dest_y)
 
-/proc/GetRedPart(const/hexa)
+/proc/GetRedPart(hexa)
 	return hex2num(copytext(hexa,2,4))
 
-/proc/GetGreenPart(const/hexa)
+/proc/GetGreenPart(hexa)
 	return hex2num(copytext(hexa,4,6))
 
-/proc/GetBluePart(const/hexa)
+/proc/GetBluePart(hexa)
 	return hex2num(copytext(hexa,6,8))
 
-/proc/GetHexColors(const/hexa)
+/proc/GetHexColors(hexa)
 	RETURN_TYPE(/list)
 	return list(
 			GetRedPart(hexa),
@@ -451,7 +455,7 @@
 			GetBluePart(hexa)
 		)
 
-/proc/MixColors(const/list/colors)
+/proc/MixColors(list/colors)
 	var/list/reds = list()
 	var/list/blues = list()
 	var/list/greens = list()
@@ -524,7 +528,7 @@
 
 /proc/getCardinalAirInfo(turf/loc, list/stats=list("temperature"))
 	RETURN_TYPE(/list)
-	var/list/temps = new/list(4)
+	var/list/temps = new(4)
 	for(var/dir in GLOB.cardinal)
 		var/direction
 		switch(dir)
@@ -537,7 +541,7 @@
 			if(WEST)
 				direction = 4
 		var/turf/simulated/T=get_turf(get_step(loc,dir))
-		var/list/rstats = new /list(length(stats))
+		var/list/rstats = new(length(stats))
 		if(T && istype(T) && T.zone)
 			var/datum/gas_mixture/environment = T.return_air()
 			for(var/i=1;i<=length(stats);i++)

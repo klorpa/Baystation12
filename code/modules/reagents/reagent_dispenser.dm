@@ -2,7 +2,7 @@
 /obj/structure/reagent_dispensers
 	name = "dispenser"
 	desc = "..."
-	icon = 'icons/obj/objects.dmi'
+	icon = 'icons/obj/structures/liquid_tanks.dmi'
 	icon_state = "watertank"
 	density = TRUE
 	anchored = FALSE
@@ -57,12 +57,12 @@
 			return
 		if(EX_ACT_HEAVY)
 			if (prob(50))
-				new /obj/effect/effect/water(src.loc)
+				new /obj/effect/water(src.loc)
 				qdel(src)
 				return
 		if(EX_ACT_LIGHT)
 			if (prob(5))
-				new /obj/effect/effect/water(src.loc)
+				new /obj/effect/water(src.loc)
 				qdel(src)
 				return
 		else
@@ -71,15 +71,15 @@
 /obj/structure/reagent_dispensers/AltClick(mob/user)
 	if(possible_transfer_amounts)
 		set_amount_per_transfer_from_this()
-	else
-		return ..()
+		return TRUE
+	return ..()
 
 
 //Dispensers
 /obj/structure/reagent_dispensers/watertank
 	name = "water tank"
 	desc = "A tank containing water."
-	icon = 'icons/obj/objects.dmi'
+	icon = 'icons/obj/structures/liquid_tanks.dmi'
 	icon_state = "watertank"
 	amount_per_transfer_from_this = 10
 	var/modded = 0
@@ -162,7 +162,7 @@
 /obj/structure/reagent_dispensers/fueltank
 	name = "fuel tank"
 	desc = "A tank containing welding fuel."
-	icon = 'icons/obj/objects.dmi'
+	icon = 'icons/obj/structures/liquid_tanks.dmi'
 	icon_state = "weldtank"
 	amount_per_transfer_from_this = 10
 	var/modded = 0
@@ -185,7 +185,7 @@
 			usr.visible_message(SPAN_NOTICE("\The [usr] detaches \the [rig] from \the [src]."), SPAN_NOTICE("You detach [rig] from \the [src]"))
 			rig.dropInto(usr.loc)
 			rig = null
-			overlays.Cut()
+			ClearOverlays()
 
 
 /obj/structure/reagent_dispensers/fueltank/use_weapon(obj/item/weapon, mob/user, list/click_params)
@@ -224,7 +224,7 @@
 			SPAN_NOTICE("\The [user] starts attaching \a [tool] to \the [src]."),
 			SPAN_NOTICE("You start attaching \the [tool] to \the [src].")
 		)
-		if (!user.do_skilled(2 SECONDS, SKILL_DEVICES, src) || !user.use_sanity_check(src, tool, SANITY_CHECK_TOOL_UNEQUIP))
+		if (!user.do_skilled(2 SECONDS, SKILL_DEVICES, src) || !user.use_sanity_check(src, tool, SANITY_CHECK_DEFAULT | SANITY_CHECK_TOOL_UNEQUIP))
 			return TRUE
 		if (rig)
 			USE_FEEDBACK_FAILURE("\The [src] already has \a [rig] attached.")
@@ -253,7 +253,7 @@
 			SPAN_NOTICE("You [user] [modded ? "open" : "close"] \the [src]'s valve with \the [tool].")
 		)
 		if (modded)
-			log_and_message_admins("opened a fuel tank at [get_area(src)], leaking fuel.")
+			log_and_message_admins("opened a fuel tank at [get_area(src)], leaking fuel.", user, src)
 			leak_fuel(amount_per_transfer_from_this)
 		return TRUE
 
@@ -261,12 +261,12 @@
 
 
 /obj/structure/reagent_dispensers/fueltank/on_update_icon()
-	overlays.Cut()
+	ClearOverlays()
 	if (rig)
 		var/icon/rig_overlay = getFlatIcon(rig)
 		rig_overlay.Shift(NORTH, 1)
 		rig_overlay.Shift(EAST, 6)
-		overlays += rig_overlay
+		AddOverlays(rig_overlay)
 
 
 /obj/structure/reagent_dispensers/fueltank/bullet_act(obj/item/projectile/Proj)
@@ -275,9 +275,9 @@
 			var/turf/turf = get_turf(src)
 			if(turf)
 				var/area/area = turf.loc || "*unknown area*"
-				log_and_message_admins("[key_name_admin(Proj.firer)] shot a fuel tank in \the [area].")
+				log_and_message_admins("shot a fuel tank in \the [area].", Proj.firer, loc)
 			else
-				log_and_message_admins("shot a fuel tank outside the world.")
+				log_and_message_admins("shot a fuel tank outside the world.", Proj.firer, loc)
 
 		if(!istype(Proj ,/obj/item/projectile/beam/lastertag) && !istype(Proj ,/obj/item/projectile/beam/practice) )
 			explode()
@@ -304,12 +304,12 @@
 
 	amount = min(amount, reagents.total_volume)
 	reagents.remove_reagent(/datum/reagent/fuel,amount)
-	new /obj/effect/decal/cleanable/liquid_fuel(src.loc, amount,1)
+	new /obj/decal/cleanable/liquid_fuel(src.loc, amount,1)
 
 /obj/structure/reagent_dispensers/peppertank
 	name = "pepper spray refiller"
 	desc = "Refills pepper spray canisters."
-	icon = 'icons/obj/objects.dmi'
+	icon = 'icons/obj/structures/chemical_dispensers.dmi'
 	icon_state = "peppertank"
 	anchored = TRUE
 	density = FALSE
@@ -321,7 +321,7 @@
 	name = "water cooler"
 	desc = "A machine that dispenses cool water to drink."
 	amount_per_transfer_from_this = 5
-	icon = 'icons/obj/vending.dmi'
+	icon = 'icons/obj/machines/vending.dmi'
 	icon_state = "water_cooler"
 	possible_transfer_amounts = null
 	anchored = TRUE
@@ -357,7 +357,7 @@
 /obj/structure/reagent_dispensers/beerkeg
 	name = "beer keg"
 	desc = "A beer keg."
-	icon = 'icons/obj/objects.dmi'
+	icon = 'icons/obj/structures/liquid_tanks.dmi'
 	icon_state = "beertankTEMP"
 	amount_per_transfer_from_this = 10
 	initial_reagent_types = list(/datum/reagent/ethanol/beer = 1)
@@ -367,7 +367,7 @@
 /obj/structure/reagent_dispensers/acid
 	name = "sulphuric acid dispenser"
 	desc = "A dispenser of acid for industrial processes."
-	icon = 'icons/obj/objects.dmi'
+	icon = 'icons/obj/structures/chemical_dispensers.dmi'
 	icon_state = "acidtank"
 	amount_per_transfer_from_this = 10
 	anchored = TRUE

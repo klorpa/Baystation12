@@ -1,5 +1,7 @@
 LEGACY_RECORD_STRUCTURE(all_waypoints, waypoint)
 
+GLOBAL_LIST_EMPTY(overmap_helm_computers)
+
 /obj/machinery/computer/ship/helm
 	name = "helm control console"
 	icon_keyboard = "teleport_key"
@@ -21,15 +23,15 @@ LEGACY_RECORD_STRUCTURE(all_waypoints, waypoint)
 
 /obj/machinery/computer/ship/helm/Initialize()
 	. = ..()
-	get_known_sectors()
+	LAZYADD(GLOB.overmap_helm_computers, src)
+	for(var/obj/overmap/visitable/sector as anything in GLOB.known_overmap_sectors)
+		add_known_sector(sector)
 
-/obj/machinery/computer/ship/helm/proc/get_known_sectors()
-	var/area/overmap/map = locate() in world
-	for(var/obj/effect/overmap/visitable/sector/S in map)
-		if (S.known)
-			add_known_sector(S)
+/obj/machinery/computer/ship/helm/Destroy()
+	. = ..()
+	LAZYREMOVE(GLOB.overmap_helm_computers, src)
 
-/obj/machinery/computer/ship/helm/proc/add_known_sector(obj/effect/overmap/visitable/sector/S, notify = FALSE)
+/obj/machinery/computer/ship/helm/proc/add_known_sector(obj/overmap/visitable/sector/S, notify = FALSE)
 	var/datum/computer_file/data/waypoint/R = new()
 	R.fields["name"] = S.name
 	R.fields["x"] = S.x
@@ -94,7 +96,7 @@ LEGACY_RECORD_STRUCTURE(all_waypoints, waypoint)
 		display_reconnect_dialog(user, "helm")
 	else
 		var/turf/T = get_turf(linked)
-		var/obj/effect/overmap/visitable/sector/current_sector = locate() in T
+		var/obj/overmap/visitable/sector/current_sector = locate() in T
 
 		var/mob/living/silicon/silicon = user
 		data["viewing_silicon"] = ismachinerestricted(silicon)
@@ -186,14 +188,14 @@ LEGACY_RECORD_STRUCTURE(all_waypoints, waypoint)
 			qdel(R)
 
 	if (href_list["setx"])
-		var/newx = input("Input new destiniation x coordinate", "Coordinate input", dx) as num|null
+		var/newx = input("Input new destination x coordinate", "Coordinate input", dx) as num|null
 		if(!CanInteract(user,state))
 			return
 		if (newx)
 			dx = clamp(newx, 1, world.maxx)
 
 	if (href_list["sety"])
-		var/newy = input("Input new destiniation y coordinate", "Coordinate input", dy) as num|null
+		var/newy = input("Input new destination y coordinate", "Coordinate input", dy) as num|null
 		if(!CanInteract(user,state))
 			return
 		if (newy)
@@ -340,7 +342,7 @@ LEGACY_RECORD_STRUCTURE(all_waypoints, waypoint)
 
 
 	var/turf/T = get_turf(linked)
-	var/obj/effect/overmap/visitable/sector/current_sector = locate() in T
+	var/obj/overmap/visitable/sector/current_sector = locate() in T
 
 	var/mob/living/silicon/silicon = user
 	data["viewing_silicon"] = ismachinerestricted(silicon)
@@ -389,4 +391,4 @@ LEGACY_RECORD_STRUCTURE(all_waypoints, waypoint)
 		set_light(0)
 	else
 		icon_state = "tele_nav"
-		set_light(light_max_bright_on, light_inner_range_on, light_outer_range_on, 2, light_color)
+		set_light(light_range_on, light_power_on, light_color)

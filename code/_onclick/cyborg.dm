@@ -12,24 +12,30 @@
 	next_click = world.time + 1
 
 	var/list/modifiers = params2list(params)
-	if (modifiers["ctrl"] && modifiers["alt"])
-		CtrlAltClickOn(A)
-		return
-	if(modifiers["shift"] && modifiers["ctrl"])
-		CtrlShiftClickOn(A)
-		return
-	if(modifiers["middle"])
-		MiddleClickOn(A)
-		return
-	if(modifiers["shift"])
-		ShiftClickOn(A)
-		return
-	if(modifiers["alt"]) // alt and alt-gr (rightalt)
-		AltClickOn(A)
-		return
-	if(modifiers["ctrl"])
-		CtrlClickOn(A)
-		return
+	if (modifiers["ctrl"] && modifiers["alt"] && modifiers["shift"])
+		if (A.BorgCtrlAltShiftClick(src) || A.AICtrlAltShiftClick(src) || CtrlAltShiftClickOn(A))
+			return TRUE
+	else if (modifiers["ctrl"] && modifiers["alt"])
+		if (A.BorgCtrlAltClick(src) || A.AICtrlAltClick(src) || CtrlAltClickOn(A))
+			return TRUE
+	else if (modifiers["shift"] && modifiers["ctrl"])
+		if (A.BorgCtrlShiftClick(src) || A.AICtrlShiftClick(src) || CtrlShiftClickOn(A))
+			return TRUE
+	else if (modifiers["shift"] && modifiers["alt"])
+		if (A.BorgAltShiftClick(src) || A.AIAltShiftClick(src) || AltShiftClickOn(A))
+			return TRUE
+	else if (modifiers["middle"])
+		if (A.BorgMiddleClick(src) || A.AIMiddleClick(src) || MiddleClickOn(A))
+			return TRUE
+	else if (modifiers["shift"])
+		if (A.BorgShiftClick(src) || A.AIShiftClick(src) || ShiftClickOn(A))
+			return TRUE
+	else if (modifiers["alt"])
+		if (A.BorgAltClick(src) || A.AIAltClick(src) || AltClickOn(A))
+			return TRUE
+	else if (modifiers["ctrl"])
+		if (A.BorgCtrlClick(src) || A.AICtrlClick(src) || CtrlClickOn(A))
+			return TRUE
 
 	if(incapacitated())
 		return
@@ -41,7 +47,7 @@
 
 	if(silicon_camera.in_camera_mode)
 		silicon_camera.camera_mode_off()
-		if(is_component_functioning("camera"))
+		if(is_component_functioning("diagnosis unit"))
 			silicon_camera.captureimage(A, usr)
 		else
 			to_chat(src, SPAN_CLASS("userdanger", "Your camera isn't functional."))
@@ -99,23 +105,19 @@
 //Middle click cycles through selected modules.
 /mob/living/silicon/robot/MiddleClickOn(atom/A)
 	cycle_modules()
-	return
+	return TRUE
 
-//Give cyborgs hotkey clicks without breaking existing uses of hotkey clicks
-// for non-doors/apcs
 /mob/living/silicon/robot/CtrlAltClickOn(atom/A)
-	if(A.BorgCtrlAltClick(src))
-		return
-	pointed(A)
+	return pointed(A)
 
-/mob/living/silicon/robot/ShiftClickOn(atom/A)
-	A.BorgShiftClick(src)
+/atom/proc/BorgMiddleClick(mob/living/silicon/robot/user)
+	return FALSE
 
-/mob/living/silicon/robot/CtrlClickOn(atom/A)
-	return A.BorgCtrlClick(src)
+/atom/proc/BorgCtrlAltClick(mob/living/silicon/robot/user)
+	return FALSE
 
-/mob/living/silicon/robot/AltClickOn(atom/A)
-	A.BorgAltClick(src)
+/atom/proc/BorgShiftClick(mob/living/silicon/robot/user)
+	return FALSE
 
 /mob/living/silicon/robot/CtrlShiftClickOn(atom/A)
 	A.BorgCtrlShiftClick(src)
@@ -161,7 +163,13 @@
 	return AltClick()
 
 /atom/proc/BorgCtrlShiftClick(mob/living/silicon/robot/user)
-	CtrlShiftClick(user)
+	return FALSE
+
+/atom/proc/BorgAltShiftClick(mob/living/silicon/robot/user)
+	return FALSE
+
+/atom/proc/BorgCtrlAltShiftClick(mob/living/silicon/robot/user)
+	return FALSE
 
 /*
 	As with AI, these are not used in click code,

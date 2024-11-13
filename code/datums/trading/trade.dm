@@ -62,37 +62,22 @@
 		add_to_pool(trading_items, possible_trading_items, force = 1)
 		add_to_pool(wanted_items, possible_wanted_items, force = 1)
 
-/datum/trader/proc/generate_pool(list/trading_pool)
-	. = list()
-	// Add types
-	for(var/type in trading_pool)
-		var/status = trading_pool[type]
-		if(status & TRADER_THIS_TYPE)
-			. += type
-		if(status & TRADER_SUBTYPES_ONLY)
-			. += subtypesof(type)
 
-	// Remove blacklisted
-	for (var/type in .)
-		var/status = trading_pool[type]
-		if (HAS_FLAGS(status, TRADER_BLACKLIST) || !validate_type_for_trade(type))
-			. -= type
-		if (HAS_FLAGS(status, TRADER_BLACKLIST_SUB))
-			. -= subtypesof(type)
-
-
-/**
- * Validates a given type can be used for trading. Intended to prevent certain items from being attainable via merchants.
- *
- * Returns boolean.
- */
-/datum/trader/proc/validate_type_for_trade(type)
-	if (isatom(type))
-		var/atom/atom = type
-		// Block abstracts
-		if (type == initial(atom.abstract_type))
-			return FALSE
-	return TRUE
+/datum/trader/proc/generate_pool(list/pool)
+	var/list/result = list()
+	for (var/path in pool)
+		var/status = pool[path]
+		if (GET_FLAGS(status, TRADER_THIS_TYPE) && !is_abstract(path))
+			result += path
+		if (GET_FLAGS(status, TRADER_SUBTYPES_ONLY))
+			result += subtypesof_real(path)
+	for (var/path in result)
+		var/status = pool[path]
+		if (GET_FLAGS(status, TRADER_BLACKLIST))
+			result -= path
+		if (GET_FLAGS(status, TRADER_BLACKLIST_SUB))
+			result -= subtypesof(path)
+	return result
 
 
 //If this hits 0 then they decide to up and leave.
@@ -144,12 +129,12 @@
 
 /datum/trader/proc/skill_curve(skill)
 	switch(skill)
-		if(SKILL_EXPERT)
+		if(SKILL_EXPERIENCED)
 			. = 1
-		if(SKILL_EXPERT to SKILL_MAX)
-			. = 1 + (SKILL_EXPERT - skill) * 0.2
+		if(SKILL_EXPERIENCED to SKILL_MAX)
+			. = 1 + (SKILL_EXPERIENCED - skill) * 0.2
 		else
-			. = 1 + (SKILL_EXPERT - skill) ** 2
+			. = 1 + (SKILL_EXPERIENCED - skill) ** 2
 	//This condition ensures that the buy price is higher than the sell price on generic goods, i.e. the merchant can't be exploited
 	. = max(., price_rng/((margin - 1)*(200 - price_rng)))
 

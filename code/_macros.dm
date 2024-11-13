@@ -7,7 +7,20 @@
 
 #define CLAMP01(x) clamp(x, 0, 1)
 
+/**
+ * Get the turf that `A` resides in, regardless of any containers.
+ *
+ * Use in favor of `A.loc` or `src.loc` so that things work correctly when
+ * stored inside an inventory, locker, or other container.
+ */
 #define get_turf(A) get_step(A,0)
+
+/**
+ * Get the ultimate area of `A`, similarly to [get_turf].
+ *
+ * Use instead of `A.loc.loc`.
+ */
+#define get_area(A) (isarea(A) ? A : get_step(A, 0)?.loc)
 
 #define get_x(A) (get_step(A, 0)?.x || 0)
 
@@ -28,6 +41,8 @@
 #define isprojectile(A) istype(A, /obj/item/projectile)
 
 #define isbeam(A) istype(A, /obj/item/projectile/beam)
+
+#define ismagazine(A) istype(A, /obj/item/ammo_magazine)
 
 #define isbrain(A) istype(A, /mob/living/carbon/brain)
 
@@ -178,6 +193,8 @@
 
 #define SPAN_OCCULT(X) SPAN_CLASS("cult", "[X]")
 
+#define SPAN_LEGION(X) SPAN_CLASS("legion", "[X]")
+
 #define SPAN_MFAUNA(X) SPAN_CLASS("mfauna", "[X]")
 
 #define SPAN_SUBTLE(X) SPAN_CLASS("subtle", "[X]")
@@ -205,6 +222,8 @@
 #define FONT_GIANT(X) SPAN_SIZE("24px", "[X]")
 
 #define crash_with(X) crash_at(X, __FILE__, __LINE__)
+
+#define TO_HEX_DIGIT(n) ascii2text((n&15) + ((n&15)<10 ? 48 : 87))
 
 
 /// Semantic define for a 0 int intended for use as a bitfield
@@ -267,6 +286,13 @@
 
 
 #define num2hex(num) num2text(num, 1, 16)
+
+
+/// Generate random hex up to char length nibbles
+/proc/randhex(nibbles)
+	for (var/i = 1 to nibbles)
+		. += num2text(rand(0, 15), 1, 16)
+
 
 /// Increase the size of L by 1 at the end. Is the old last entry index.
 #define LIST_INC(L) ((L).len++)

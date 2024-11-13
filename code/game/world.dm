@@ -5,28 +5,10 @@
 
 
 
-var/global/game_id = null
+var/global/game_id = randhex(8)
 
 GLOBAL_VAR(href_logfile)
 
-/hook/global_init/proc/generate_gameid()
-	if(game_id != null)
-		return
-	game_id = ""
-
-	var/list/c = list("a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0")
-	var/l = length(c)
-
-	var/t = world.timeofday
-	for(var/_ = 1 to 4)
-		game_id = "[c[(t % l) + 1]][game_id]"
-		t = round(t / l)
-	game_id = "-[game_id]"
-	t = round(world.realtime / (10 * 60 * 60 * 24))
-	for(var/_ = 1 to 3)
-		game_id = "[c[(t % l) + 1]][game_id]"
-		t = round(t / l)
-	return 1
 
 // Find mobs matching a given string
 //
@@ -88,6 +70,7 @@ GLOBAL_VAR(href_logfile)
 #ifndef UNIT_TEST
 /hook/startup/proc/set_visibility()
 	world.update_hub_visibility(config.hub_visible)
+	return TRUE
 #endif
 
 /world/New()
@@ -112,8 +95,8 @@ GLOBAL_VAR(href_logfile)
 
 	if (byond_version < RECOMMENDED_VERSION)
 		to_world_log("Your server's byond version does not meet the recommended requirements for this server. Please update BYOND")
-
 	callHook("startup")
+	QDEL_NULL(__global_init)
 	..()
 
 #ifdef UNIT_TEST
@@ -219,6 +202,8 @@ GLOBAL_VAR_INIT(world_topic_last, world.timeofday)
 			if(length(dept_list) > 0)
 				positions[dept] = list()
 				for(var/list/person in dept_list)
+					if (person["status"] == "Stored")
+						continue
 					positions[dept][person["name"]] = person["rank"]
 
 		for(var/k in positions)
@@ -417,9 +402,8 @@ GLOBAL_VAR_INIT(world_topic_last, world.timeofday)
 		var/amessage =  SPAN_CLASS("staff_pm", "[rank] PM from <a href='?irc_msg=[input["sender"]]'>[input["sender"]]</a> to <b>[key_name(C)]</b> : [input["msg"]]")
 
 		C.received_irc_pm = world.time
-		C.irc_admin = input["sender"]
 
-		sound_to(C, 'sound/ui/pm-notify.ogg')
+		sound_to(C, sound('sound/ui/pm-notify.ogg', volume = 40))
 		to_chat(C, message)
 
 		for(var/client/A as anything in GLOB.admins)
@@ -512,9 +496,6 @@ GLOBAL_VAR_INIT(world_topic_last, world.timeofday)
 		GLOB.log_directory += "[game_id]"
 	else
 		GLOB.log_directory += "[replacetext(time_stamp(), ":", ".")]"
-
-	GLOB.world_qdel_log = file("[GLOB.log_directory]/qdel.log")
-	to_file(GLOB.world_qdel_log, "\n\nStarting up round ID [game_id]. [time_stamp()]\n---------------------")
 
 
 var/global/failed_db_connections = 0

@@ -1,7 +1,7 @@
 /obj/structure/pit
 	name = "pit"
 	desc = "Watch your step, partner."
-	icon = 'icons/obj/pit.dmi'
+	icon = 'icons/obj/structures/pit.dmi'
 	icon_state = "pit1"
 	blend_mode = BLEND_MULTIPLY
 	density = FALSE
@@ -16,7 +16,7 @@
 			SPAN_NOTICE("\The [user] starts [open ? "filling" : "digging open"] \the [src] with \a [tool]."),
 			SPAN_NOTICE("You start [open ? "filling" : "digging open"] \the [src] with \the [tool].")
 		)
-		if (!user.do_skilled(5 SECONDS, SKILL_HAULING, src) || !user.use_sanity_check(src, tool))
+		if (!user.do_skilled((tool.toolspeed * 5) SECONDS, SKILL_HAULING, src) || !user.use_sanity_check(src, tool))
 			return TRUE
 		user.visible_message(
 			SPAN_NOTICE("\The [user] [open ? "fills" : "digs open"] \the [src] with \a [tool]."),
@@ -156,7 +156,7 @@
 /obj/structure/gravemarker
 	name = "grave marker"
 	desc = "You're not the first."
-	icon = 'icons/obj/gravestone.dmi'
+	icon = 'icons/obj/structures/gravestone.dmi'
 	icon_state = "wood"
 	pixel_x = 15
 	pixel_y = 8
@@ -188,12 +188,12 @@
 
 /obj/structure/gravemarker/use_tool(obj/item/tool, mob/user, list/click_params)
 	// Hatchet - Remove marker
-	if (istype(tool, /obj/item/material/hatchet))
+	if (isHatchet(tool))
 		user.visible_message(
 			SPAN_NOTICE("\The [user] starts hacking away at \the [src] with \a [tool]."),
 			SPAN_NOTICE("You start hacking away at \the [src] with \the [tool].")
 		)
-		if (!user.do_skilled(2 SECONDS, list(SKILL_CONSTRUCTION, SKILL_HAULING), src) || !user.use_sanity_check(src, tool))
+		if (!user.do_skilled((tool.toolspeed * 2) SECONDS, list(SKILL_CONSTRUCTION, SKILL_HAULING), src) || !user.use_sanity_check(src, tool))
 			return TRUE
 		var/obj/item/stack/material/wood/stack = new(loc, 1)
 		transfer_fingerprints_to(stack)

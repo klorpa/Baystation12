@@ -195,7 +195,7 @@
 
 	var/list/override_organ_types // Used for species that only need to change one or two entries in has_organ.
 
-	var/obj/effect/decal/cleanable/blood/tracks/move_trail = /obj/effect/decal/cleanable/blood/tracks/footprints // What marks are left when walking
+	var/obj/decal/cleanable/blood/tracks/move_trail = /obj/decal/cleanable/blood/tracks/footprints // What marks are left when walking
 
 	var/list/skin_overlays = list()
 
@@ -228,14 +228,13 @@
 
 	var/pass_flags = 0
 	var/breathing_sound = 'sound/voice/monkey.ogg'
+	var/bodyfall_sound = 'sound/effects/bodyfall.ogg'
 	var/list/equip_adjust = list()
 	var/list/equip_overlays = list()
 
 	var/list/base_auras
 
 	var/sexybits_location	//organ tag where they are located if they can be kicked for increased pain
-
-	var/job_skill_buffs = list()				// A list containing jobs (/datum/job), with values the extra points that job receives.
 
 	var/list/descriptors = list(
 		/datum/mob_descriptor/height = 0,
@@ -481,7 +480,10 @@ The slots that you can use are found in items_clothing.dm and are the inventory 
 	handle_limbs_setup(H)
 
 /datum/species/proc/handle_pre_spawn(mob/living/carbon/human/H)
-	return
+	// Changing species can change NPC behaviour, so delete the holder if there is one
+	if (H.ai_holder && istype(H.ai_holder, /datum))
+		GLOB.stat_set_event.unregister(H, H.ai_holder, /datum/ai_holder/proc/holder_stat_change)
+		QDEL_NULL(H.ai_holder)
 
 /datum/species/proc/handle_death(mob/living/carbon/human/H) //Handles any species-specific death events (such as dionaea nymph spawns).
 	return
@@ -554,10 +556,6 @@ The slots that you can use are found in items_clothing.dm and are the inventory 
 			return 1
 
 	return 0
-
-// Called in life() when the mob has no client.
-/datum/species/proc/handle_npc(mob/living/carbon/human/H)
-	return
 
 /datum/species/proc/handle_vision(mob/living/carbon/human/H)
 	var/list/vision = H.get_accumulated_vision_handlers()
@@ -637,7 +635,7 @@ The slots that you can use are found in items_clothing.dm and are the inventory 
 // Impliments different trails for species depending on if they're wearing shoes.
 /datum/species/proc/get_move_trail(mob/living/carbon/human/H)
 	if(H.lying)
-		return /obj/effect/decal/cleanable/blood/tracks/body
+		return /obj/decal/cleanable/blood/tracks/body
 	if(H.shoes || (H.wear_suit && (H.wear_suit.body_parts_covered & FEET)))
 		var/obj/item/clothing/shoes = (H.wear_suit && (H.wear_suit.body_parts_covered & FEET)) ? H.wear_suit : H.shoes // suits take priority over shoes
 		if(footwear_trail_overrides)
@@ -762,6 +760,7 @@ The slots that you can use are found in items_clothing.dm and are the inventory 
 		"lack of air" = oxy_mod,
 		"poison" = toxins_mod
 	)
+	var/name_clean = replace_characters(name,list("'"=""))
 	if(!header)
 		header = "<center><h2>[name]</h2></center><hr/>"
 	var/dat = list()
@@ -779,8 +778,8 @@ The slots that you can use are found in items_clothing.dm and are the inventory 
 	if((!skip_photo && preview_icon) || !skip_detail)
 		dat += "<td width = 200 align='center'>"
 		if(!skip_photo && preview_icon)
-			send_rsc(usr, icon(icon = preview_icon, icon_state = ""), "species_preview_[name].png")
-			dat += "<img src='species_preview_[name].png' width='64px' height='64px'><br/><br/>"
+			send_rsc(usr, icon(icon = preview_icon, icon_state = ""), "species_preview_[name_clean].png")
+			dat += "<img src='species_preview_[name_clean].png'>"
 		if(!skip_detail)
 			dat += "<small>"
 			if(spawn_flags & SPECIES_CAN_JOIN)
@@ -833,13 +832,6 @@ The slots that you can use are found in items_clothing.dm and are the inventory 
 	set src = usr
 
 	show_browser(src, species.get_description(), "window=species;size=700x400")
-
-/datum/species/proc/skills_from_age(age)	//Converts an age into a skill point allocation modifier. Can be used to give skill point bonuses/penalities not depending on job.
-	switch(age)
-		if(0 to 22) 	. = 0
-		if(23 to 30) 	. = 3
-		if(31 to 45)	. = 6
-		else			. = 8
 
 /datum/species/proc/post_organ_rejuvenate(obj/item/organ/org, mob/living/carbon/human/H)
 	return

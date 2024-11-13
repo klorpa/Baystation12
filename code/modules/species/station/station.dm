@@ -3,11 +3,12 @@
 	name_plural = "Humans"
 	primitive_form = "Monkey"
 	unarmed_types = list(/datum/unarmed_attack/stomp, /datum/unarmed_attack/kick, /datum/unarmed_attack/punch, /datum/unarmed_attack/bite)
-	description = "Humanity originated in the Sol system, and over the last five centuries has spread \
+	description = "Humanity originated in the Sol system, and over the last three centuries has spread \
 	colonies across a wide swathe of space. They hold a wide range of forms and creeds.<br/><br/> \
-	While the central Sol government maintains control of its far-flung people, powerful corporate \
-	interests, rampant cyber and bio-augmentation and secretive factions make life on most human \
-	worlds tumultous at best."
+	The two largest human governments are the Sol Central Government and the Gilgamesh Colonial Confederation, \
+	which are currently locked in a cold war. Many other human states exist, however - these include the Frontier \
+	Alliance, a loose collection of planets which has recently seceded from the Sol Central Government; \
+	Magnitka, an independent authoritarian planet; and many other minor colonies."
 	assisted_langs = list(LANGUAGE_NABBER)
 	min_age = 18
 	max_age = 100
@@ -30,12 +31,27 @@
 			CULTURE_HUMAN_VENUSIAN,
 			CULTURE_HUMAN_VENUSLOW,
 			CULTURE_HUMAN_BELTER,
-			CULTURE_HUMAN_PLUTO,
+			CULTURE_HUMAN_KUIPERI,
+			CULTURE_HUMAN_KUIPERO,
+			CULTURE_HUMAN_MAGNITKA,
 			CULTURE_HUMAN_EARTH,
-			CULTURE_HUMAN_CETI,
+			CULTURE_HUMAN_CETIN,
+			CULTURE_HUMAN_CETIS,
+			CULTURE_HUMAN_CETII,
 			CULTURE_HUMAN_SPACER,
-			CULTURE_HUMAN_SPAFRO,
-			CULTURE_HUMAN_CONFED,
+			CULTURE_HUMAN_OFFWORLD,
+			CULTURE_HUMAN_CONFEDC,
+			CULTURE_HUMAN_CONFEDO,
+			CULTURE_HUMAN_FOSTER,
+			CULTURE_HUMAN_PIRXL,
+			CULTURE_HUMAN_PIRXB,
+			CULTURE_HUMAN_PIRXF,
+			CULTURE_HUMAN_TADMOR,
+			CULTURE_HUMAN_IOLAUS,
+			CULTURE_HUMAN_BRAHE,
+			CULTURE_HUMAN_EOS,
+			CULTURE_HUMAN_CONFEDC,
+			CULTURE_HUMAN_CONFEDO,
 			CULTURE_HUMAN_GAIAN,
 			CULTURE_HUMAN_OTHER
 		)
@@ -58,50 +74,6 @@
 
 /datum/species/human/get_bodytype(mob/living/carbon/human/H)
 	return SPECIES_HUMAN
-
-/datum/species/human/handle_npc(mob/living/carbon/human/H)
-	if(H.stat != CONSCIOUS)
-		return
-
-	if(H.get_shock() && H.shock_stage < 40 && prob(3))
-		H.emote(pick("moan","groan"))
-
-	if(H.shock_stage > 10 && prob(3))
-		H.emote(pick("cry","whimper"))
-
-	if(H.shock_stage >= 40 && prob(3))
-		H.emote("scream")
-
-	if(!H.restrained() && H.lying && H.shock_stage >= 60 && prob(3))
-		H.custom_emote("thrashes in agony")
-
-	if(!H.restrained() && H.shock_stage < 40 && prob(3))
-		var/maxdam = 0
-		var/obj/item/organ/external/damaged_organ = null
-		for(var/obj/item/organ/external/E in H.organs)
-			if(!E.can_feel_pain()) continue
-			var/dam = E.get_damage()
-			// make the choice of the organ depend on damage,
-			// but also sometimes use one of the less damaged ones
-			if(dam > maxdam && (maxdam == 0 || prob(50)) )
-				damaged_organ = E
-				maxdam = dam
-		var/datum/pronouns/P = H.choose_from_pronouns()
-		if(damaged_organ)
-			if(damaged_organ.status & ORGAN_BLEEDING)
-				H.custom_emote("clutches [P.his] [damaged_organ.name], trying to stop the blood.")
-			else if(damaged_organ.status & ORGAN_BROKEN)
-				H.custom_emote("holds [P.his] [damaged_organ.name] carefully.")
-			else if(damaged_organ.burn_dam > damaged_organ.brute_dam && damaged_organ.organ_tag != BP_HEAD)
-				H.custom_emote("blows on [P.his] [damaged_organ.name] carefully.")
-			else
-				H.custom_emote("rubs [P.his] [damaged_organ.name] carefully.")
-
-		for(var/obj/item/organ/I in H.internal_organs)
-			if((I.status & ORGAN_DEAD) || BP_IS_ROBOTIC(I)) continue
-			if(I.damage > 2) if(prob(2))
-				var/obj/item/organ/external/parent = H.get_organ(I.parent_organ)
-				H.custom_emote("clutches [P.his] [parent.name]!")
 
 /datum/species/human/get_ssd(mob/living/carbon/human/H)
 	if (H.ai_holder)
@@ -258,6 +230,8 @@
 		/singleton/trait/general/permeable_skin = TRAIT_LEVEL_MINOR
 	)
 
+	bodyfall_sound = 'sound/effects/bodyfall_skrell.ogg'
+
 /datum/species/skrell/get_sex(mob/living/carbon/human/H)
 	return istype(H) && (H.descriptors["headtail length"] == 1 ? MALE : FEMALE)
 
@@ -409,12 +383,6 @@
 		H.equip_to_slot_or_del(new /obj/item/device/flashlight/flare(H.back), slot_in_backpack)
 	else
 		H.equip_to_slot_or_del(new /obj/item/device/flashlight/flare(H), slot_r_hand)
-
-/datum/species/diona/skills_from_age(age)
-	switch(age)
-		if(101 to 200)	. = 12 // age bracket before this is 46 to 100 . = 8 making this +4
-		if(201 to 300)	. = 16 // + 8
-		else			. = ..()
 
 // Dionaea spawned by hand or by joining will not have any
 // nymphs passed to them. This should take care of that.

@@ -1,7 +1,7 @@
 /obj/structure/bed
 	name = "bed"
 	desc = "This is used to lie in, sleep in or strap on."
-	icon = 'icons/obj/furniture.dmi'
+	icon = 'icons/obj/structures/furniture.dmi'
 	icon_state = "bed"
 	anchored = TRUE
 	can_buckle = TRUE
@@ -32,15 +32,15 @@
 /obj/structure/bed/on_update_icon()
 	// Prep icon.
 	icon_state = ""
-	overlays.Cut()
+	ClearOverlays()
 	// Base icon.
 	var/cache_key = "[base_icon]-[material.name]"
 	if(isnull(stool_cache[cache_key]))
-		var/image/I = image('icons/obj/furniture.dmi', base_icon)
+		var/image/I = image('icons/obj/structures/furniture.dmi', base_icon)
 		if(material_alteration & MATERIAL_ALTERATION_COLOR)
 			I.color = material.icon_colour
 		stool_cache[cache_key] = I
-	overlays |= stool_cache[cache_key]
+	AddOverlays(stool_cache[cache_key])
 	// Padding overlay.
 	if(padding_material)
 		var/padding_cache_key = "[base_icon]-padding-[padding_material.name]"
@@ -49,7 +49,7 @@
 			if(material_alteration & MATERIAL_ALTERATION_COLOR)
 				I.color = padding_material.icon_colour
 			stool_cache[padding_cache_key] = I
-		overlays |= stool_cache[padding_cache_key]
+		AddOverlays(stool_cache[padding_cache_key])
 
 	// Strings.
 	if(material_alteration & MATERIAL_ALTERATION_NAME)
@@ -113,8 +113,8 @@
 		add_padding(padding_type)
 		return TRUE
 
-	// Wirecutters - Remove padding
-	if (isWirecutter(tool))
+	// Sharp items - Remove padding
+	if (is_sharp(tool))
 		if (!padding_material)
 			USE_FEEDBACK_FAILURE("\The [src] has no padding to remove.")
 			return TRUE
@@ -156,7 +156,7 @@
 		VISIBLE_MESSAGE,
 		SPAN_DANGER("You feel someone trying to force you into a bed or chair!")
 	)
-	if (!do_after(grab.assailant, 2 SECONDS, src, DO_PUBLIC_UNIQUE) || QDELETED(grab) || !grab.assailant.use_sanity_check(src, grab.affecting))
+	if (!do_after(grab.assailant, 2 SECONDS, src, DO_PUBLIC_UNIQUE) || !grab.use_sanity_check(src))
 		return TRUE
 	grab.assailant.visible_message(
 		SPAN_WARNING("\The [grab.assailant] buckles \the [grab.affecting] to \the [src]."),
@@ -203,7 +203,7 @@
 
 /obj/structure/mattress
 	name = "mattress"
-	icon = 'icons/obj/furniture.dmi'
+	icon = 'icons/obj/structures/furniture.dmi'
 	icon_state = "mattress"
 	desc = "A bare mattress. It doesn't look very comfortable."
 	anchored = FALSE

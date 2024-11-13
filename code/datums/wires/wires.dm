@@ -112,7 +112,7 @@ var/global/list/wireColours = list("red", "blue", "green", "darkred", "orange", 
 
 	var/list/wires_used = list()
 	for(var/colour in wires)
-		wires_used += prob(user.skill_fail_chance(SKILL_ELECTRICAL, 20, SKILL_ADEPT)) ? pick(wires) : colour
+		wires_used += prob(user.skill_fail_chance(SKILL_ELECTRICAL, 20, SKILL_TRAINED)) ? pick(wires) : colour
 	if(!user.skill_check(SKILL_ELECTRICAL, SKILL_BASIC))
 		wires_used = shuffle(wires_used)
 
@@ -156,7 +156,7 @@ var/global/list/wireColours = list("red", "blue", "green", "darkred", "orange", 
 					else
 						message = SPAN_NOTICE("You cut the [colour] wire.")
 
-					if(prob(L.skill_fail_chance(SKILL_ELECTRICAL, 20, SKILL_ADEPT)))
+					if(prob(L.skill_fail_chance(SKILL_ELECTRICAL, 20, SKILL_TRAINED)))
 						RandomCut()
 						message = SPAN_DANGER("You accidentally nick another wire in addition to the [colour] wire!")
 					else if(!L.skill_check(SKILL_ELECTRICAL, SKILL_BASIC))
@@ -169,7 +169,7 @@ var/global/list/wireColours = list("red", "blue", "green", "darkred", "orange", 
 			else if(href_list["pulse"])
 				if(isMultitool(I) || isMultitool(offhand_item))
 					var/colour = href_list["pulse"]
-					if(prob(L.skill_fail_chance(SKILL_ELECTRICAL, 30, SKILL_ADEPT)))
+					if(prob(L.skill_fail_chance(SKILL_ELECTRICAL, 30, SKILL_TRAINED)))
 						RandomPulse()
 						to_chat(L, SPAN_DANGER("You accidentally pulse another wire instead of the [colour] wire!"))
 						if(prob(L.skill_fail_chance(SKILL_ELECTRICAL, 60, SKILL_BASIC)))
@@ -186,7 +186,7 @@ var/global/list/wireColours = list("red", "blue", "green", "darkred", "orange", 
 			else if(href_list["attach"])
 				var/colour = href_list["attach"]
 				var/failed = 0
-				if(prob(L.skill_fail_chance(SKILL_ELECTRICAL, 80, SKILL_EXPERT)))
+				if(prob(L.skill_fail_chance(SKILL_ELECTRICAL, 80, SKILL_EXPERIENCED)))
 					colour = pick(wires)
 					to_chat(L, SPAN_DANGER("Are you sure you got the right wire?"))
 					failed = 1
@@ -208,7 +208,7 @@ var/global/list/wireColours = list("red", "blue", "green", "darkred", "orange", 
 						to_chat(L, SPAN_CLASS("error", "You need a remote signaller!"))
 			else if(href_list["examine"])
 				var/colour = href_list["examine"]
-				to_chat(usr, examine(GetIndex(colour), usr))
+				to_chat(usr, ExamineWire(GetIndex(colour), usr))
 
 		// Update Window
 			Interact(usr)
@@ -233,7 +233,7 @@ var/global/list/wireColours = list("red", "blue", "green", "darkred", "orange", 
 /datum/wires/proc/ResetPulsed(index)
 	return
 
-/datum/wires/proc/examine(index, mob/user)
+/datum/wires/proc/ExamineWire(index, mob/user)
 	. = "You aren't sure what this wire does."
 
 	var/datum/wire_description/wd = get_description(index)

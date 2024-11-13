@@ -66,6 +66,9 @@
 	wall_smooth = SMOOTH_ALL
 	space_smooth = SMOOTH_NONE
 
+/singleton/flooring/grass/cut
+	floor_smooth = SMOOTH_ALL
+
 /singleton/flooring/dirt
 	name = "dirt"
 	desc = "Extra dirty."
@@ -137,6 +140,11 @@
 	name = "red carpet"
 	icon_base = "red"
 	build_type = /obj/item/stack/tile/carpetred
+
+/singleton/flooring/carpet/black
+	name = "black carpet"
+	icon_base = "black"
+	build_type = /obj/item/stack/tile/carpetblack
 
 /singleton/flooring/linoleum
 	name = "linoleum"
@@ -307,8 +315,11 @@
 
 /singleton/flooring/reinforced/circuit/red
 	icon_base = "rcircuit"
+
+/singleton/flooring/reinforced/circuit/selfdestruct
+	icon_base = "rcircuit_off"
 	flags = TURF_ACID_IMMUNE
-	can_paint = 0
+	can_paint = FALSE
 
 /singleton/flooring/reinforced/cult
 	name = "engraved floor"
@@ -402,3 +413,16 @@
 	wall_smooth = SMOOTH_NONE
 	space_smooth = SMOOTH_NONE
 	height = -FLUID_OVER_MOB_HEAD * 2
+
+
+/singleton/flooring/bluespace
+	name = "bluespace"
+	desc = "Infinite bluespace. It gives you a piercing headache if you stare at it for too long."
+	icon = 'icons/turf/space.dmi'
+	icon_base = "bluespace"
+	flags = TURF_ACID_IMMUNE
+	build_type = null
+	footstep_type = /singleton/footsteps/tiles
+	floor_smooth = SMOOTH_NONE
+	wall_smooth = SMOOTH_NONE
+	space_smooth = SMOOTH_NONE

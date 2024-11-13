@@ -11,7 +11,7 @@
 
 	var/proj_trail = 0 //if it leaves a trail
 	var/proj_trail_lifespan = 0 //deciseconds
-	var/proj_trail_icon = 'icons/obj/wizard.dmi'
+	var/proj_trail_icon = 'icons/obj/cult.dmi'
 	var/proj_trail_icon_state = "trail"
 	var/list/trails = new()
 
@@ -26,7 +26,7 @@
 
 /obj/item/projectile/spell_projectile/before_move()
 	if(proj_trail && src && src.loc) //pretty trails
-		var/obj/effect/overlay/trail = new /obj/effect/overlay(loc)
+		var/obj/overlay/trail = new /obj/overlay(loc)
 		trails += trail
 		trail.icon = proj_trail_icon
 		trail.icon_state = proj_trail_icon_state

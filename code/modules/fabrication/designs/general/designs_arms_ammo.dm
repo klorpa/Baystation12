@@ -134,3 +134,7 @@
 /datum/fabricator_recipe/arms_ammo/hidden/rifleinternalclip
 	name = "ammunition (en-bloc clip)"
 	path = /obj/item/ammo_magazine/iclipr
+
+/datum/fabricator_recipe/arms_ammo/hidden/beandrum
+	name = "ammunition (drum magazine, beanbag)"
+	path = /obj/item/ammo_magazine/shotgunmag/beanbag

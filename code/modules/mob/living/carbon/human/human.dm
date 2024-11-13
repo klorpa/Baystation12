@@ -173,8 +173,7 @@
 	if(user.incapacitated()  || !user.Adjacent(src) || !user.IsAdvancedToolUser())
 		return
 
-	user.set_machine(src)
-	var/dat = "<B><HR>[FONT_LARGE(name)]</B><BR><HR>"
+	var/dat = ""
 
 	for(var/entry in species.hud.gear)
 		var/list/slot_ref = species.hud.gear[entry]
@@ -217,10 +216,10 @@
 		dat += "<BR><a href='?src=\ref[src];item=\ref[UW]'>Remove \the [UW]</a>"
 
 	dat += "<BR><A href='?src=\ref[src];refresh=1'>Refresh</A>"
-	dat += "<BR><A href='?src=\ref[user];mach_close=mob[name]'>Close</A>"
 
-	show_browser(user, dat, text("window=mob[name];size=340x540"))
-	onclose(user, "mob[name]")
+	var/datum/browser/popup = new(user, "mob[name]", name, 340, 540)
+	popup.set_content(dat)
+	popup.open()
 	return
 
 // called when something steps onto a human
@@ -385,7 +384,7 @@
 	if (href_list["lookitem"])
 		var/obj/item/I = locate(href_list["lookitem"])
 		if(I)
-			src.examinate(I)
+			examinate(src, I)
 			return TOPIC_HANDLED
 	return ..()
 
@@ -614,6 +613,7 @@
 	var/obj/item/organ/internal/cell/potato = internal_organs_by_name[BP_CELL]
 	if(potato && potato.cell)
 		stat("Battery charge:", "[potato.get_charge()]/[potato.cell.maxcharge]")
+		stat("Operating temperature:", "[round(bodytemperature-T0C)]&deg;C")
 
 	if(back && istype(back,/obj/item/rig))
 		var/obj/item/rig/suit = back
@@ -649,8 +649,9 @@
 	return species.name
 
 /mob/living/carbon/human/proc/play_xylophone()
+	var/datum/pronouns/pronouns = choose_from_pronouns()
 	if(!src.xylophone)
-		visible_message(SPAN_WARNING("\The [src] begins playing \his ribcage like a xylophone. It's quite spooky."),SPAN_NOTICE("You begin to play a spooky refrain on your ribcage."),SPAN_WARNING("You hear a spooky xylophone melody."))
+		visible_message(SPAN_WARNING("\The [src] begins playing [pronouns.his] ribcage like a xylophone. It's quite spooky."),SPAN_NOTICE("You begin to play a spooky refrain on your ribcage."),SPAN_WARNING("You hear a spooky xylophone melody."))
 		var/song = pick('sound/effects/xylophone1.ogg','sound/effects/xylophone2.ogg','sound/effects/xylophone3.ogg')
 		playsound(loc, song, 50, 1, -1)
 		xylophone = 1
@@ -722,7 +723,7 @@
 	visible_message(SPAN_DANGER("\The [src] throws up!"),SPAN_DANGER("You throw up!"))
 	playsound(loc, 'sound/effects/splat.ogg', 50, 1)
 	if(istype(location, /turf/simulated))
-		var/obj/effect/decal/cleanable/vomit/splat = new /obj/effect/decal/cleanable/vomit(location)
+		var/obj/decal/cleanable/vomit/splat = new /obj/decal/cleanable/vomit(location)
 		if(stomach.ingested.total_volume)
 			stomach.ingested.trans_to_obj(splat, min(15, stomach.ingested.total_volume))
 		handle_additional_vomit_reagents(splat)
@@ -904,17 +905,17 @@
 		reset_view(0)
 
 /**
- * Retrieves the atom's visible gender. Generally this is just `gender` but some factors may mask or change this.
+ * Retrieves the atom's pronouns. Generally this is just based on `gender` but some factors may mask or change this.
  *
- * Returns a valid gender value. See DM documentation for `/mob/var/gender`.
+ * Returns instance of `/datum/pronouns`.
  */
 /atom/proc/choose_from_pronouns()
-	return gender
+	RETURN_TYPE(/datum/pronouns)
+	return GLOB.pronouns_from_gender[gender]
 
 /mob/living/carbon/human/choose_from_pronouns()
-	if(wear_suit && wear_suit.flags_inv & HIDEJUMPSUIT && ((head && head.flags_inv & HIDEMASK) || wear_mask))
-		var/datum/pronouns/P = GLOB.pronouns.by_key[PRONOUNS_THEY_THEM]
-		return P
+	if (wear_suit && HAS_FLAGS(wear_suit.flags_inv, HIDEJUMPSUIT) && ((head && HAS_FLAGS(head.flags_inv, HIDEMASK)) || wear_mask))
+		return GLOB.pronouns.by_key[PRONOUNS_THEY_THEM]
 	return ..()
 
 /mob/living/carbon/human/proc/increase_germ_level(n)
@@ -982,6 +983,7 @@
 			organ.gunshot_residue = null
 
 	if(clean_feet && !shoes)
+		track_blood = 0
 		feet_blood_color = null
 		feet_blood_DNA = null
 		update_inv_shoes(1)
@@ -1072,27 +1074,28 @@
 	set desc = "Approximately count somebody's pulse. Requires you to stand still at least 6 seconds."
 	set src in view(1)
 	var/self = 0
+	var/datum/pronouns/pronouns = usr.choose_from_pronouns()
 
 	if(usr.stat || usr.restrained() || !isliving(usr)) return
 
 	if(usr == src)
 		self = 1
 	if(!self)
-		usr.visible_message(SPAN_NOTICE("[usr] kneels down, puts \his hand on [src]'s wrist and begins counting their pulse."),\
-		"You begin counting [src]'s pulse")
+		usr.visible_message(SPAN_NOTICE("\The [usr] kneels down, puts [pronouns.his] hand on \the [src]'s wrist and begins counting their pulse."),\
+		"You begin counting \the [src]'s pulse")
 	else
-		usr.visible_message(SPAN_NOTICE("[usr] begins counting their pulse."),\
+		usr.visible_message(SPAN_NOTICE("\The [usr] begins counting [pronouns.his] pulse."),\
 		"You begin counting your pulse.")
 
 	if (!pulse() || status_flags & FAKEDEATH)
-		to_chat(usr, SPAN_DANGER("[src] has no pulse!"))
+		to_chat(usr, SPAN_DANGER("\The [src] has no pulse!"))
 		return
 	else
-		to_chat(usr, SPAN_NOTICE("[self ? "You have a" : "[src] has a"] pulse! Counting..."))
+		to_chat(usr, SPAN_NOTICE("[self ? "You have a" : "\The [src] has a"] pulse! Counting..."))
 
 	to_chat(usr, "You must[self ? "" : " both"] remain still until counting is finished.")
 	if(do_after(usr, 6 SECONDS, src, DO_DEFAULT | DO_USER_UNIQUE_ACT | DO_PUBLIC_PROGRESS))
-		var/message = SPAN_NOTICE("[self ? "Your" : "[src]'s"] pulse is [src.get_pulse(GETPULSE_HAND)].")
+		var/message = SPAN_NOTICE("[self ? "Your" : "\The [src]'s"] pulse is [src.get_pulse(GETPULSE_HAND)].")
 		to_chat(usr, message)
 	else
 		to_chat(usr, SPAN_WARNING("You failed to check the pulse. Try again."))
@@ -1114,6 +1117,40 @@
 			to_chat(src, SPAN_NOTICE("You look up."))
 			reset_view(z_eye)
 			return
+
+		var/turf/T= get_turf(src)
+
+		if(T.is_outside())// They're outside and hopefully on a planet.
+			var/obj/overmap/visitable/sector/exoplanet/E = map_sectors["[T.z]"]
+			if (!istype(E))
+				to_chat(usr, SPAN_NOTICE("You see... things, it's hard to put into words what you're seeing specifically."))
+				return
+
+			//Weather hook here when it is a thing
+
+			// Sun-related output.
+			//Calculate time of day
+			var/time_of_day = E.sun_last_process % E.daycycle
+			var/afternoon = time_of_day > (E.daycycle / 2)
+			var/star_name = GLOB.using_map.system_name
+
+			var/sun_message = null
+			switch(E.sun_position)
+				if(0 to 0.4) // Night
+					sun_message = "It is night time, [star_name] is not visible."
+				if(0.4 to 0.5) // Twilight
+					sun_message = "The sky is in twilight, however [star_name] is not visible."
+				if(0.5 to 0.7) // Sunrise/set.
+					sun_message = "[star_name] is slowly [!afternoon ? "rising from" : "setting on"] the horizon."
+				if(0.7 to 0.9) // Morning/evening
+					sun_message = "[star_name]'s position implies it is currently [!afternoon ? "early" : "late"] in the day."
+				if(0.9 to 1.0) // Noon
+					sun_message = "It's high noon. [star_name] hangs directly above you."
+
+			to_chat(usr, SPAN_NOTICE(sun_message))
+			return
+
+
 		to_chat(src, SPAN_NOTICE("You can see \the [above ? above : "ceiling"]."))
 	else
 		to_chat(src, SPAN_NOTICE("You can't look up right now."))
@@ -1338,7 +1375,7 @@
 		return
 
 	var/num_doodles = 0
-	for (var/obj/effect/decal/cleanable/blood/writing/W in T)
+	for (var/obj/decal/cleanable/blood/writing/W in T)
 		num_doodles++
 	if (num_doodles > 4)
 		to_chat(src, SPAN_WARNING("There is no space to write on!"))
@@ -1355,7 +1392,7 @@
 		if (length(message) > max_length)
 			message += "-"
 			to_chat(src, SPAN_WARNING("You ran out of blood to write with!"))
-		var/obj/effect/decal/cleanable/blood/writing/W = new(T)
+		var/obj/decal/cleanable/blood/writing/W = new(T)
 		W.basecolor = (hand_blood_color) ? hand_blood_color : COLOR_BLOOD_HUMAN
 		W.update_icon()
 		W.message = message
@@ -1500,9 +1537,9 @@
 	if(!current_limb || !S || !U)
 		return
 
-	var/fail_prob = U.skill_fail_chance(SKILL_MEDICAL, 60, SKILL_ADEPT, 3)
+	var/fail_prob = U.skill_fail_chance(SKILL_MEDICAL, 60, SKILL_TRAINED, 3)
 	if(self)
-		fail_prob += U.skill_fail_chance(SKILL_MEDICAL, 20, SKILL_EXPERT, 1)
+		fail_prob += U.skill_fail_chance(SKILL_MEDICAL, 20, SKILL_EXPERIENCED, 1)
 	var/datum/pronouns/P = choose_from_pronouns()
 	if(prob(fail_prob))
 		visible_message( \
@@ -1622,17 +1659,19 @@
 		affecting = organs_by_name[BP_GROIN]
 
 	if(affecting && BP_IS_ROBOTIC(affecting))
-		return 0
+		return FALSE
 	return (species && species.has_organ[organ_check])
 
 /mob/living/carbon/human/can_feel_pain(obj/item/organ/check_organ)
 	if(isSynthetic())
-		return 0
+		return FALSE
+	if (species.species_flags & SPECIES_FLAG_NO_PAIN)
+		return FALSE
 	if(check_organ)
 		if(!istype(check_organ))
-			return 0
+			return FALSE
 		return check_organ.can_feel_pain()
-	return !(species.species_flags & SPECIES_FLAG_NO_PAIN)
+	return TRUE
 
 /mob/living/carbon/human/get_breath_volume()
 	. = ..()
@@ -1719,7 +1758,8 @@
 		if(!nervous_system_failure() && active_breaths)
 			visible_message("\The [src] jerks and gasps for breath!")
 		else
-			visible_message("\The [src] twitches a bit as \his heart restarts!")
+			var/datum/pronouns/pronouns = choose_from_pronouns()
+			visible_message("\The [src] twitches a bit as [pronouns.his] heart restarts!")
 		shock_stage = min(shock_stage, 100) // 120 is the point at which the heart stops.
 		if(getOxyLoss() >= 75)
 			setOxyLoss(75)
@@ -1754,7 +1794,7 @@
 
 /mob/living/carbon/human/ranged_accuracy_mods()
 	. = ..()
-	if(get_shock() > 10 && !skill_check(SKILL_WEAPONS, SKILL_ADEPT))
+	if(get_shock() > 10 && !skill_check(SKILL_WEAPONS, SKILL_TRAINED))
 		. -= 1
 	if(get_shock() > 50)
 		. -= 1
@@ -1762,11 +1802,11 @@
 		. -= 1
 	if(shock_stage > 30)
 		. -= 1
-	if(skill_check(SKILL_WEAPONS, SKILL_ADEPT))
+	if(skill_check(SKILL_WEAPONS, SKILL_TRAINED))
 		. += 1
-	if(skill_check(SKILL_WEAPONS, SKILL_EXPERT))
+	if(skill_check(SKILL_WEAPONS, SKILL_EXPERIENCED))
 		. += 1
-	if(skill_check(SKILL_WEAPONS, SKILL_PROF))
+	if(skill_check(SKILL_WEAPONS, SKILL_MASTER))
 		. += 2
 
 /mob/living/carbon/human/can_drown()
@@ -1823,7 +1863,7 @@
 	return species.get_digestion_product(src)
 
 // A damaged stomach can put blood in your vomit.
-/mob/living/carbon/human/handle_additional_vomit_reagents(obj/effect/decal/cleanable/vomit/vomit)
+/mob/living/carbon/human/handle_additional_vomit_reagents(obj/decal/cleanable/vomit/vomit)
 	..()
 	if(should_have_organ(BP_STOMACH))
 		var/obj/item/organ/internal/stomach/stomach = internal_organs_by_name[BP_STOMACH]
@@ -1860,10 +1900,10 @@
 		if(BULLET_IMPACT_MEAT)
 			if (damage && P.damtype == DAMAGE_BRUTE)
 				var/hit_dir = get_dir(P.starting, src)
-				var/obj/effect/decal/cleanable/blood/B = blood_splatter(get_step(src, hit_dir), src, 1, hit_dir)
+				var/obj/decal/cleanable/blood/B = blood_splatter(get_step(src, hit_dir), src, 1, hit_dir)
 				B.icon_state = pick("dir_splatter_1","dir_splatter_2")
 				B.SetTransform(scale = min(1, round(P.damage / 50, 0.2)))
-				new /obj/effect/temp_visual/bloodsplatter(loc, hit_dir, species.blood_color)
+				new /obj/temp_visual/bloodsplatter(loc, hit_dir, species.blood_color)
 
 /mob/living/carbon/human/proc/dream()
 	dream_timer = null

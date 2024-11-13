@@ -21,9 +21,10 @@ GLOBAL_LIST_INIT(bitflags, list(1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 204
 #define ATOM_FLAG_CAN_BE_PAINTED         FLAG(7)  // Can be painted using a paint sprayer or similar.
 #define ATOM_FLAG_ADJACENT_EXCEPTION     FLAG(8)  // Skips adjacent checks for atoms that should always be reachable in window tiles
 #define ATOM_FLAG_NO_TOOLS               FLAG(9)  // Blocks tool interactions.
+#define ATOM_AWAITING_OVERLAY_UPDATE     FLAG(10)
 
 #define MOVABLE_FLAG_PROXMOVE       FLAG(0)  // Does this object require proximity checking in Enter()?
-#define MOVABLE_FLAG_Z_INTERACT     FLAG(1)  // Should attackby and attack_hand be relayed through ladders and open spaces?
+#define MOVABLE_FLAG_Z_INTERACT     FLAG(1)  // Should use_tool and attack_hand be relayed through ladders and open spaces?
 #define MOVABLE_FLAG_EFFECTMOVE     FLAG(2)  // Is this an effect that should move?
 
 #define OBJ_FLAG_ANCHORABLE     FLAG(0)  // This object can be stuck in place with a tool
@@ -51,7 +52,7 @@ GLOBAL_LIST_INIT(bitflags, list(1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 204
 #define ITEM_FLAG_NOCUFFS                   FLAG(13) // Gloves that have this flag prevent cuffs being applied
 #define ITEM_FLAG_CAN_HIDE_IN_SHOES         FLAG(14) // Items that can be hidden in shoes that permit it
 #define ITEM_FLAG_WASHER_ALLOWED            FLAG(15) // Items that can be washed in washing machines
-#define ITEM_FLAG_TRY_ATTACK                FLAG(16) // Use the item's attack() when set before trying the receiver's attackby()
+#define ITEM_FLAG_IS_CHAMELEON_ITEM         FLAG(16) // Setups the chameleon extension on init. Throws an exception if there is no compatible extension subtype.
 
 // Flags for pass_flags.
 #define PASS_FLAG_TABLE     FLAG(0)
@@ -71,3 +72,16 @@ GLOBAL_LIST_INIT(bitflags, list(1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 204
 #define BED_FLAG_CANNOT_BE_PADDED FLAG(2)
 /// The bed/chair cannot be made into an electric chair with a shock kit. Only applies to `/obj/structure/bed/chair` subtypes.
 #define BED_FLAG_CANNOT_BE_ELECTRIFIED FLAG(3)
+
+/// Whether or not this sector is a starting sector. Z levels contained in this sector are added to station_levels
+#define OVERMAP_SECTOR_BASE         FLAG(0)
+/// Makes the sector show up on nav computers
+#define OVERMAP_SECTOR_KNOWN        FLAG(1)
+/// If the sector can be accessed by drifting off the map edge
+#define OVERMAP_SECTOR_IN_SPACE     FLAG(2)
+/// If the sector is untargetable by missiles.
+#define OVERMAP_SECTOR_UNTARGETABLE FLAG(3)
+
+
+/// For mob/living/ignore_hazard_flags. When set, shards do not damage the mob.
+var/global/const/HAZARD_FLAG_SHARD = FLAG(0)

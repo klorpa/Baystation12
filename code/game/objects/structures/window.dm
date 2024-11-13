@@ -1,11 +1,12 @@
 /obj/structure/window
 	name = "window"
 	desc = "A window."
-	icon = 'icons/obj/window.dmi'
+	icon = 'icons/obj/structures/window.dmi'
 	density = TRUE
 	w_class = ITEM_SIZE_NORMAL
 
 	damage_hitsound = 'sound/effects/Glasshit.ogg'
+	attacked_verb = "bangs"
 
 	layer = SIDE_WINDOW_LAYER
 	anchored = TRUE
@@ -16,7 +17,10 @@
 	var/damaged_reinf = FALSE
 	var/init_material = MATERIAL_GLASS
 	var/init_reinf_material = null
-	var/construction_state = 2
+	var/const/CONSTRUCT_STATE_COMPLETE = 2
+	var/const/CONSTRUCT_STATE_ANCHORED = 1
+	var/const/CONSTRUCT_STATE_UNANCHORED = 0
+	var/construction_state = CONSTRUCT_STATE_COMPLETE
 	var/id
 	var/polarized = 0
 	var/basestate = "window"
@@ -70,6 +74,7 @@
 
 	if(is_fulltile())
 		layer = FULL_WINDOW_LAYER
+		CLEAR_FLAGS(obj_flags, OBJ_FLAG_ROTATABLE)
 
 	health_min_damage = material.hardness * 1.25
 	if (reinf_material)
@@ -78,7 +83,7 @@
 
 	if (constructed)
 		set_anchored(FALSE)
-		construction_state = 0
+		construction_state = CONSTRUCT_STATE_UNANCHORED
 
 	base_color = get_color()
 
@@ -103,11 +108,11 @@
 
 	if (reinf_material)
 		switch (construction_state)
-			if (0)
+			if (CONSTRUCT_STATE_UNANCHORED)
 				to_chat(user, SPAN_WARNING("The window is not in the frame."))
-			if (1)
+			if (CONSTRUCT_STATE_ANCHORED)
 				to_chat(user, SPAN_WARNING("The window is pried into the frame but not yet fastened."))
-			if (2)
+			if (CONSTRUCT_STATE_COMPLETE)
 				to_chat(user, SPAN_NOTICE("The window is fastened to the frame."))
 
 	if (anchored)
@@ -214,35 +219,14 @@
 	return 1
 
 /obj/structure/window/attack_hand(mob/user as mob)
-	user.setClickCooldown(DEFAULT_ATTACK_COOLDOWN)
-	if(MUTATION_HULK in user.mutations)
-		user.say(pick(";RAAAAAAAARGH!", ";HNNNNNNNNNGGGGGGH!", ";GWAAAAAAAARRRHHH!", "NNNNNNNNGGGGGGGGHH!", ";AAAAAAARRRGH!"))
-		user.visible_message(SPAN_DANGER("[user] smashes through [src]!"))
-		user.do_attack_animation(src)
-		shatter()
-	else if(MUTATION_FERAL in user.mutations)
-		user.setClickCooldown(DEFAULT_ATTACK_COOLDOWN*2) //Additional cooldown
-		attack_generic(user, 10, "smashes")
+	if ((. = ..()))
+		return
 
-	else if (user.a_intent && user.a_intent == I_HURT)
-
-		if (istype(user,/mob/living/carbon/human))
-			var/mob/living/carbon/human/H = user
-			if(H.species.can_shred(H))
-				attack_generic(H,25)
-				return
-
-		playsound(src.loc, 'sound/effects/glassknock.ogg', 80, 1)
-		user.do_attack_animation(src)
-		user.visible_message(SPAN_DANGER("\The [user] bangs against \the [src]!"),
-							SPAN_DANGER("You bang against \the [src]!"),
-							"You hear a banging sound.")
-	else
-		playsound(src.loc, 'sound/effects/glassknock.ogg', 80, 1)
-		user.visible_message("[user.name] knocks on the [src.name].",
-							"You knock on the [src.name].",
-							"You hear a knocking sound.")
-	return
+	playsound(src.loc, 'sound/effects/glassknock.ogg', 80, 1)
+	user.visible_message("[user.name] knocks on the [src.name].",
+						"You knock on the [src.name].",
+						"You hear a knocking sound.")
+	return TRUE
 
 /obj/structure/window/do_simple_ranged_interaction(mob/user)
 	visible_message(SPAN_NOTICE("Something knocks on \the [src]."))
@@ -285,13 +269,16 @@
 		if (!reinf_material)
 			USE_FEEDBACK_FAILURE("\The [src] doesn't have a reinforced frame to pry out.")
 			return TRUE
-		if (construction_state == 2)
+		if (construction_state == CONSTRUCT_STATE_COMPLETE)
 			USE_FEEDBACK_FAILURE("\The [src] needs to be unfastened from the frame before you can pry it out.")
 			return TRUE
 		if (!anchored)
 			USE_FEEDBACK_FAILURE("\The [src] isn't anchored and doesn't need to be pried.")
 			return TRUE
-		construction_state = 1 - construction_state
+		if (construction_state == CONSTRUCT_STATE_ANCHORED)
+			construction_state = CONSTRUCT_STATE_UNANCHORED
+		else
+			construction_state = CONSTRUCT_STATE_ANCHORED
 		playsound(src, 'sound/items/Crowbar.ogg', 50, TRUE)
 		user.visible_message(
 			SPAN_NOTICE("\The [user] pries \the [src] [construction_state ? "into" : "out of"] its frame with \a [tool]."),
@@ -361,7 +348,7 @@
 			SPAN_NOTICE("\The [user] starts slicing \the [src] apart with \a [tool]."),
 			SPAN_NOTICE("You start slicing \the [src] apart with \the [tool].")
 		)
-		if (!user.do_skilled(2 SECONDS, SKILL_CONSTRUCTION, src, do_flags = DO_REPAIR_CONSTRUCT) || !user.use_sanity_check(src, tool))
+		if (!user.do_skilled((tool.toolspeed * 2) SECONDS, SKILL_CONSTRUCTION, src, do_flags = DO_REPAIR_CONSTRUCT) || !user.use_sanity_check(src, tool))
 			return TRUE
 		playsound(src, 'sound/items/Welder.ogg', 50, TRUE)
 		user.visible_message(
@@ -375,27 +362,35 @@
 	if (isScrewdriver(tool))
 		// Reinforced Window
 		if (reinf_material)
-			if (construction_state == 0)
-				if (!can_install_here(user))
+			switch(construction_state)
+				if (CONSTRUCT_STATE_UNANCHORED)
+					if (!can_install_here(user))
+						return TRUE
+					set_anchored(!anchored)
+					playsound(src, 'sound/items/Screwdriver.ogg', 50, TRUE)
+					user.visible_message(
+						SPAN_NOTICE("\The [user] [!anchored ? "un" : null]fastens \the [src] [!anchored ? "from" : "to"] the floor with \a [tool]."),
+						SPAN_NOTICE("You [!anchored ? "un" : null]fasten \the [src] [!anchored ? "from" : "to"] the floor with \the [tool].")
+					)
 					return TRUE
-				set_anchored(!anchored)
-				playsound(src, 'sound/items/Screwdriver.ogg', 50, TRUE)
-				user.visible_message(
-					SPAN_NOTICE("\The [user] [!anchored ? "un" : null]fastens \the [src] [!anchored ? "from" : "to"] the floor with \a [tool]."),
-					SPAN_NOTICE("You [!anchored ? "un" : null]fasten \the [src] [!anchored ? "from" : "to"] the floor with \the [tool].")
-				)
-				return TRUE
-			construction_state = 3 - construction_state
+				if (CONSTRUCT_STATE_ANCHORED)
+					construction_state = CONSTRUCT_STATE_COMPLETE
+				if (CONSTRUCT_STATE_COMPLETE)
+					construction_state = CONSTRUCT_STATE_ANCHORED
 			update_nearby_icons()
 			playsound(src, 'sound/items/Screwdriver.ogg', 50, TRUE)
 			user.visible_message(
-				SPAN_NOTICE("\The [user] [construction_state == 1 ? "un" : null]fastens \the [src] [construction_state == 1 ? "from" : "to"] its frame with \a [tool]."),
-				SPAN_NOTICE("You [construction_state == 1 ? "un" : null]fasten \the [src] [construction_state == 1 ? "from" : "to"] its frame with \the [tool].")
+				SPAN_NOTICE("\The [user] [construction_state == CONSTRUCT_STATE_ANCHORED ? "un" : null]fastens \the [src] [construction_state == CONSTRUCT_STATE_ANCHORED ? "from" : "to"] its frame with \a [tool]."),
+				SPAN_NOTICE("You [construction_state == CONSTRUCT_STATE_ANCHORED ? "un" : null]fasten \the [src] [construction_state == CONSTRUCT_STATE_ANCHORED ? "from" : "to"] its frame with \the [tool].")
 			)
 			return TRUE
 		// Regular Windows
 		if (!anchored && !can_install_here(user))
 			return TRUE
+		if (anchored)
+			construction_state = CONSTRUCT_STATE_UNANCHORED
+		else
+			construction_state = CONSTRUCT_STATE_ANCHORED
 		set_anchored(!anchored)
 		playsound(src, 'sound/items/Screwdriver.ogg', 50, TRUE)
 		user.visible_message(
@@ -517,7 +512,7 @@
 		)
 
 /obj/structure/window/proc/deanchor(atom/impact_origin)
-	if (!health_dead && get_damage_percentage() >= 85)
+	if (!health_dead() && get_damage_percentage() >= 85)
 		set_anchored(FALSE)
 		step(src, get_dir(impact_origin, src))
 
@@ -582,7 +577,7 @@
 		basestate = reinf_basestate
 	else
 		basestate = initial(basestate)
-	overlays.Cut()
+	ClearOverlays()
 	layer = FULL_WINDOW_LAYER
 	if (paint_color)
 		color = paint_color
@@ -620,7 +615,7 @@
 /obj/structure/window/proc/process_icon(basestate, icon_group, damage_group, connections, img_dir, damage_alpha)
 	var/image/I = image(icon, "[basestate][icon_group][connections]", dir = img_dir)
 	I.color = get_color()
-	overlays += I
+	AddOverlays(I)
 
 	if (damage_group == "_onframe")
 		process_overlay_damage("window0_damage", damage_alpha, img_dir)
@@ -632,7 +627,7 @@
 	D = image(icon, damage_state, dir = img_dir)
 	D.blend_mode = BLEND_MULTIPLY
 	D.alpha = damage_alpha
-	overlays += D
+	AddOverlays(D)
 
 /obj/structure/window/get_material_melting_point()
 	. = ..()
@@ -692,7 +687,7 @@
 /obj/structure/window/shuttle
 	name = "shuttle window"
 	desc = "It looks rather strong. Might take a few good hits to shatter it."
-	icon = 'icons/obj/podwindows.dmi'
+	icon = 'icons/obj/structures/podwindows.dmi'
 	basestate = "w"
 	reinf_basestate = "w"
 	dir = 5
@@ -733,7 +728,7 @@
 
 /obj/machinery/button/windowtint
 	name = "window tint control"
-	icon = 'icons/obj/power.dmi'
+	icon = 'icons/obj/structures/buttons.dmi'
 	icon_state = "light0"
 	desc = "A remote control switch for electrochromic windows."
 	var/id
@@ -743,23 +738,29 @@
 		/obj/item/stock_parts/power/apc
 	)
 
-/obj/machinery/button/windowtint/attackby(obj/item/device/W as obj, mob/user as mob)
+/obj/machinery/button/windowtint/use_tool(obj/item/W, mob/living/user, list/click_params)
 	if(isMultitool(W))
-		var/t = sanitizeSafe(input(user, "Enter the ID for the button.", src.name, id), MAX_NAME_LEN)
+		var/t = sanitizeSafe(input(user, "Enter the ID for the button.", name, id), MAX_NAME_LEN)
 		if(user.incapacitated() && !user.Adjacent(src))
-			return
+			return TRUE
 		if (user.get_active_hand() != W)
-			return
+			to_chat(SPAN_WARNING("\The [W] needs to be in your active hand."))
+			return TRUE
 		if (!in_range(src, user) && src.loc != user)
-			return
+			return TRUE
 		t = sanitizeSafe(t, MAX_NAME_LEN)
 		if (t)
 			src.id = t
 			to_chat(user, SPAN_NOTICE("The new ID of the button is [id]"))
-		return
-	if(istype(W, /obj/item/screwdriver))
-		new /obj/item/frame/light_switch/windowtint(user.loc, 1)
+		return TRUE
+
+	if(isScrewdriver(W))
+		var/obj/item/frame/light_switch/windowtint/frame = new /obj/item/frame/light_switch/windowtint(user.loc, 1)
+		transfer_fingerprints_to(frame)
 		qdel(src)
+		return TRUE
+
+	return ..()
 
 /obj/machinery/button/windowtint/activate()
 	if(operating)

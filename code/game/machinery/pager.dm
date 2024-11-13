@@ -1,6 +1,6 @@
 /obj/machinery/pager
 	name = "departmental pager button"
-	icon = 'icons/obj/objects.dmi'
+	icon = 'icons/obj/structures/buttons.dmi'
 	icon_state = "doorbell"
 	desc = "A button used to request the presence of anyone in the department."
 	anchored = TRUE
@@ -16,8 +16,8 @@
 		var/area/A = get_area(src)
 		location = A.name
 
-/obj/machinery/pager/attackby(obj/item/W, mob/user as mob)
-	return attack_hand(user)
+/obj/machinery/pager/use_tool(obj/item/tool, mob/living/user, list/click_params)
+	return attack_hand(user) || ..()
 
 /obj/machinery/pager/interface_interact(mob/living/user)
 	if(!CanInteract(user, GLOB.default_state))

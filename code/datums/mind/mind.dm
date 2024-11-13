@@ -418,7 +418,6 @@
 				to_chat(H, SPAN_DANGER(FONT_LARGE("You somehow have become the recepient of a loyalty transplant, and it just activated!")))
 				H.implant_loyalty(H, override = TRUE)
 				log_admin("[key_name_admin(usr)] has loyalty implanted [current].")
-			else
 	else if (href_list["silicon"])
 		SET_BIT(current.hud_updateflag, SPECIALROLE_HUD)
 		switch(href_list["silicon"])
@@ -427,17 +426,6 @@
 				var/mob/living/silicon/robot/R = current
 				if (istype(R))
 					R.emagged = FALSE
-					if (R.IsHolding(R.module.emag))
-						R.module_active = null
-					if(R.module_state_1 == R.module.emag)
-						R.module_state_1 = null
-						R.module.emag.forceMove(null)
-					else if(R.module_state_2 == R.module.emag)
-						R.module_state_2 = null
-						R.module.emag.forceMove(null)
-					else if(R.module_state_3 == R.module.emag)
-						R.module_state_3 = null
-						R.module.emag.forceMove(null)
 					log_admin("[key_name_admin(usr)] has unemag'ed [R].")
 
 			if("unemagcyborgs")
@@ -445,18 +433,6 @@
 					var/mob/living/silicon/ai/ai = current
 					for (var/mob/living/silicon/robot/R in ai.connected_robots)
 						R.emagged = FALSE
-						if (R.module)
-							if (R.IsHolding(R.module.emag))
-								R.module_active = null
-							if(R.module_state_1 == R.module.emag)
-								R.module_state_1 = null
-								R.module.emag.forceMove(null)
-							else if(R.module_state_2 == R.module.emag)
-								R.module_state_2 = null
-								R.module.emag.forceMove(null)
-							else if(R.module_state_3 == R.module.emag)
-								R.module_state_3 = null
-								R.module.emag.forceMove(null)
 					log_admin("[key_name_admin(usr)] has unemag'ed [ai]'s Cyborgs.")
 
 	else if (href_list["common"])

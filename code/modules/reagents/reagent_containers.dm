@@ -1,7 +1,7 @@
 /obj/item/reagent_containers
 	name = "Container"
 	desc = "..."
-	icon = 'icons/obj/chemical.dmi'
+	icon = 'icons/obj/chemical_storage.dmi'
 	icon_state = null
 	w_class = ITEM_SIZE_SMALL
 	var/amount_per_transfer_from_this = 5
@@ -39,23 +39,21 @@
 /obj/item/reagent_containers/attack_self(mob/user as mob)
 	return
 
-/obj/item/reagent_containers/afterattack(obj/target, mob/user, flag)
-	return
-
 /obj/item/reagent_containers/proc/reagentlist() // For attack logs
 	if(reagents)
 		return reagents.get_reagents()
 	return "No reagent holder"
 
-/obj/item/reagent_containers/attackby(obj/item/W as obj, mob/user as mob)
+/obj/item/reagent_containers/use_tool(obj/item/W, mob/living/user, list/click_params)
 	if(istype(W, /obj/item/pen) || istype(W, /obj/item/device/flashlight/pen))
 		var/tmp_label = sanitizeSafe(input(user, "Enter a label for [name]", "Label", label_text), MAX_NAME_LEN)
-		if(length(tmp_label) > 10)
+		if(length_char(tmp_label) > 10)
 			to_chat(user, SPAN_NOTICE("The label can be at most 10 characters long."))
 		else
 			to_chat(user, SPAN_NOTICE("You set the label to \"[tmp_label]\"."))
 			label_text = tmp_label
 			update_name_label()
+		return TRUE
 	else
 		return ..()
 
@@ -65,7 +63,7 @@
 	else
 		SetName("[initial(name)] ([label_text])")
 
-/obj/item/reagent_containers/proc/standard_dispenser_refill(mob/user, obj/structure/reagent_dispensers/target) // This goes into afterattack
+/obj/item/reagent_containers/proc/standard_dispenser_refill(mob/user, obj/structure/reagent_dispensers/target) // This goes into use_after()
 	if(!istype(target))
 		return 0
 
@@ -81,7 +79,7 @@
 	to_chat(user, SPAN_NOTICE("You fill [src] with [trans] units of the contents of [target]."))
 	return 1
 
-/obj/item/reagent_containers/proc/standard_splash_mob(mob/user, mob/target) // This goes into afterattack
+/obj/item/reagent_containers/proc/standard_splash_mob(mob/user, mob/target) // This goes into use_after()
 	if(!istype(target))
 		return
 
@@ -145,11 +143,11 @@
 	var/is_self = target == user
 	if (!target.check_has_mouth())
 		to_chat(user, SPAN_WARNING("[is_self ? "You" : "\The [target]"] can't consume \the [src] - [is_self ? "you" : "they"] don't have a mouth!"))
-		return FALSE
+		return TRUE
 	var/obj/item/blocker = target.check_mouth_coverage()
 	if (blocker)
 		to_chat(user, SPAN_WARNING("[is_self ? "Your" : "\The [target]'s"] [blocker] is in the way!"))
-		return FALSE
+		return TRUE
 	user?.setClickCooldown(DEFAULT_ATTACK_COOLDOWN)
 	if (is_self)
 		self_feed_message(target)
@@ -157,7 +155,7 @@
 	else
 		other_feed_message_start(user, target)
 		if (!do_after(user, 3 SECONDS, target, DO_DEFAULT | DO_USER_UNIQUE_ACT | DO_PUBLIC_PROGRESS))
-			return FALSE
+			return TRUE
 		other_feed_message_finish(user, target)
 		add_trace_DNA(target)
 		var/contained = reagentlist()
@@ -172,7 +170,7 @@
 	return TRUE
 
 
-/obj/item/reagent_containers/proc/standard_pour_into(mob/user, atom/target) // This goes into afterattack and yes, it's atom-level
+/obj/item/reagent_containers/proc/standard_pour_into(mob/user, atom/target) // This goes into use_after() and yes, it's atom-level
 	if(!target.reagents)
 		return 0
 
@@ -204,8 +202,8 @@
 /obj/item/reagent_containers/AltClick(mob/user)
 	if(possible_transfer_amounts)
 		set_amount_per_transfer_from_this()
-	else
-		return ..()
+		return TRUE
+	return ..()
 
 /obj/item/reagent_containers/examine(mob/user)
 	. = ..()
@@ -214,8 +212,8 @@
 	if(hasHUD(user, HUD_SCIENCE))
 		var/prec = user.skill_fail_chance(SKILL_CHEMISTRY, 10)
 		to_chat(user, SPAN_NOTICE("The [src] contains: [reagents.get_reagents(precision = prec)]."))
-	else if((loc == user) && user.skill_check(SKILL_CHEMISTRY, SKILL_EXPERT))
-		to_chat(user, SPAN_NOTICE("Using your chemistry knowledge, you identify the following reagents in \the [src]: [reagents.get_reagents(!user.skill_check(SKILL_CHEMISTRY, SKILL_PROF), 5)]."))
+	else if((loc == user) && user.skill_check(SKILL_CHEMISTRY, SKILL_EXPERIENCED))
+		to_chat(user, SPAN_NOTICE("Using your chemistry knowledge, you identify the following reagents in \the [src]: [reagents.get_reagents(!user.skill_check(SKILL_CHEMISTRY, SKILL_MASTER), 5)]."))
 
 /obj/item/reagent_containers/ex_act(severity)
 	if(reagents)

@@ -1,7 +1,7 @@
 /obj/item/teleportation_scroll
 	name = "scroll of teleportation"
 	desc = "A scroll for moving around."
-	icon = 'icons/obj/wizard.dmi'
+	icon = 'icons/obj/cult.dmi'
 	icon_state = "scroll"
 	var/uses = 4.0
 	w_class = ITEM_SIZE_TINY
@@ -47,7 +47,7 @@
 	if (!thearea || CanUseTopic(user) != STATUS_INTERACTIVE)
 		return
 
-	var/datum/effect/effect/system/smoke_spread/smoke = new /datum/effect/effect/system/smoke_spread()
+	var/datum/effect/smoke_spread/smoke = new /datum/effect/smoke_spread()
 	smoke.set_up(5, 0, user.loc)
 	smoke.attach(user)
 	smoke.start()

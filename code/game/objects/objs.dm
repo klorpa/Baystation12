@@ -8,8 +8,12 @@
 	var/w_class // Size of the object.
 	var/unacidable = FALSE //universal "unacidabliness" var, here so you can use it in any obj.
 	var/throwforce = 0
-	var/sharp = FALSE		// whether this object cuts
-	var/edge = FALSE		// whether this object is more likely to dismember
+	///// whether this object cuts
+	var/sharp = FALSE
+	///Whether this object is more likely to dismember
+	var/edge = FALSE
+	///For items that can puncture e.g. thick plastic but aren't necessarily sharp. Called in can_puncture()
+	var/puncture = FALSE
 	var/in_use = 0 // If we have a user using us, this will be set on. We will check if the user has stopped using us, and thus stop updating and LAGGING EVERYTHING!
 	var/damtype = DAMAGE_BRUTE
 	var/armor_penetration = 0
@@ -48,7 +52,7 @@
 				SPAN_NOTICE("\The [user] starts lifting \the [dropped] onto \the [src]."),
 				SPAN_NOTICE("You start lifting \the [dropped] onto \the [src].")
 			)
-			if (!user.do_skilled(6 SECONDS, SKILL_HAULING, src, do_flags = DO_PUBLIC_UNIQUE) || !user.use_sanity_check(src, dropped, SANITY_CHECK_BOTH_ADJACENT))
+			if (!user.do_skilled(6 SECONDS, SKILL_HAULING, src, do_flags = DO_PUBLIC_UNIQUE) || !user.use_sanity_check(src, dropped))
 				return TRUE
 			if (!HAS_FLAGS(obj_flags, OBJ_FLAG_RECEIVE_TABLE))
 				USE_FEEDBACK_FAILURE("\The [src]'s state has changed.")
@@ -182,15 +186,14 @@
 		. |= DAMAGE_FLAG_EDGE
 	if(is_sharp(src))
 		. |= DAMAGE_FLAG_SHARP
-		if (damtype == DAMAGE_BURN)
-			. |= DAMAGE_FLAG_LASER
+	if (damtype == DAMAGE_BURN)
+		. |= DAMAGE_FLAG_LASER
 
-/obj/attackby(obj/item/O, mob/user)
-	if (isWrench(O) && HAS_FLAGS(obj_flags, OBJ_FLAG_ANCHORABLE))
-		wrench_floor_bolts(user, O)
+/obj/use_tool(obj/item/tool, mob/living/user, list/click_params)
+	if (isWrench(tool) && HAS_FLAGS(obj_flags, OBJ_FLAG_ANCHORABLE))
+		wrench_floor_bolts(user, tool)
 		return TRUE
 	return ..()
-
 
 /**
  * Whether or not the object can be anchored in its current state/position. Assumes the anchorable flag has already been checked.
@@ -218,11 +221,11 @@
 		SPAN_NOTICE("You begin [anchored ? "un" : ""]securing \the [src] [anchored ? "from" : "to"] the floor with \the [tool].")
 	)
 	playsound(src, 'sound/items/Ratchet.ogg', 50, TRUE)
-	if (!user.do_skilled(delay, SKILL_CONSTRUCTION, src, do_flags = DO_REPAIR_CONSTRUCT) || !user.use_sanity_check(src, tool))
+	if (!user.do_skilled((tool.toolspeed * delay), SKILL_CONSTRUCTION, src, do_flags = DO_REPAIR_CONSTRUCT) || !user.use_sanity_check(src, tool))
 		return
 	user.visible_message(
 		SPAN_NOTICE("\The [user] [anchored ? "un" : ""]secures \the [src] [anchored ? "from" : "to"] the floor with \a [tool]."),
-		SPAN_NOTICE("You [anchored ? "un" : ""]secures \the [src] [anchored ? "from" : "to"] the floor with \the [tool].")
+		SPAN_NOTICE("You [anchored ? "un" : ""]secure \the [src] [anchored ? "from" : "to"] the floor with \the [tool].")
 	)
 	playsound(src, 'sound/items/Ratchet.ogg', 50, TRUE)
 	anchored = !anchored
@@ -239,9 +242,43 @@
 
 
 /obj/attack_hand(mob/living/user)
-	if(Adjacent(user))
+	. = ..()
+	if (.)
+		return
+	if (Adjacent(user))
 		add_fingerprint(user)
-	..()
+
+	if (ishuman(user) && !isitem(src) && user.a_intent == I_HURT && get_max_health())
+		var/mob/living/carbon/human/assailant = user
+		var/datum/unarmed_attack/attack = assailant.get_unarmed_attack(src)
+		if (!attack)
+			return ..()
+		assailant.do_attack_animation(src)
+		assailant.setClickCooldown(DEFAULT_ATTACK_COOLDOWN)
+		var/damage = attack.damage + rand(1,5)
+		var/attack_verb = "[pick(attack.attack_verb)]"
+
+		if (MUTATION_FERAL in user.mutations)
+			attack_verb = "smashes"
+			damage = 10
+
+		if (!can_damage_health(damage, attack.get_damage_type()))
+			playsound(loc, use_weapon_hitsound? attack.attack_sound : damage_hitsound, 25, TRUE, -1)
+			user.visible_message(
+				SPAN_WARNING("\The [user] hits \the [src], but doesn't even leave a dent!"),
+				SPAN_WARNING("You hit \the [src], but cause no visible damage and hurt yourself!")
+			)
+			if (!(MUTATION_FERAL in user.mutations))
+				user.apply_damage(3, DAMAGE_BRUTE, user.hand ? BP_L_HAND : BP_R_HAND)
+				return TRUE
+
+		playsound(loc, use_weapon_hitsound? attack.attack_sound : damage_hitsound, 25, TRUE, -1)
+		assailant.visible_message(
+				SPAN_WARNING("\The [assailant] [attack_verb] \the [src]!"),
+				SPAN_WARNING("You [attack_verb] \the [src]!")
+				)
+		damage_health(damage, attack.get_damage_type(), attack.damage_flags())
+		return TRUE
 
 /obj/is_fluid_pushable(amt)
 	return ..() && w_class <= round(amt/20)
@@ -252,12 +289,15 @@
 /obj/AltClick(mob/user)
 	if(obj_flags & OBJ_FLAG_ROTATABLE)
 		rotate(user)
-	..()
+		return TRUE
+	return ..()
 
 /obj/examine(mob/user)
 	. = ..()
 	if((obj_flags & OBJ_FLAG_ROTATABLE))
 		to_chat(user, SPAN_SUBTLE("Can be rotated with alt-click."))
+	if((obj_flags & OBJ_FLAG_ANCHORABLE))
+		to_chat(user, SPAN_SUBTLE("Can be [anchored? "unsecured from the floor" : "secured to the floor"] using a wrench."))
 
 /obj/proc/rotate(mob/user)
 	if(!CanPhysicallyInteract(user))
@@ -279,3 +319,6 @@
  */
 /obj/proc/is_safe_to_step(mob/living/L)
 	return TRUE
+
+/obj/get_mass()
+	return min(2**(w_class-1), 100)

@@ -1,7 +1,7 @@
 /obj/structure/extinguisher_cabinet
 	name = "extinguisher cabinet"
 	desc = "A small wall mounted cabinet designed to hold a fire extinguisher."
-	icon = 'icons/obj/extinguisher.dmi'
+	icon = 'icons/obj/structures/extinguisher.dmi'
 	icon_state = "extinguisher_closed"
 	anchored = TRUE
 	density = FALSE
@@ -73,6 +73,8 @@
 	if(CanPhysicallyInteract(user))
 		opened = !opened
 		update_icon()
+		return TRUE
+	return FALSE
 
 /obj/structure/extinguisher_cabinet/do_simple_ranged_interaction(mob/user)
 	if(has_extinguisher)

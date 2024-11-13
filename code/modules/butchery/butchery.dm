@@ -61,7 +61,7 @@
 	desc = "It looks pretty sharp."
 	anchored = TRUE
 	density =  TRUE
-	icon = 'icons/obj/butchery.dmi'
+	icon = 'icons/obj/structures/butchery.dmi'
 	icon_state = "spike"
 
 	var/mob/living/occupant
@@ -133,13 +133,13 @@
 	return istype(victim) && ((victim.meat_type && victim.meat_amount) || (victim.skin_material && victim.skin_amount) || (victim.bone_material && victim.bone_amount))
 
 /obj/structure/kitchenspike/on_update_icon()
-	overlays.Cut()
+	ClearOverlays()
 	if(occupant)
 		occupant.set_dir(SOUTH)
 		var/image/I = image(null)
 		I.appearance = occupant
 		I.SetTransform(rotation = occupant.butchery_rotation)
-		overlays += I
+		AddOverlays(I)
 
 /obj/structure/kitchenspike/mob_breakout(mob/living/escapee)
 	. = ..()

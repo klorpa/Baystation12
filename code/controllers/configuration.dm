@@ -81,11 +81,17 @@
 	/// length of voting period (deciseconds, default 1 minute)
 	var/static/vote_period = 600
 
-	/// Length of time before the first autotransfer vote is called
-	var/static/vote_autotransfer_initial = 120 MINUTES
+	/// Time in minutes after which a round with no living players ends
+	var/static/empty_round_timeout = 0
 
-	/// length of time before next sequential autotransfer vote
-	var/static/vote_autotransfer_interval = 30 MINUTES
+	/// Time in minutes before the first autotransfer vote
+	var/static/vote_autotransfer_initial = 120
+
+	/// Time in minutes before each following autotransfer vote
+	var/static/vote_autotransfer_interval = 30
+
+	/// Time in minutes before transfer votes where antagonists cannot be added
+	var/static/transfer_vote_block_antag_time = 20
 
 	/// Length of time before round start when autogamemode vote is called (in seconds, default 100).
 	var/static/vote_autogamemode_timeleft = 100
@@ -108,13 +114,8 @@
 	/// if objectives are disabled or not
 	var/static/objectives_disabled = FALSE
 
-	/// If security and such can be traitor/cult/other
-	var/static/protect_roles_from_antagonist = FALSE
-
 	/// Gamemodes which end instantly will instead keep on going until the round ends by escape shuttle or nuke.
 	var/static/continous_rounds = FALSE
-
-	var/static/fps = 30
 
 	var/static/list/resource_urls
 
@@ -249,9 +250,6 @@
 
 	var/static/no_click_cooldown = FALSE
 
-	/// optional runtime configuration of http://www.byond.com/docs/ref/#/atom/movable/var/glide_size
-	var/static/glide_size
-
 	/// Modifier for ticks between moves while running
 	var/static/run_delay = 2
 
@@ -343,8 +341,8 @@
 
 	var/static/aooc_allowed = TRUE
 
-	/// Whether space turfs have ambient light or not
-	var/static/starlight = 0
+	/// Whether space turfs and some exterior turfs have ambient light or not default, 0.5, values over 1 may overpower dynamic lights
+	var/static/starlight = 0.5
 
 	var/static/list/ert_species = list(SPECIES_HUMAN)
 
@@ -353,6 +351,8 @@
 	var/static/aggressive_changelog = FALSE
 
 	var/static/ghosts_can_possess_animals = FALSE
+
+	var/static/ghosts_can_possess_zombies = TRUE
 
 	var/static/delist_when_no_admins = FALSE
 
@@ -435,6 +435,10 @@
 	var/static/hub_entry = "<b>$SERVER</b> by <b>$HOST</b> &#8212; $ACTIVES of $PLAYERS alive"
 
 	var/static/run_empty_levels = FALSE
+
+	var/static/deletion_starts_paused = TRUE
+
+	var/static/enable_cold_mist = FALSE
 
 
 /datum/configuration/New()
@@ -556,20 +560,38 @@
 				var/list/values = splittext(value, ";")
 				var/len = length(values)
 				if (len == 7)
-					vote_autotransfer_initial = text2num(values[get_weekday_index()]) MINUTES
+					vote_autotransfer_initial = text2num_or_default(values[get_weekday_index()])
 				else if (len == 1)
-					vote_autotransfer_initial = text2num(value) MINUTES
+					vote_autotransfer_initial = text2num_or_default(value)
 				else
 					log_misc("Invalid vote_autotransfer_initial: [value]")
+					vote_autotransfer_initial = 0
+				if (isnull(vote_autotransfer_initial) || vote_autotransfer_initial < 0)
+					log_misc("Invalid vote_autotransfer_initial: [value]")
+					vote_autotransfer_initial = 0
 			if ("vote_autotransfer_interval")
 				var/list/values = splittext(value, ";")
 				var/len = length(values)
 				if (len == 7)
-					vote_autotransfer_interval = text2num(values[get_weekday_index()]) MINUTES
+					vote_autotransfer_interval = text2num_or_default(values[get_weekday_index()])
 				else if (len == 1)
-					vote_autotransfer_interval = text2num(value) MINUTES
+					vote_autotransfer_interval = text2num_or_default(value)
 				else
 					log_misc("Invalid vote_autotransfer_interval: [value]")
+					vote_autotransfer_interval = 0
+				if (isnull(vote_autotransfer_interval) || vote_autotransfer_interval < 0)
+					log_misc("Invalid vote_autotransfer_interval: [value]")
+					vote_autotransfer_interval = 0
+			if ("transfer_vote_block_antag_time")
+				transfer_vote_block_antag_time = text2num_or_default(value)
+				if (isnull(transfer_vote_block_antag_time) || transfer_vote_block_antag_time < 0)
+					log_misc("Invalid transfer_vote_block_antag_time: [value]")
+					transfer_vote_block_antag_time = 0
+			if ("empty_round_timeout")
+				empty_round_timeout = text2num_or_default(value)
+				if (isnull(empty_round_timeout) || empty_round_timeout < 0)
+					log_misc("Invalid empty_round_timeout: [value]")
+					empty_round_timeout = 0
 			if ("vote_autogamemode_timeleft")
 				vote_autogamemode_timeleft = text2num(value)
 			if ("pre_game_time")
@@ -647,8 +669,6 @@
 						else
 							log_misc("Incorrect objective disabled definition: [value]")
 							objectives_disabled = CONFIG_OBJECTIVE_NONE
-			if ("protect_roles_from_antagonist")
-				protect_roles_from_antagonist = TRUE
 			if ("probability")
 				var/regex/flatten = new (@"\s+", "g")
 				for (var/entry in value)
@@ -670,10 +690,6 @@
 				kick_inactive = text2num(value)
 			if ("use_irc_bot")
 				use_irc_bot = TRUE
-			if ("fps")
-				fps = round(text2num(value))
-				if (fps <= 0)
-					fps = initial(fps)
 			if ("allow_antag_hud")
 				antag_hud_allowed = TRUE
 			if ("antag_hud_restricted")
@@ -844,7 +860,10 @@
 			if ("log_timers_on_bucket_reset")
 				log_timers_on_bucket_reset = TRUE
 			if ("maximum_round_length")
-				maximum_round_length = text2num(value) MINUTES
+				maximum_round_length = text2num_or_default(value)
+				if (isnull(maximum_round_length) || maximum_round_length < 0)
+					log_misc("Invalid maximum_round_length: [value]")
+					maximum_round_length = 0
 			if ("stat_delay")
 				stat_delay = floor(text2num(value))
 			if ("warn_autoban_threshold")
@@ -855,6 +874,10 @@
 				run_empty_levels = TRUE
 			if ("warn_if_staff_same_ip")
 				warn_if_staff_same_ip = TRUE
+			if ("deletion_starts_paused")
+				deletion_starts_paused = TRUE
+			if ("enable_cold_mist")
+				enable_cold_mist = TRUE
 			else
 				log_misc("Unknown setting in config/config.txt: '[name]'")
 
@@ -889,8 +912,6 @@
 				walk_delay = value
 			if ("creep_delay")
 				creep_delay = value
-			if ("glide_size")
-				glide_size = value
 			if ("minimum_sprint_cost")
 				minimum_sprint_cost = value
 			if ("skill_sprint_cost_range")

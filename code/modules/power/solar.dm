@@ -5,7 +5,7 @@ var/global/solar_gen_rate = 1500
 /obj/machinery/power/solar
 	name = "solar panel"
 	desc = "A solar electrical generator."
-	icon = 'icons/obj/power.dmi'
+	icon = 'icons/obj/machines/power/solar_panels.dmi'
 	icon_state = "sp_base"
 	anchored = TRUE
 	density = TRUE
@@ -62,11 +62,11 @@ var/global/solar_gen_rate = 1500
 
 
 
-/obj/machinery/power/solar/attackby(obj/item/W, mob/user)
+/obj/machinery/power/solar/use_tool(obj/item/W, mob/living/user, list/click_params)
 	if(isCrowbar(W))
 		playsound(src.loc, 'sound/machines/click.ogg', 50, 1)
 		user.visible_message(SPAN_NOTICE("[user] begins to take the glass off the solar panel."))
-		if(do_after(user, 5 SECONDS, src, DO_REPAIR_CONSTRUCT))
+		if(do_after(user, (W.toolspeed * 5) SECONDS, src, DO_REPAIR_CONSTRUCT))
 			var/obj/item/solar_assembly/S = locate() in src
 			if(S)
 				S.dropInto(loc)
@@ -76,15 +76,15 @@ var/global/solar_gen_rate = 1500
 			qdel(src)
 		return TRUE
 
-	. = ..()
+	return ..()
 
 /obj/machinery/power/solar/on_update_icon()
 	..()
-	overlays.Cut()
+	ClearOverlays()
 	if(MACHINE_IS_BROKEN(src))
-		overlays += image('icons/obj/power.dmi', icon_state = "solar_panel-b", layer = ABOVE_HUMAN_LAYER)
+		AddOverlays(image('icons/obj/machines/power/solar_panels.dmi', icon_state = "solar_panel-b", layer = ABOVE_HUMAN_LAYER))
 	else
-		overlays += image('icons/obj/power.dmi', icon_state = "solar_panel", layer = ABOVE_HUMAN_LAYER)
+		AddOverlays(image('icons/obj/machines/power/solar_panels.dmi', icon_state = "solar_panel", layer = ABOVE_HUMAN_LAYER))
 		src.set_dir(angle2dir(adir))
 	return
 
@@ -122,7 +122,7 @@ var/global/solar_gen_rate = 1500
 
 /obj/machinery/power/solar/set_broken(new_state)
 	. = ..()
-	if(. && new_state && !health_dead)
+	if(. && new_state && !health_dead())
 		kill_health()
 
 /obj/machinery/power/solar/on_death()
@@ -173,7 +173,7 @@ var/global/solar_gen_rate = 1500
 	// On planets, we take fewer steps because the light is mostly up
 	// Also, many planets barely have any spots with enough clear space around
 	if(GLOB.using_map.use_overmap)
-		var/obj/effect/overmap/visitable/sector/exoplanet/E = map_sectors["[z]"]
+		var/obj/overmap/visitable/sector/exoplanet/E = map_sectors["[z]"]
 		if(istype(E))
 			steps = 5
 
@@ -201,7 +201,7 @@ var/global/solar_gen_rate = 1500
 /obj/item/solar_assembly
 	name = "solar panel assembly"
 	desc = "A solar panel assembly kit, allows constructions of a solar panel, or with a tracking circuit board, a solar tracker."
-	icon = 'icons/obj/power.dmi'
+	icon = 'icons/obj/machines/power/solar_panels.dmi'
 	icon_state = "sp_base"
 	item_state = "electropack"
 	w_class = ITEM_SIZE_HUGE // Pretty big!
@@ -221,52 +221,50 @@ var/global/solar_gen_rate = 1500
 		glass_type = null
 
 
-/obj/item/solar_assembly/attackby(obj/item/W, mob/user)
-
+/obj/item/solar_assembly/use_tool(obj/item/W, mob/living/user, list/click_params)
 	if(!anchored && isturf(loc))
 		if(isWrench(W))
 			anchored = TRUE
 			pixel_x = 0
 			pixel_y = 0
 			pixel_z = 0
-			user.visible_message(SPAN_NOTICE("[user] wrenches the solar assembly into place."))
+			user.visible_message(SPAN_NOTICE("\The [user] wrenches \the [src] into place."))
 			playsound(src.loc, 'sound/items/Ratchet.ogg', 75, 1)
-			return 1
+			return TRUE
 	else
 		if(isWrench(W))
 			anchored = FALSE
-			user.visible_message(SPAN_NOTICE("[user] unwrenches the solar assembly from it's place."))
+			user.visible_message(SPAN_NOTICE("\The [user] unwrenches \the [src] from it's place."))
 			playsound(src.loc, 'sound/items/Ratchet.ogg', 75, 1)
-			return 1
+			return TRUE
 
 		if(istype(W, /obj/item/stack/material) && W.get_material_name() == MATERIAL_GLASS)
 			var/obj/item/stack/material/S = W
 			if(S.use(2))
 				glass_type = W.type
 				playsound(src.loc, 'sound/machines/click.ogg', 50, 1)
-				user.visible_message(SPAN_NOTICE("[user] places the glass on the solar assembly."))
+				user.visible_message(SPAN_NOTICE("\The [user] places the glass on \the [src]."))
 				if(tracker)
 					new /obj/machinery/power/tracker(get_turf(src), src)
 				else
 					new /obj/machinery/power/solar(get_turf(src), src)
 			else
 				to_chat(user, SPAN_WARNING("You need two sheets of glass to put them into a solar panel."))
-				return
-			return 1
+			return TRUE
 
 	if(!tracker)
 		if(istype(W, /obj/item/tracker_electronics))
 			tracker = 1
 			qdel(W)
-			user.visible_message(SPAN_NOTICE("[user] inserts the electronics into the solar assembly."))
-			return 1
+			user.visible_message(SPAN_NOTICE("\The [user] inserts the electronics into \the [src]."))
+			return TRUE
 	else
 		if(isCrowbar(W))
-			new /obj/item/tracker_electronics(src.loc)
+			new /obj/item/tracker_electronics(loc)
 			tracker = 0
-			user.visible_message(SPAN_NOTICE("[user] takes out the electronics from the solar assembly."))
-			return 1
-	..()
+			user.visible_message(SPAN_NOTICE("\The [user] takes out the electronics from \the [src]."))
+			return TRUE
+	return ..()
 
 //
 // Solar Control Computer
@@ -275,8 +273,8 @@ var/global/solar_gen_rate = 1500
 /obj/machinery/power/solar_control
 	name = "solar panel control"
 	desc = "A controller for solar panel arrays."
-	icon = 'icons/obj/computer.dmi'
-	icon_state = "solar"
+	icon = 'icons/obj/machines/computer.dmi'
+	icon_state = "computer"
 	anchored = TRUE
 	density = TRUE
 	use_power = POWER_USE_IDLE
@@ -357,16 +355,16 @@ var/global/solar_gen_rate = 1500
 /obj/machinery/power/solar_control/on_update_icon()
 	if(MACHINE_IS_BROKEN(src))
 		icon_state = "broken"
-		overlays.Cut()
+		ClearOverlays()
 		return
 	if(!is_powered())
-		icon_state = "c_unpowered"
-		overlays.Cut()
+		icon_state = "computer"
+		ClearOverlays()
 		return
 	icon_state = "solar"
-	overlays.Cut()
+	ClearOverlays()
 	if(cdir > -1)
-		overlays += image('icons/obj/computer.dmi', "solcon-o", ABOVE_OBJ_LAYER, angle2dir(cdir))
+		AddOverlays(image('icons/obj/machines/computer.dmi', "solcon-o", angle2dir(cdir)))
 	return
 
 /obj/machinery/power/solar_control/interface_interact(mob/user)

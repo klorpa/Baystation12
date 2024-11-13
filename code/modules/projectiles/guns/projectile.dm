@@ -7,11 +7,12 @@
 	w_class = ITEM_SIZE_NORMAL
 	matter = list(MATERIAL_STEEL = 1000)
 	screen_shake = 1
+	space_recoil = 1
 	combustion = 1
 
 	var/caliber = CALIBER_PISTOL		//determines which casings will fit
 	var/handle_casings = EJECT_CASINGS	//determines how spent casings should be handled
-	var/load_method = SINGLE_CASING|SPEEDLOADER //1 = Single shells, 2 = box or quick loader, 3 = magazine
+	var/load_method = SINGLE_CASING|SPEEDLOADER //1 = Single shells, 2 = box or quick loader, 4 = magazine
 	var/obj/item/ammo_casing/chambered = null
 
 	//For SINGLE_CASING or SPEEDLOADER guns
@@ -20,6 +21,10 @@
 	var/list/loaded = list()	//stored ammo
 	var/starts_loaded = 1		//whether the gun starts loaded or not, can be overridden for guns crafted in-game
 	var/load_sound = 'sound/weapons/guns/interaction/bullet_insert.ogg'
+	var/recentload = 0		// artificially limits how fast a gun can be loaded
+
+	//For CYCLE_CASING guns
+	var/chamber_offset = 0 //how many empty chambers in the cylinder until you hit a round
 
 	//For MAGAZINE guns
 	var/magazine_type = null	//the type of magazine that the gun comes preloaded with
@@ -55,7 +60,7 @@
 		is_jammed = 1
 		var/mob/user = loc
 		if(istype(user))
-			if(prob(user.skill_fail_chance(SKILL_WEAPONS, 100, SKILL_PROF)))
+			if(prob(user.skill_fail_chance(SKILL_WEAPONS, 100, SKILL_MASTER)))
 				return null
 			else
 				to_chat(user, SPAN_NOTICE("You reflexively clear the jam on \the [src]."))
@@ -117,6 +122,8 @@
 	if(handle_casings != HOLD_CASINGS)
 		chambered = null
 
+	update_icon()
+
 #define EXP_TAC_RELOAD 1 SECOND
 #define PROF_TAC_RELOAD 0.5 SECONDS
 #define EXP_SPD_RELOAD 0.5 SECONDS
@@ -130,7 +137,25 @@
 	if(istype(A, /obj/item/ammo_magazine))
 		. = TRUE
 		var/obj/item/ammo_magazine/AM = A
-		if(!(load_method & AM.mag_type) || ((istext(caliber) && caliber != AM.caliber) && (islist(caliber) && !is_type_in_list(AM.caliber, caliber))))
+		if (((istext(caliber) && caliber != AM.caliber) || (islist(caliber) && !is_type_in_list(AM.caliber, caliber))))
+			return //incompatible
+		else if (load_method == SINGLE_CASING && AM.mag_type == SPEEDLOADER && world.time >= recentload)
+			if (length(AM.stored_ammo))
+				var/C = AM.stored_ammo[1]
+				if (length(loaded) >= max_shells)
+					to_chat(user, SPAN_WARNING("[src] is full!"))
+					return
+				if (!user.unEquip(C, src))
+					return
+				loaded.Insert(1, C) //add to the head of the list
+				AM.stored_ammo -= C
+				user.visible_message("[user] inserts \a [C] into [src].", SPAN_NOTICE("You insert \a [C] into [src]."))
+				playsound(loc, load_sound, 50, 1)
+				recentload = world.time + 0.5 SECONDS
+			AM.update_icon()
+			update_icon()
+			return
+		else if (!(load_method & AM.mag_type))
 			return //incompatible
 
 		switch(AM.mag_type)
@@ -139,7 +164,7 @@
 					to_chat(user, SPAN_WARNING("\The [A] won't fit into [src]."))
 					return
 				if(ammo_magazine)
-					if(user.a_intent == I_HELP || user.a_intent == I_DISARM || !user.skill_check(SKILL_WEAPONS, SKILL_EXPERT))
+					if(user.a_intent == I_HELP || user.a_intent == I_DISARM || !user.skill_check(SKILL_WEAPONS, SKILL_EXPERIENCED))
 						to_chat(user, SPAN_WARNING("[src] already has a magazine loaded."))//already a magazine here
 						return
 					else
@@ -150,7 +175,7 @@
 							if(!user.unEquip(AM, src))
 								return
 							//Experienced gets a 1 second delay, master gets a 0.5 second delay
-							if(do_after(user, user.get_skill_value(SKILL_WEAPONS) == SKILL_PROF ? PROF_TAC_RELOAD : EXP_TAC_RELOAD, src, DO_DEFAULT | DO_BOTH_UNIQUE_ACT))
+							if(do_after(user, user.get_skill_value(SKILL_WEAPONS) == SKILL_MASTER ? PROF_TAC_RELOAD : EXP_TAC_RELOAD, src, DO_DEFAULT | DO_BOTH_UNIQUE_ACT))
 								if(jam_chance && (!(ammo_magazine.type == magazine_type)))
 									jam_chance -= 20
 								ammo_magazine.update_icon()
@@ -166,7 +191,7 @@
 							if(!user.unEquip(AM, src))
 								return
 							//Experienced gets a 0.5 second delay, master gets a 0.25 second delay
-							if(do_after(user, user.get_skill_value(SKILL_WEAPONS) == SKILL_PROF ? PROF_SPD_RELOAD : EXP_SPD_RELOAD, src, DO_DEFAULT | DO_BOTH_UNIQUE_ACT))
+							if(do_after(user, user.get_skill_value(SKILL_WEAPONS) == SKILL_MASTER ? PROF_SPD_RELOAD : EXP_SPD_RELOAD, src, DO_DEFAULT | DO_BOTH_UNIQUE_ACT))
 								if(jam_chance && istype(ammo_magazine, magazine_type))
 									jam_chance -= 10
 								ammo_magazine.update_icon()
@@ -267,9 +292,14 @@
 		to_chat(user, SPAN_WARNING("[src] is empty."))
 	update_icon()
 
-/obj/item/gun/projectile/attackby(obj/item/A as obj, mob/user as mob)
-	if(!load_ammo(A, user))
-		return ..()
+
+/obj/item/gun/projectile/use_tool(obj/item/tool, mob/user, list/click_params)
+	// Anything - Attempt to load ammo
+	if (load_ammo(tool, user))
+		return TRUE
+
+	return ..()
+
 
 /obj/item/gun/projectile/attack_self(mob/user as mob)
 	if(length(firemodes) > 1)
@@ -295,7 +325,7 @@
 			playsound(user, auto_eject_sound, 40, 1)
 		ammo_magazine.update_icon()
 		ammo_magazine = null
-		update_icon() //make sure to do this after unsetting ammo_magazine
+	update_icon() //make sure to do this after unsetting ammo_magazine
 
 /obj/item/gun/projectile/examine(mob/user)
 	. = ..()
@@ -303,8 +333,10 @@
 		to_chat(user, SPAN_WARNING("It looks jammed."))
 	if(ammo_magazine)
 		to_chat(user, "It has \a [ammo_magazine] loaded.")
-	if(user.skill_check(SKILL_WEAPONS, SKILL_ADEPT))
+	if(user.skill_check(SKILL_WEAPONS, SKILL_TRAINED))
 		to_chat(user, "Has [getAmmo()] round\s remaining.")
+	if (user.skill_check(SKILL_WEAPONS, SKILL_EXPERIENCED))
+		to_chat(user, "[src.DrawChamber()]")
 
 /obj/item/gun/projectile/proc/getAmmo()
 	var/bullets = 0
@@ -315,6 +347,26 @@
 	if(chambered)
 		bullets += 1
 	return bullets
+
+/obj/item/gun/projectile/proc/DrawChamber()
+	if (handle_casings == CYCLE_CASINGS)
+		var/chambers = list()
+		var/empty_chambers = 0
+		while (chamber_offset > empty_chambers)
+			chambers += "🌣"
+			empty_chambers ++
+		for (var/obj/item/ammo_casing/casing in loaded)
+			if (casing.BB)
+				chambers += "◉"
+			else
+				chambers += "◎"
+		while (max_shells > length(chambers))
+			chambers += "🌣"
+			empty_chambers ++
+		var/chamberlist = ""
+		for (var/chamber in chambers)
+			chamberlist += chamber
+		return chamberlist
 
 /* Unneeded -- so far.
 //in case the weapon has firemodes and can't unload using attack_hand()

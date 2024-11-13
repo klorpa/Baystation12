@@ -64,10 +64,10 @@
 		if(AB_ITEM, AB_ITEM_USE_ICON)
 			if(target)
 				var/obj/item/item = target
-				item.ui_action_click()
+				item.ui_action_click(owner)
 		//if(AB_SPELL)
 		//	if(target)
-		//		var/obj/effect/proc_holder/spell = target
+		//		var/obj/proc_holder/spell = target
 		//		spell.Click()
 		if(AB_INNATE)
 			if(!active)
@@ -120,6 +120,16 @@
 /obj/screen/movable/action_button
 	var/datum/action/owner
 	screen_loc = "WEST,NORTH"
+	/// String. Title of the tooltip displayed on hover. Set during `Initialize()`, defaults to `owner.target.name`.
+	var/tooltip_title
+
+
+/obj/screen/movable/action_button/Initialize(mapload, _owner)
+	. = ..(mapload)
+	owner = _owner
+	if (owner?.target)
+		tooltip_title = owner.target.name
+
 
 /obj/screen/movable/action_button/Click(location,control,params)
 	var/list/modifiers = params2list(params)
@@ -131,13 +141,22 @@
 	owner.Trigger()
 	return 1
 
+
+/obj/screen/movable/action_button/MouseEntered(location, control, params)
+	openToolTip(usr, src, params, tooltip_title, name)
+
+
+/obj/screen/movable/action_button/MouseExited(location, control, params)
+	closeToolTip(usr)
+
+
 /obj/screen/movable/action_button/proc/UpdateIcon()
 	if(!owner)
 		return
 	icon = owner.button_icon
 	icon_state = owner.background_icon_state
 
-	overlays.Cut()
+	ClearOverlays()
 	var/image/img
 	if(owner.action_type == AB_ITEM && owner.target)
 		var/obj/item/I = owner.target
@@ -146,7 +165,7 @@
 		img = image(owner.button_icon,src,owner.button_icon_state)
 	img.pixel_x = 0
 	img.pixel_y = 0
-	overlays += img
+	AddOverlays(img)
 
 	if(!owner.IsAvailable())
 		color = rgb(128,0,0,128)
@@ -181,9 +200,9 @@
 	return
 
 /obj/screen/movable/action_button/hide_toggle/UpdateIcon()
-	overlays.Cut()
+	ClearOverlays()
 	var/image/img = image(icon,src,hidden?"show":"hide")
-	overlays += img
+	AddOverlays(img)
 	return
 
 //This is the proc used to update all the action buttons. Properly defined in /mob/living

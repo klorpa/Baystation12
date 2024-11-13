@@ -40,7 +40,8 @@
 		user.RemoveClickHandler(src)
 		return
 	if(E.hatch_closed)
-		return E.ClickOn(A, params, user)
+		E.ClickOn(A, params, user)
+		return
 	else return ..()
 
 /datum/click_handler/default/mech/OnDblClick(atom/A, params)
@@ -68,7 +69,7 @@
 
 	var/modifiers = params2list(params)
 	if(modifiers["shift"])
-		user.examinate(A)
+		examinate(user, A)
 		return
 
 	if(modifiers["ctrl"])
@@ -184,7 +185,7 @@
 	if(A == src)
 		setClickCooldown(5)
 		return attack_self(user)
-	else if(adj)
+	else if(adj && user.a_intent == I_HURT) //Prevents accidental slams.
 		setClickCooldown(arms ? arms.action_delay : 7) // You've already commited to applying fist, don't turn and back out now!
 		playsound(src.loc, legs.mech_step_sound, 60, 1)
 		src.visible_message(SPAN_DANGER("\The [src] steps back, preparing for a slam!"), blind_message = SPAN_DANGER("You hear the loud hissing of hydraulics!"))
@@ -194,6 +195,9 @@
 			if(istype(T))
 				do_attack_effect(T, "smash")
 			playsound(src.loc, arms.punch_sound, 50, 1)
+	else if(istype(A, /obj/structure/ladder))
+		var/obj/structure/ladder/L = A
+		L.climb(src) //Those are some real sturdy ladders.
 	return
 
 /mob/living/exosuit/proc/set_hardpoint(hardpoint_tag)
@@ -348,7 +352,7 @@
 			SPAN_WARNING("\The [user] starts forcing \the [src]'s emergency [body.hatch_descriptor] release using \a [tool]."),
 			SPAN_WARNING("You start forcing \the [src]'s emergency [body.hatch_descriptor] release using \the [tool].")
 		)
-		if (!user.do_skilled(5 SECONDS, list(SKILL_DEVICES, SKILL_EVA), src) || !user.use_sanity_check(src, tool))
+		if (!user.do_skilled((tool.toolspeed * 5) SECONDS, list(SKILL_DEVICES, SKILL_EVA), src) || !user.use_sanity_check(src, tool))
 			return TRUE
 		if (!body)
 			USE_FEEDBACK_FAILURE("\The [src] has no cockpit to force.")
@@ -394,13 +398,13 @@
 			return TRUE
 		var/free_hardpoints = list()
 		for (var/hardpoint in hardpoints)
-			if (hardpoints[hardpoint] == null && (!length(mech_equipment.restricted_hardpoints) || (hardpoint in mech_equipment.restricted_hardpoints)))
+			if (isnull(hardpoints[hardpoint]) && (!length(mech_equipment.restricted_hardpoints) || (hardpoint in mech_equipment.restricted_hardpoints)))
 				free_hardpoints += hardpoint
 		if (!length(free_hardpoints))
 			USE_FEEDBACK_FAILURE("\The [src] has no free hardpoints for \the [tool].")
 			return TRUE
 		var/input = input(user, "Where would you like to install \the [tool]?", "\The [src] - Hardpoint Installation") as null|anything in free_hardpoints
-		if (!input || !user.use_sanity_check(src, tool, SANITY_CHECK_TOOL_UNEQUIP))
+		if (!input || !user.use_sanity_check(src, tool, SANITY_CHECK_DEFAULT | SANITY_CHECK_TOOL_UNEQUIP))
 			return TRUE
 		if (hardpoints[input] != null)
 			USE_FEEDBACK_FAILURE("\The [input] slot on \the [src] is no longer free. It has \a [hardpoints[input]] attached.")
@@ -420,7 +424,7 @@
 		var/input = input(user, "Which component would you like to remove?", "\The [src] - Remove Hardpoint") as null|anything in parts
 		if (!input || !user.use_sanity_check(src, tool))
 			return TRUE
-		if (hardpoints[input] == null)
+		if (isnull(hardpoints[input]))
 			USE_FEEDBACK_FAILURE("\The [src] not longer has a component in the [input] slot.")
 			return TRUE
 		remove_system(input, user)
@@ -445,18 +449,6 @@
 		)
 		return TRUE
 
-	// Robot Analyzer - Scan mech
-	if (istype(tool, /obj/item/device/robotanalyzer))
-		user.visible_message(
-			SPAN_NOTICE("\The [user] scans \the [src] with \a [tool]."),
-			SPAN_NOTICE("You scan \the [src] with \the [tool].")
-		)
-		to_chat(user, SPAN_INFO("Diagnostic Report for \the [src]:"))
-		for (var/obj/item/mech_component/component in list(arms, legs, body, head))
-			if (component)
-				component.return_diagnostics(user)
-		return TRUE
-
 	// Screwdriver - Remove cell
 	if (isScrewdriver(tool))
 		if (!maintenance_protocols)
@@ -469,7 +461,7 @@
 			SPAN_NOTICE("\The [user] starts removing \the [src]'s power cell with \a [tool]."),
 			SPAN_NOTICE("You start removing \the [src]'s power cell with \the [tool].")
 		)
-		if (!user.do_skilled(2 SECONDS, SKILL_DEVICES, src) || !user.use_sanity_check(src, tool))
+		if (!user.do_skilled((tool.toolspeed * 2) SECONDS, SKILL_DEVICES, src) || !user.use_sanity_check(src, tool))
 			return
 		if (!maintenance_protocols)
 			USE_FEEDBACK_FAILURE("\The [src]'s maintenance protocols must be enabled to access the power cell.")
@@ -514,7 +506,7 @@
 			SPAN_NOTICE("\The [user] starts removing \the [src]'s securing bolts with \a [tool]."),
 			SPAN_NOTICE("You start removing \the [src]'s securing bolts with \the [tool].")
 		)
-		if (!user.do_skilled(6 SECONDS, SKILL_DEVICES, src) || !user.use_sanity_check(src, tool))
+		if (!user.do_skilled((tool.toolspeed * 6) SECONDS, SKILL_DEVICES, src) || !user.use_sanity_check(src, tool))
 			return TRUE
 		if (!maintenance_protocols)
 			USE_FEEDBACK_FAILURE("\The [src]'s maintenance protocols must be enabled to access the securing bolts.")
@@ -542,8 +534,8 @@
 				eject(pilot, silent=1)
 		else if(hatch_closed)
 			if(MUTATION_FERAL in user.mutations)
-				user.setClickCooldown(DEFAULT_ATTACK_COOLDOWN)
-				attack_generic(user, 5)
+				attack_generic(user, 5, "slams")
+				user.setClickCooldown(DEFAULT_ATTACK_COOLDOWN*2)
 		return
 
 	// Otherwise toggle the hatch.
@@ -552,6 +544,7 @@
 	return
 
 /mob/living/exosuit/attack_generic(mob/user, damage, attack_message = "smashes into")
+	..()
 	if(damage)
 		playsound(loc, body.damage_sound, 40, 1)
 

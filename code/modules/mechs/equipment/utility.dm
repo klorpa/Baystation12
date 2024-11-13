@@ -2,7 +2,7 @@
 /obj/structure/cargopile
 	name = "spilled cargo"
 	desc = "The jetsam of some unfortunate power loader."
-	icon = 'icons/obj/rubble.dmi'
+	icon = 'icons/obj/structures/rubble.dmi'
 	icon_state = "base"
 	appearance_flags = DEFAULT_APPEARANCE_FLAGS | PIXEL_SCALE
 	atom_flags = ATOM_FLAG_CLIMBABLE
@@ -12,7 +12,7 @@
 
 
 /obj/structure/cargopile/on_update_icon()
-	overlays.Cut()
+	ClearOverlays()
 	for(var/obj/thing in contents)
 		var/image/I = new
 		I.appearance = thing.appearance
@@ -20,7 +20,7 @@
 		I.pixel_x = rand(-16,16)
 		I.pixel_y = rand(-16,16)
 		I.SetTransform(rotation = rand(0, 360))
-		overlays += I
+		AddOverlays(I)
 
 /obj/structure/cargopile/attack_hand(mob/user)
 	. = ..()
@@ -191,8 +191,8 @@
 /obj/item/mech_equipment/clamp/CtrlClick(mob/user)
 	if(owner)
 		drop_carrying(user, FALSE)
-	else
-		..()
+		return TRUE
+	return ..()
 
 /obj/item/mech_equipment/clamp/proc/drop_carrying(mob/user, choose_object)
 	if(!length(carrying))
@@ -274,9 +274,8 @@
 
 
 	var/on = 0
-	var/l_max_bright = 0.9
-	var/l_inner_range = 1
-	var/l_outer_range = 6
+	var/l_power = 2
+	var/l_range = 6
 	origin_tech = list(TECH_MATERIAL = 1, TECH_ENGINEERING = 1)
 
 /obj/item/mech_equipment/light/installed(mob/living/exosuit/_owner)
@@ -304,7 +303,7 @@
 /obj/item/mech_equipment/light/on_update_icon()
 	if(on)
 		icon_state = "[initial(icon_state)]-on"
-		set_light(l_max_bright, l_inner_range, l_outer_range)
+		set_light(l_range, l_power, angle = LIGHT_WIDE)
 	else
 		icon_state = "[initial(icon_state)]"
 		set_light(0, 0)
@@ -333,15 +332,16 @@
  	///For when targetting a single object, will create a warp beam
 	var/datum/beam = null
 	var/max_dist = 6
-	var/obj/effect/effect/warp/small/warpeffect = null
+	var/obj/effect/warp/small/warpeffect = null
 
-/obj/effect/ebeam/warp
+/obj/ebeam/warp
 	plane = WARP_EFFECT_PLANE
+	appearance_flags = DEFAULT_APPEARANCE_FLAGS | TILE_BOUND | NO_CLIENT_COLOR
 	z_flags = ZMM_IGNORE
 
-/obj/effect/effect/warp/small
+/obj/effect/warp/small
 	plane = WARP_EFFECT_PLANE
-	appearance_flags = PIXEL_SCALE
+	appearance_flags = PIXEL_SCALE | NO_CLIENT_COLOR
 	icon = 'icons/effects/96x96.dmi'
 	icon_state = "singularity_s3"
 	pixel_x = -32
@@ -402,7 +402,7 @@
 						to_chat(user, SPAN_NOTICE("Unable to lock on [target]."))
 						return
 					locked = AM
-					beam = owner.Beam(BeamTarget = target, icon_state = "r_beam", maxdistance = max_dist, beam_type = /obj/effect/ebeam/warp)
+					beam = owner.Beam(BeamTarget = target, icon_state = "r_beam", maxdistance = max_dist, beam_type = /obj/ebeam/warp)
 					GLOB.destroyed_event.register(beam, src, .proc/beamdestroyed)
 
 					animate(target,pixel_y= initial(target.pixel_y) - 2,time=1 SECOND, easing = SINE_EASING, flags = ANIMATION_PARALLEL, loop = -1)
@@ -550,11 +550,11 @@
 	drill_head = DH
 
 
-/obj/item/mech_equipment/drill/attackby(obj/item/I, mob/user)
+/obj/item/mech_equipment/drill/use_tool(obj/item/I, mob/living/user, list/click_params)
 	if (istype(I, /obj/item/material/drill_head))
 		attach_head(I, user)
 		return TRUE
-	. = ..()
+	return ..()
 
 /obj/item/mech_equipment/drill/proc/scoop_ore(at_turf)
 	if (!owner)
@@ -736,14 +736,14 @@
 	var/activated_passive_power = 2 KILOWATTS
 	var/movement_power = 75
 	origin_tech = list(TECH_ENGINEERING = 3, TECH_MAGNET = 3, TECH_PHORON = 3)
-	var/datum/effect/effect/system/trail/ion/ion_trail
+	var/datum/effect/trail/ion/ion_trail
 	require_adjacent = FALSE
 	var/stabilizers = FALSE
 	var/slide_distance = 6
 
 /obj/item/mech_equipment/ionjets/Initialize()
 	. = ..()
-	ion_trail = new /datum/effect/effect/system/trail/ion()
+	ion_trail = new /datum/effect/trail/ion()
 	ion_trail.set_up(src)
 
 /obj/item/mech_equipment/ionjets/proc/allowSpaceMove()
@@ -774,8 +774,8 @@
 		if (active)
 			stabilizers = !stabilizers
 			to_chat(user, SPAN_NOTICE("You toggle the stabilizers [stabilizers ? "on" : "off"]"))
-	else
-		..()
+		return TRUE
+	return ..()
 
 /obj/item/mech_equipment/ionjets/proc/activate()
 	passive_power_use = activated_passive_power
@@ -790,10 +790,9 @@
 	update_icon()
 
 /obj/item/mech_equipment/ionjets/on_update_icon()
-	. = ..()
 	if (active)
 		icon_state = "mech_jet_on"
-		set_light(1, 1, 1, l_color = COLOR_LIGHT_CYAN)
+		set_light(1, 1, l_color = COLOR_LIGHT_CYAN)
 	else
 		icon_state = "mech_jet_off"
 		set_light(0)
@@ -824,7 +823,7 @@
 				SPAN_WARNING("\The [src] charges up in preparation for a slide!"),
 				blind_message = SPAN_WARNING("You hear a loud hum and an intense crackling.")
 			)
-			new /obj/effect/temporary(get_step(owner.loc, reverse_direction(owner.dir)), 2 SECONDS, 'icons/effects/effects.dmi',"cyan_sparkles")
+			new /obj/temporary(get_step(owner.loc, reverse_direction(owner.dir)), 2 SECONDS, 'icons/effects/effects.dmi',"cyan_sparkles")
 			owner.setClickCooldown(2 SECONDS)
 			if (do_after(owner, 2 SECONDS, target, (DO_DEFAULT | DO_PUBLIC_PROGRESS | DO_USER_UNIQUE_ACT) & ~DO_USER_CAN_TURN) && slideCheck(TT))
 				owner.visible_message(SPAN_DANGER("Burning hard, \the [owner] thrusts forward!"))
@@ -846,7 +845,7 @@
 	equipment_delay = 10
 
 	origin_tech = list(TECH_MATERIAL = 1, TECH_ENGINEERING = 2, TECH_MAGNET = 2)
-	var/obj/machinery/camera/network/thunder/camera
+	var/obj/machinery/camera/network/helmet/camera
 	var/list/additional_networks //If you want to make a subtype for mercs, ert etc... Write here the extra networks
 
 /obj/item/mech_equipment/camera/Destroy()
@@ -859,6 +858,7 @@
 	camera.c_tag = "null"
 	camera.set_status(FALSE)
 	camera.is_helmet_cam = TRUE //Can transmit locally regardless of network
+	camera.set_stat_immunity(MACHINE_STAT_NOPOWER) //Camera power comes from the mech, not the camera itself.
 
 /obj/item/mech_equipment/camera/installed(mob/living/exosuit/_owner)
 	. = ..()
@@ -885,9 +885,7 @@
 	passive_power_use = 0
 	. = ..()
 
-/obj/item/mech_equipment/camera/attackby(obj/item/W, mob/user)
-	. = ..()
-
+/obj/item/mech_equipment/camera/use_tool(obj/item/W, mob/living/user, list/click_params)
 	if(isScrewdriver(W))
 		var/list/all_networks = list()
 		for(var/network in GLOB.using_map.station_networks)
@@ -899,11 +897,15 @@
 		var/network = input("Which network would you like to configure it for?") as null|anything in (all_networks)
 		if(!network)
 			to_chat(user, SPAN_WARNING("You cannot connect to any camera network!."))
+			return TRUE
 		var/delay = 2 SECONDS * user.skill_delay_mult(SKILL_DEVICES)
 		if(do_after(user, delay, src, DO_DEFAULT | DO_BOTH_UNIQUE_ACT) && network)
 			camera.network = list(network)
 			camera.update_coverage(TRUE)
 			to_chat(user, SPAN_NOTICE("You configure the camera for \the [network] network."))
+		return TRUE
+
+	return ..()
 
 /obj/item/mech_equipment/camera/attack_self(mob/user)
 	. = ..()

@@ -114,6 +114,10 @@
 		var/headset = pick(spawn_headset_options)
 		ears = new headset(src)
 
+	icon_state = "[icon_set]_fly"
+	icon_living = "[icon_set]_fly"
+	icon_dead = "[icon_set]_dead"
+
 	parrot_sleep_dur = parrot_sleep_max //In case someone decides to change the max without changing the duration var
 
 	verbs += /mob/living/simple_animal/hostile/retaliate/parrot/proc/steal_from_ground
@@ -133,11 +137,6 @@
 /mob/living/simple_animal/hostile/retaliate/parrot/Stat()
 	. = ..()
 	stat("Held Item", held_item)
-
-/mob/living/simple_animal/hostile/retaliate/parrot/on_update_icon()
-	icon_state = "[icon_set]_fly"
-	icon_living = "[icon_set]_fly"
-	icon_dead = "[icon_set]_dead"
 
 /*
  * Inventory
@@ -263,7 +262,7 @@
 	..()
 
 	// React to being hit
-	if ((use_call == "weapon" || use_call == "attackby") && !stat && !client)
+	if ((use_call == "weapon" || use_call == "use") && !stat && !client)
 		if (parrot_state == PARROT_PERCH)
 			parrot_sleep_dur = parrot_sleep_max //Reset it's sleep timer if it was perched
 
@@ -508,7 +507,8 @@
 				return
 
 			//Time for the hurt to begin!
-			L.attackby(get_natural_weapon(), src)
+			var/obj/item/weapon = get_natural_weapon()
+			weapon.resolve_attackby(L, src)
 			return
 
 		//Otherwise, fly towards the mob!
@@ -529,7 +529,7 @@
  * Procs
  */
 
-/mob/living/simple_animal/hostile/retaliate/parrot/movement_delay()
+/mob/living/simple_animal/hostile/retaliate/parrot/movement_delay(singleton/move_intent/using_intent = move_intent)
 	if(client && stat == CONSCIOUS && parrot_state != "parrot_fly")
 		icon_state = "[icon_set]_fly"
 	..()
@@ -664,7 +664,7 @@
 		return -1
 
 	if(!held_item)
-		to_chat(usr, SPAN_WARNING("You have nothing to drop!"))
+		to_chat(src, SPAN_WARNING("You have nothing to drop!"))
 		return 0
 
 	if(!drop_gently)
@@ -672,11 +672,11 @@
 			var/obj/item/grenade/G = held_item
 			G.dropInto(loc)
 			G.detonate()
-			to_chat(src, "You let go of the [held_item]!")
+			to_chat(src, "You let go of \the [held_item]!")
 			held_item = null
 			return 1
 
-	to_chat(src, "You drop the [held_item].")
+	to_chat(src, "You drop \the [held_item].")
 
 	held_item.dropInto(loc)
 	held_item = null

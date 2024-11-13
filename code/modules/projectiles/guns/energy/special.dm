@@ -30,7 +30,17 @@
 	one_hand_penalty = 0
 	charge_cost = 40
 	max_shots = 3
+	fire_delay = 30
 	projectile_type = /obj/item/projectile/ion/small
+
+/obj/item/gun/energy/ionrifle/mounted
+	name = "mounted ion gun"
+	desc = "You should not see this. Call a developer."
+	fire_delay = 30
+	one_hand_penalty = 0
+	self_recharge = TRUE
+	use_external_power = TRUE
+	has_safety = FALSE
 
 /obj/item/gun/energy/decloner
 	name = "biological demolecularisor"
@@ -64,18 +74,13 @@
 		list(mode_name="induce specific mutations", projectile_type=/obj/item/projectile/energy/floramut/gene, modifystate="floramut"),
 		)
 
-/obj/item/gun/energy/floragun/resolve_attackby(atom/A)
-	if(istype(A,/obj/machinery/portable_atmospherics/hydroponics))
-		return FALSE // do afterattack, i.e. fire, at pointblank at trays.
-	return ..()
+/obj/item/gun/energy/floragun/use_before(atom/target, mob/living/user, click_parameters)
+	if (!istype(target, /obj/machinery/portable_atmospherics/hydroponics))
+		return FALSE
 
-/obj/item/gun/energy/floragun/afterattack(obj/target, mob/user, adjacent_flag)
-	//allow shooting into adjacent hydrotrays regardless of intent
-	if(adjacent_flag && istype(target,/obj/machinery/portable_atmospherics/hydroponics))
-		user.visible_message(SPAN_DANGER("\The [user] fires \the [src] into \the [target]!"))
-		Fire(target,user)
-		return
-	..()
+	user.visible_message(SPAN_DANGER("\The [user] fires \the [src] into \the [target]!"))
+	Fire(target,user)
+	return TRUE
 
 /obj/item/gun/energy/floragun/verb/select_gene()
 	set name = "Select Gene"
@@ -156,11 +161,11 @@
 	projectile_type = /obj/item/projectile/beam/plasmacutter
 	max_shots = 10
 	self_recharge = 1
-	var/datum/effect/effect/system/spark_spread/spark_system
+	var/datum/effect/spark_spread/spark_system
 
 	// As an industrial tool the plasma cutter's safety training falls under construction.
 	gun_skill = SKILL_CONSTRUCTION
-	safety_skill = SKILL_ADEPT
+	safety_skill = SKILL_TRAINED
 
 /obj/item/gun/energy/plasmacutter/mounted
 	name = "mounted plasma cutter"
@@ -170,7 +175,7 @@
 
 /obj/item/gun/energy/plasmacutter/Initialize()
 	. = ..()
-	spark_system = new /datum/effect/effect/system/spark_spread
+	spark_system = new /datum/effect/spark_spread
 	spark_system.set_up(5, 0, src)
 	spark_system.attach(src)
 
@@ -204,3 +209,43 @@
 	matter = list(MATERIAL_ALUMINIUM = 1000, MATERIAL_PLASTIC = 500, MATERIAL_DIAMOND = 500)
 	projectile_type = /obj/item/projectile/beam/incendiary_laser
 	max_shots = 4
+
+
+/obj/item/gun/energy/laser/xenofauna
+	name = "xenofauna carbine"
+	desc = "An outdated LP76 energy carbine, repurposed for wildlife control. A safety limiter locks it to a beam capable of frying the nervous system of simple wildlife, but with barely any effect on humans."
+	icon_state = "laserwild"
+	item_state = "laserwild"
+	projectile_type = /obj/item/projectile/beam/xenofauna
+	slot_flags = null
+	wielded_item_state = "laserwild-wielded"
+	max_shots = 12
+	var/emagged = FALSE
+
+
+/obj/item/gun/energy/laser/xenofauna/emag_act(charges, mob/user)
+	if (!charges)
+		return NO_EMAG_ACT
+	if (emagged)
+		to_chat(user, SPAN_NOTICE("\The [src]'s safety limiter has already been disabled!"))
+		return NO_EMAG_ACT
+	else
+		to_chat(user, SPAN_NOTICE("\The [src]'s safety limiter sparks and dies!"))
+		projectile_type = /obj/item/projectile/beam/smalllaser
+		charge_cost = 30
+	return ..()
+
+
+/obj/item/gun/energy/laser/xenofauna/examine(mob/user, distance)
+	. = ..()
+	if (emagged && distance < 3)
+		to_chat(user, SPAN_DANGER("The safety limiter doesn't look functional."))
+
+
+/obj/item/gun/energy/laser/xenofauna/broken
+	desc = "An outdated LP76 energy carbine, repurposed for wildlife control. This one looks like junk."
+
+
+/obj/item/gun/energy/laser/xenofauna/broken/Initialize()
+	. = ..()
+	emag_act(INFINITY)

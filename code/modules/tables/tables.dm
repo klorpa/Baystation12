@@ -1,6 +1,6 @@
 /obj/structure/table
 	name = "table frame"
-	icon = 'icons/obj/tables.dmi'
+	icon = 'icons/obj/structures/tables.dmi'
 	icon_state = "frame"
 	desc = "It's a table, for putting things on. Or standing on, if you really want to."
 	density = TRUE
@@ -129,7 +129,7 @@
 
 	// Energy Blade, Psiblade
 	if (istype(weapon, /obj/item/melee/energy/blade) || istype(weapon, /obj/item/psychic_power/psiblade/master/grand/paramount))
-		var/datum/effect/effect/system/spark_spread/spark_system = new(src)
+		var/datum/effect/spark_spread/spark_system = new(src)
 		spark_system.set_up(5, EMPTY_BITFIELD, loc)
 		spark_system.start()
 		playsound(loc, 'sound/weapons/blade1.ogg', 50, TRUE)
@@ -143,15 +143,9 @@
 
 	// Material - Plate table
 	if (istype(weapon, /obj/item/stack/material))
-		if (material)
-			reinforce_table(weapon, user)
-			return TRUE
-		material = common_material_add(weapon, user, "plat")
-		if (material)
-			update_connections(TRUE)
-			update_icon()
-			update_desc()
-			update_material()
+		if (!material)
+			return FALSE // Handled by `use_tool()`
+		reinforce_table(weapon, user)
 		return TRUE
 
 	// Welding Tool - Repair damage
@@ -167,7 +161,7 @@
 			SPAN_NOTICE("\The [user] starts repairing \the [src] with \a [weapon]."),
 			SPAN_NOTICE("You start repairing \the [src] with \the [weapon].")
 		)
-		if (!user.do_skilled(2 SECONDS, SKILL_CONSTRUCTION, src, do_flags = DO_REPAIR_CONSTRUCT) || !user.use_sanity_check(src, weapon) || !welder.remove_fuel(1))
+		if (!user.do_skilled((weapon.toolspeed * 2) SECONDS, SKILL_CONSTRUCTION, src, do_flags = DO_REPAIR_CONSTRUCT) || !user.use_sanity_check(src, weapon) || !welder.remove_fuel(1))
 			return TRUE
 		playsound(src, 'sound/items/Welder.ogg', 50, TRUE)
 		restore_health(get_max_health() / 5) // 20% repair per application
@@ -216,10 +210,28 @@
 /obj/structure/table/use_tool(obj/item/tool, mob/user, list/click_params)
 	SHOULD_CALL_PARENT(FALSE)
 
-	// Put things on table
+	// Unfinished table - Construction stuff
 	if (can_plate && !material)
+		// Material - Plate table
+		if (istype(tool, /obj/item/stack/material))
+			material = common_material_add(tool, user, "plat")
+			if (material)
+				update_connections(TRUE)
+				update_icon()
+				update_desc()
+				update_material()
+			return TRUE
+
+		// Wrench - Dismantle
+		if (isWrench(tool))
+			dismantle(tool, user)
+			return TRUE
+
+		// Anything else - Can't put it on an unfinished table
 		USE_FEEDBACK_FAILURE("\The [src] needs to be plated before you can put \the [tool] on it.")
 		return TRUE
+
+	// Put things on table
 	if (!user.unEquip(tool, loc))
 		FEEDBACK_UNEQUIP_FAILURE(user, tool)
 		return TRUE
@@ -227,11 +239,16 @@
 	return TRUE
 
 
-/obj/structure/table/MouseDrop_T(obj/item/stack/material/what)
-	if(can_reinforce && isliving(usr) && (!usr.stat) && istype(what) && usr.get_active_hand() == what && Adjacent(usr))
-		reinforce_table(what, usr)
-	else
-		return ..()
+/obj/structure/table/MouseDrop_T(atom/dropped, mob/user)
+	// Place held objects on table
+	if (isitem(dropped) && user.IsHolding(dropped))
+		if (!user.use_sanity_check(src, dropped, SANITY_CHECK_DEFAULT | SANITY_CHECK_TOOL_UNEQUIP))
+			return TRUE
+		user.unEquip(dropped, get_turf(src))
+		return TRUE
+
+	return ..()
+
 
 /obj/structure/table/proc/reinforce_table(obj/item/stack/material/S, mob/user)
 	if(reinforced)
@@ -297,7 +314,7 @@
 	                              SPAN_NOTICE("You begin removing the [type_holding] holding \the [src]'s [M.display_name] [what] in place."))
 	if(sound)
 		playsound(src.loc, sound, 50, 1)
-	if(!do_after(user, 4 SECONDS, src, DO_REPAIR_CONSTRUCT))
+	if(!do_after(user, delay, src, DO_REPAIR_CONSTRUCT))
 		manipulating = 0
 		return M
 	user.visible_message(SPAN_NOTICE("\The [user] removes the [M.display_name] [what] from \the [src]."),
@@ -306,24 +323,27 @@
 	manipulating = 0
 	return null
 
-/obj/structure/table/proc/remove_reinforced(obj/item/screwdriver/S, mob/user)
-	reinforced = common_material_remove(user, reinforced, 40, "reinforcements", "screws", 'sound/items/Screwdriver.ogg')
+/obj/structure/table/proc/remove_reinforced(obj/item/S, mob/user)
+	reinforced = common_material_remove(user, reinforced, (S.toolspeed * 4) SECONDS, "reinforcements", "screws", 'sound/items/Screwdriver.ogg')
 
-/obj/structure/table/proc/remove_material(obj/item/wrench/W, mob/user)
-	material = common_material_remove(user, material, 20, "plating", "bolts", 'sound/items/Ratchet.ogg')
+/obj/structure/table/proc/remove_material(obj/item/W, mob/user)
+	material = common_material_remove(user, material, (W.toolspeed * 2) SECONDS, "plating", "bolts", 'sound/items/Ratchet.ogg')
 
-/obj/structure/table/proc/dismantle(obj/item/wrench/W, mob/user)
+/obj/structure/table/proc/dismantle(obj/item/W, mob/user)
+	if (!isWrench(W))
+		return
+
 	reset_mobs_offset()
 	if(manipulating) return
 	manipulating = 1
 	user.visible_message(SPAN_NOTICE("\The [user] begins dismantling \the [src]."),
-	                              SPAN_NOTICE("You begin dismantling \the [src]."))
+								SPAN_NOTICE("You begin dismantling \the [src]."))
 	playsound(src.loc, 'sound/items/Ratchet.ogg', 50, 1)
-	if(!do_after(user, 2 SECONDS, src, DO_REPAIR_CONSTRUCT))
+	if(!do_after(user, (W.toolspeed * 2) SECONDS, src, DO_REPAIR_CONSTRUCT))
 		manipulating = 0
 		return
 	user.visible_message(SPAN_NOTICE("\The [user] dismantles \the [src]."),
-	                              SPAN_NOTICE("You dismantle \the [src]."))
+								SPAN_NOTICE("You dismantle \the [src]."))
 	new /obj/item/stack/material/steel(src.loc)
 	qdel(src)
 	return
@@ -367,14 +387,14 @@
 	if(!flipped)
 		mob_offset = initial(mob_offset)
 		icon_state = "blank"
-		overlays.Cut()
+		ClearOverlays()
 
 		var/image/I
 
 		// Base frame shape. Mostly done for glass/diamond tables, where this is visible.
 		for(var/i = 1 to 4)
 			I = image(icon, dir = SHIFTL(1, i - 1), icon_state = connections[i])
-			overlays += I
+			AddOverlays(I)
 
 		// Standard table image
 		if(material)
@@ -382,23 +402,23 @@
 				I = image(icon, "[material.table_icon_base]_[connections[i]]", dir = SHIFTL(1, i - 1))
 				if(material.icon_colour) I.color = material.icon_colour
 				I.alpha = 255 * material.opacity
-				overlays += I
+				AddOverlays(I)
 
 		// Reinforcements
 		if(reinforced)
 			for(var/i = 1 to 4)
-				I = image(icon, "[reinforced.table_reinf]_[connections[i]]", dir = SHIFTL(1, i - 1))
+				I = image(icon, "[material.table_icon_reinf]_[connections[i]]", dir = SHIFTL(1, i - 1))
 				I.color = reinforced.icon_colour
 				I.alpha = 255 * reinforced.opacity
-				overlays += I
+				AddOverlays(I)
 
 		if(carpeted)
 			for(var/i = 1 to 4)
 				I = image(icon, "carpet_[connections[i]]", dir = SHIFTL(1, i - 1))
-				overlays += I
+				AddOverlays(I)
 	else
 		mob_offset = 0
-		overlays.Cut()
+		ClearOverlays()
 		var/type = 0
 		var/tabledirs = 0
 		for(var/direction in list(turn(dir,90), turn(dir,-90)) )
@@ -419,19 +439,19 @@
 			var/image/I = image(icon, "[material.table_icon_base]_flip[type]")
 			I.color = material.icon_colour
 			I.alpha = 255 * material.opacity
-			overlays += I
+			AddOverlays(I)
 			name = "[material.display_name] table"
 		else
 			name = "table frame"
 
 		if(reinforced)
-			var/image/I = image(icon, "[reinforced.table_reinf]_flip[type]")
+			var/image/I = image(icon, "[material.table_icon_reinf]_flip[type]")
 			I.color = reinforced.icon_colour
 			I.alpha = 255 * reinforced.opacity
-			overlays += I
+			AddOverlays(I)
 
 		if(carpeted)
-			overlays += "carpet_flip[type]"
+			AddOverlays("carpet_flip[type]")
 
 /obj/structure/table/proc/can_connect()
 	return TRUE

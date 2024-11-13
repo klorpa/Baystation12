@@ -7,7 +7,8 @@
 				list(/obj/item/clothing/under/rank/medical/scrubs/lilac, /obj/item/clothing/head/surgery/lilac), \
 				list(/obj/item/clothing/under/rank/medical/scrubs/teal, /obj/item/clothing/head/surgery/teal), \
 				list(/obj/item/clothing/under/rank/medical/scrubs/heliodor, /obj/item/clothing/head/surgery/heliodor), \
-				list(/obj/item/clothing/under/rank/medical/scrubs/navyblue, /obj/item/clothing/head/surgery/navyblue)\
+				list(/obj/item/clothing/under/rank/medical/scrubs/navyblue, /obj/item/clothing/head/surgery/navyblue), \
+				list(/obj/item/clothing/under/rank/medical/scrubs/lavender, /obj/item/clothing/head/surgery/lavender) \
 			) \
 		)
 
@@ -27,7 +28,7 @@
 		/obj/item/reagent_containers/glass/bottle/antitoxin = 2,
 		/obj/random/firstaid,
 		/obj/item/storage/box/masks,
-		/obj/item/storage/box/gloves
+		/obj/item/storage/box/latexgloves
 	)
 
 /obj/structure/closet/secure_closet/medical2
@@ -180,7 +181,7 @@
 		/obj/item/reagent_containers/syringe/antiviral,
 		/obj/item/reagent_containers/glass/bottle/antitoxin,
 		/obj/item/storage/box/masks,
-		/obj/item/storage/box/gloves,
+		/obj/item/storage/box/latexgloves,
 		/obj/item/clothing/under/rank/virologist,
 		/obj/item/clothing/shoes/white,
 		/obj/item/clothing/suit/storage/toggle/labcoat/virologist,

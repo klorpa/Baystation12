@@ -73,7 +73,7 @@
 
 /obj/structure/flora/pottedplant
 	name = "potted plant"
-	icon = 'icons/obj/plants.dmi'
+	icon = 'icons/obj/flora/plants.dmi'
 	icon_state = "plant-26"
 	layer = ABOVE_HUMAN_LAYER
 
@@ -83,6 +83,7 @@
 	icon = 'icons/obj/flora/ausflora.dmi'
 	icon_state = "firstbush_1"
 	anchored = TRUE
+	layer = PLANT_LAYER
 
 /obj/structure/flora/ausbushes/New()
 	..()
@@ -177,7 +178,7 @@
 
 /obj/structure/flora/ausbushes/ppflowers/New()
 	..()
-	icon_state = "ppflowers_[rand(1, 4)]"
+	icon_state = "ppflowers_[rand(1, 3)]"
 
 /obj/structure/flora/ausbushes/sparsegrass
 	icon_state = "sparsegrass_1"
@@ -198,7 +199,7 @@
 /obj/structure/flora/pottedplant
 	name = "potted plant"
 	desc = "Really brings the room together."
-	icon = 'icons/obj/plants.dmi'
+	icon = 'icons/obj/flora/plants.dmi'
 	icon_state = "plant-01"
 	layer = ABOVE_HUMAN_LAYER
 
@@ -244,7 +245,7 @@
 
 /obj/structure/flora/pottedplant/unusual/Initialize()
 	. = ..()
-	set_light(0.4, 0.1, 2, 2, "#007fff")
+	set_light(2, 0.4, "#007fff")
 
 /obj/structure/flora/pottedplant/orientaltree
 	name = "potted oriental tree"
@@ -298,7 +299,7 @@
 
 /obj/structure/flora/pottedplant/subterranean/Initialize()
 	. = ..()
-	set_light(0.4, 0.1, 2, 2, "#ff6633")
+	set_light(2, 0.4, "#ff6633")
 
 /obj/structure/flora/pottedplant/minitree
 	name = "potted tree"

@@ -1,7 +1,7 @@
 /obj/item/reagent_containers/ivbag
 	name = "\improper IV bag"
 	desc = "Flexible bag for IV injectors."
-	icon = 'icons/obj/bloodpack.dmi'
+	icon = 'icons/obj/tools/bloodpack.dmi'
 	icon_state = "empty"
 	w_class = ITEM_SIZE_TINY
 	volume = 120
@@ -67,14 +67,14 @@
 
 
 /obj/item/reagent_containers/ivbag/on_update_icon()
-	overlays.Cut()
+	ClearOverlays()
 	if (reagents.total_volume)
 		var/state = clamp(Roundm(Percent(reagents.total_volume, volume, 0), 25), 0, 100)
 		var/image/filling = image(icon, icon_state = "[state]")
 		filling.color = reagents.get_color()
-		overlays += filling
+		AddOverlays(filling)
 	if (patient)
-		overlays += image(icon, icon_state = "dongle")
+		AddOverlays(image(icon, icon_state = "dongle"))
 
 
 /obj/item/reagent_containers/ivbag/MouseDrop(atom/over_atom)
@@ -156,7 +156,7 @@
 	)
 	if (!user.do_skilled(5 SECONDS, SKILL_MEDICAL, target)) //slower than stands and beds
 		return
-	if (prob(user.skill_fail_chance(SKILL_MEDICAL, 80, SKILL_ADEPT))) // harder than stands and beds
+	if (prob(user.skill_fail_chance(SKILL_MEDICAL, 80, SKILL_TRAINED))) // harder than stands and beds
 		user.visible_message(
 			SPAN_DANGER("\The [user] fishes for a vein on \the [target] and fails, stabbing them instead!"),
 			SPAN_DANGER("You fish inexpertly for a vein on \the [target] and stab them instead!"),
@@ -375,12 +375,28 @@
 	return ..(mapload, "O-")
 
 
+/obj/item/reagent_containers/ivbag/glucose/Initialize()
+	. = ..()
+	reagents.add_reagent(/datum/reagent/nutriment/glucose, volume)
+	AddLabel("Glucose")
+	UpdateItemSize()
+
+
 /obj/item/storage/box/bloodpacks
 	name = "blood packs box"
 	desc = "This box contains empty blood packs."
 	icon_state = "sterile"
 	startswith = list(
 		/obj/item/reagent_containers/ivbag = 7
+	)
+
+
+/obj/item/storage/box/glucose
+	name = "glucose box"
+	desc = "This box contains glucose IV bags."
+	icon_state = "sterile"
+	startswith = list(
+		/obj/item/reagent_containers/ivbag/glucose = 7
 	)
 
 

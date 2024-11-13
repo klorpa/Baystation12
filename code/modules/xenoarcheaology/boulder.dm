@@ -1,7 +1,7 @@
 /obj/structure/boulder
 	name = "rocky debris"
 	desc = "Leftover rock from an excavation, it's been partially dug out already but there's still a lot to go."
-	icon = 'icons/obj/mining.dmi'
+	icon = 'icons/obj/boulder.dmi'
 	icon_state = "boulder1"
 	density = TRUE
 	opacity = 1
@@ -95,9 +95,9 @@
 		var/mob/living/carbon/human/H = AM
 		var/obj/item/pickaxe/P = H.get_inactive_hand()
 		if(istype(P))
-			src.attackby(P, H)
+			use_tool(P, H)
 
 	else if(istype(AM,/mob/living/silicon/robot))
 		var/mob/living/silicon/robot/R = AM
 		if(istype(R.module_active,/obj/item/pickaxe))
-			attackby(R.module_active,R)
+			use_tool(R.module_active,R)

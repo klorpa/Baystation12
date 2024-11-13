@@ -127,12 +127,12 @@
 /turf/simulated/floor/holofloor/desert/New()
 	..()
 	if(prob(10))
-		overlays += "asteroid[rand(0,9)]"
+		AddOverlays("asteroid[rand(0,9)]")
 
 /obj/structure/holostool
 	name = "stool"
 	desc = "Apply butt."
-	icon = 'icons/obj/furniture.dmi'
+	icon = 'icons/obj/structures/furniture.dmi'
 	icon_state = "stool_padded_preview"
 	anchored = TRUE
 
@@ -168,28 +168,24 @@
 /obj/machinery/door/window/holowindoor/Destroy()
 	..()
 
-/obj/machinery/door/window/holowindoor/attackby(obj/item/I as obj, mob/user as mob)
-
+/obj/machinery/door/window/holowindoor/use_tool(obj/item/I, mob/living/user, list/click_params)
 	if (operating == DOOR_OPERATING_YES)
-		return
-
-	if (user.a_intent == I_HURT)
 		return ..()
 
-	src.add_fingerprint(user)
-	if (!src.requiresID())
+	if (!requiresID())
 		user = null
 
-	if (src.allowed(user))
-		if (src.density)
+	if (allowed(user))
+		if (density)
 			open()
 		else
 			close()
 
-	else if (src.density)
-		flick(text("[]deny", src.base_state), src)
+	else if (density)
+		flick(text("[]deny", base_state), src)
+		return TRUE
 
-	return
+	return ..()
 
 /obj/machinery/door/window/holowindoor/shatter(display_message = 1)
 	src.set_density(0)
@@ -232,12 +228,12 @@
 /obj/item/holo/esword/handle_shield(mob/user, damage, atom/damage_source = null, mob/attacker = null, def_zone = null, attack_text = "the attack")
 	. = ..()
 	if(.)
-		var/datum/effect/effect/system/spark_spread/spark_system = new /datum/effect/effect/system/spark_spread()
+		var/datum/effect/spark_spread/spark_system = new /datum/effect/spark_spread()
 		spark_system.set_up(5, 0, user.loc)
 		spark_system.start()
 		playsound(user.loc, 'sound/weapons/blade1.ogg', 50, 1)
 
-/obj/item/holo/esword/get_parry_chance(mob/user)
+/obj/item/holo/esword/get_parry_chance(mob/user, mob/attacker)
 	return active ? ..() : 0
 
 /obj/item/holo/esword/Initialize()
@@ -267,7 +263,7 @@
 //BASKETBALL OBJECTS
 
 /obj/item/beach_ball/holoball
-	icon = 'icons/obj/basketball.dmi'
+	icon = 'icons/obj/structures/basketball.dmi'
 	icon_state = "basketball"
 	name = "basketball"
 	item_state = "basketball"
@@ -277,7 +273,7 @@
 /obj/structure/holohoop
 	name = "basketball hoop"
 	desc = "Boom, Shakalaka!"
-	icon = 'icons/obj/basketball.dmi'
+	icon = 'icons/obj/structures/basketball.dmi'
 	icon_state = "hoop"
 	anchored = TRUE
 	density = TRUE
@@ -300,7 +296,7 @@
 //VOLLEYBALL OBJECTS
 
 /obj/item/beach_ball/holovolleyball
-	icon = 'icons/obj/basketball.dmi'
+	icon = 'icons/obj/structures/basketball.dmi'
 	icon_state = "volleyball"
 	name = "volleyball"
 	item_state = "volleyball"
@@ -310,7 +306,7 @@
 /obj/structure/holonet
 	name = "net"
 	desc = "Bullshit, you can be mine!"
-	icon = 'icons/obj/basketball.dmi'
+	icon = 'icons/obj/structures/basketball.dmi'
 	icon_state = "volleynet_mid"
 	density = TRUE
 	anchored = TRUE
@@ -338,7 +334,7 @@
 /obj/machinery/readybutton
 	name = "Ready Declaration Device"
 	desc = "This device is used to declare ready. If all devices in an area are ready, the event will begin!"
-	icon = 'icons/obj/monitors.dmi'
+	icon = 'icons/obj/structures/keycard_authenticator.dmi'
 	icon_state = "auth_off"
 	var/ready = 0
 	var/area/currentarea = null
@@ -355,10 +351,6 @@
 
 /obj/machinery/readybutton/New()
 	..()
-
-
-/obj/machinery/readybutton/attackby(obj/item/W as obj, mob/user as mob)
-	to_chat(user, "The device is a solid button, there's nothing you can do with it!")
 
 /obj/machinery/readybutton/physical_attack_hand(mob/user)
 	currentarea = get_area(src)
@@ -419,10 +411,9 @@
 /mob/living/simple_animal/hostile/carp/holodeck/on_update_icon()
 	return
 
-
 /mob/living/simple_animal/hostile/carp/holodeck/Initialize(mapload, ...)
 	. = ..()
-	set_light(0.5, 0.1, 2) //hologram lighting
+	set_light(2, 0.5) //hologram lighting
 
 
 /mob/living/simple_animal/hostile/carp/holodeck/proc/set_safety(safe)

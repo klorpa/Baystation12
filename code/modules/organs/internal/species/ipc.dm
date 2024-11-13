@@ -1,7 +1,7 @@
 /obj/item/organ/internal/posibrain
 	name = "positronic brain"
 	desc = "A cube of shining metal, four inches to a side and covered in shallow grooves."
-	icon = 'icons/obj/assemblies.dmi'
+	icon = 'icons/obj/assemblies/assemblies.dmi'
 	icon_state = "posibrain"
 	organ_tag = BP_POSIBRAIN
 	parent_organ = BP_CHEST
@@ -21,7 +21,7 @@
 
 	var/mob/living/silicon/sil_brainmob/brainmob = null
 
-	var/searching = TIMER_ID_NULL
+	var/searching = null
 	var/last_search = 0
 
 	req_access = list(access_robotics)
@@ -58,20 +58,20 @@
 /obj/item/organ/internal/posibrain/attack_self(mob/user)
 	if (!user.IsAdvancedToolUser())
 		return
-	if (user.skill_check(SKILL_DEVICES, SKILL_ADEPT))
+	if (user.skill_check(SKILL_DEVICES, SKILL_TRAINED))
 		if (status & ORGAN_DEAD || !brainmob)
 			to_chat(user, SPAN_WARNING("\The [src] is ruined; it will never turn on again."))
 			return
 		if (damage)
 			to_chat(user, SPAN_WARNING("\The [src] is damaged and requires repair first."))
 			return
-		if (searching != TIMER_ID_NULL)
+		if (searching)
 			visible_message("\The [user] flicks the activation switch on \the [src]. The lights go dark.", range = 3)
 			cancel_search()
 			return
 		start_search(user)
 	else
-		if ((status & ORGAN_DEAD) || !brainmob || damage || (searching != TIMER_ID_NULL))
+		if ((status & ORGAN_DEAD) || !brainmob || damage || searching)
 			to_chat(user, SPAN_WARNING("\The [src] doesn't respond to your pokes and prods."))
 			return
 		start_search(user)
@@ -103,9 +103,9 @@
 
 /obj/item/organ/internal/posibrain/proc/cancel_search()
 	visible_message(SPAN_ITALIC("\The [src] buzzes quietly and returns to an idle state."), range = 3)
-	if (searching != TIMER_ID_NULL)
+	if (searching)
 		deltimer(searching)
-	searching = TIMER_ID_NULL
+	searching = null
 	if (brainmob && brainmob.key)
 		if (brainmob.mind && brainmob.mind.special_role)
 			var/sneaky = sanitizeSafe(input(brainmob, "You're safe. Pick a new name as cover? Leave blank to skip.", "Get Sneaky?", brainmob.real_name) as text, MAX_NAME_LEN)
@@ -120,7 +120,7 @@
 	update_icon()
 
 /obj/item/organ/internal/posibrain/attack_ghost(mob/observer/ghost/user)
-	if (searching == TIMER_ID_NULL)
+	if (!searching)
 		return
 	if (!brainmob)
 		return
@@ -143,7 +143,7 @@
 	if (distance > 3)
 		return
 	var/msg = ""
-	if (isghost(user) || user.skill_check(SKILL_DEVICES, SKILL_ADEPT))
+	if (isghost(user) || user.skill_check(SKILL_DEVICES, SKILL_TRAINED))
 		if ((status & ORGAN_DEAD) || damage)
 			if ((status & ORGAN_DEAD))
 				msg += SPAN_ITALIC("It is ruined and lifeless, damaged beyond hope of recovery.")
@@ -163,7 +163,7 @@
 			else if (damage)
 				msg += SPAN_ITALIC("The red integrity fault indicator pulses slowly.")
 			else
-				msg += SPAN_ITALIC("The golden ready indicator [searching != TIMER_ID_NULL ? "flickers quickly as it tries to generate a personality" : "pulses lazily"].")
+				msg += SPAN_ITALIC("The golden ready indicator [searching ? "flickers quickly as it tries to generate a personality" : "pulses lazily"].")
 	else
 		if ((status & ORGAN_DEAD) || damage > min_broken_damage)
 			msg += SPAN_ITALIC("It looks wrecked.")
@@ -178,7 +178,7 @@
 				if (damage)
 					msg += SPAN_ITALIC("A lone red light pulses malevolently on its surface.")
 				else
-					msg += SPAN_ITALIC("A lone golden light [searching != TIMER_ID_NULL ? "flickers quickly" : "pulses lazily"].")
+					msg += SPAN_ITALIC("A lone golden light [searching ? "flickers quickly" : "pulses lazily"].")
 	if (msg)
 		to_chat(user, msg)
 
@@ -209,9 +209,9 @@
 	else
 		icon_state = "posibrain"
 
-	overlays.Cut()
+	ClearOverlays()
 	if(shackle)
-		overlays |= image('icons/obj/assemblies.dmi', "posibrain-shackles")
+		AddOverlays(image('icons/obj/assemblies/assemblies.dmi', "posibrain-shackles"))
 
 /obj/item/organ/internal/posibrain/proc/transfer_identity(mob/living/carbon/H)
 	if(H && H.mind)
@@ -235,9 +235,9 @@
 	if (!owner || owner.stat)
 		return
 	if (damage > min_bruised_damage)
-		if (prob(1) && owner.confused < 1)
+		if (prob(1) && !owner.is_confused())
 			to_chat(owner, SPAN_WARNING("Your comprehension of spacial positioning goes temporarily awry."))
-			owner.confused += 3
+			owner.set_confused(3)
 		if (prob(1) && owner.eye_blurry < 1)
 			to_chat(owner, SPAN_WARNING("Your optical interpretations become transiently erratic."))
 			owner.eye_blurry += 6
@@ -263,7 +263,7 @@
 				if (C && C.get_charge() > 25)
 					C.use(25)
 					to_chat(owner, SPAN_WARNING("Your chassis power routine fluctuates wildly."))
-					var/datum/effect/effect/system/spark_spread/S = new
+					var/datum/effect/spark_spread/S = new
 					S.set_up(2, 0, loc)
 					S.start()
 

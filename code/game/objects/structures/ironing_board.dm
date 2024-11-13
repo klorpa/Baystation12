@@ -1,7 +1,7 @@
 /obj/structure/ironing_board
 	name = "ironing board"
 	desc = "An ironing board to unwrinkle your wrinkled clothing."
-	icon = 'icons/obj/ironing.dmi'
+	icon = 'icons/obj/structures/ironing.dmi'
 	icon_state = "basic-down"
 	can_buckle = TRUE
 	buckle_dir = SOUTH
@@ -49,10 +49,10 @@
 
 
 /obj/structure/ironing_board/on_update_icon()
-	overlays.Cut()
+	ClearOverlays()
 	if (deployed)
 		if (clothing)
-			overlays += clothing.appearance
+			AddOverlays(clothing.appearance)
 		if (iron)
 			icon_state = "[base_state]-up-iron"
 		else
@@ -105,11 +105,11 @@
 	..()
 	if (buckled_mob)
 		set_density(TRUE)
-		mouse_opacity = XMOUSE_OPACITY_ALWAYS
+		mouse_opacity = MOUSE_OPACITY_PRIORITY
 		deployed = TRUE
 	else
 		set_density(FALSE)
-		mouse_opacity = XMOUSE_OPACITY_DEFAULT
+		mouse_opacity = MOUSE_OPACITY_NORMAL
 		deployed = FALSE
 	update_icon()
 
@@ -123,49 +123,7 @@
 	if (clothing)
 		to_chat(user, "\A [clothing] is spread out across it.")
 
-
-/obj/structure/ironing_board/use_weapon(obj/item/weapon, mob/user, list/click_params)
-	// Iron - Iron mob
-	if (istype(weapon, /obj/item/ironing_iron) && buckled_mob)
-		var/obj/item/ironing_iron/iron = weapon
-		var/zone = user.zone_sel.selecting
-		if (!iron.iron_enabled)
-			weapon.attack(buckled_mob, user, zone, TRUE)
-			return TRUE
-		var/mob/living/carbon/human/human
-		var/obj/item/organ/external/organ
-		if (ishuman(buckled_mob))
-			human = buckled_mob
-			organ = human.get_organ(zone)
-			if (!organ)
-				USE_FEEDBACK_FAILURE("\The [buckled_mob] has no [parse_zone(zone)] to iron.")
-				return TRUE
-		user.visible_message(
-			SPAN_WARNING("\The [user] starts ironing \the [buckled_mob][human ? "'s [parse_zone(zone)]" : null] with \a [weapon]!"),
-			SPAN_DANGER("You start ironing \the [buckled_mob][human ? "'s [parse_zone(zone)]" : null] with \a [weapon]!"),
-			exclude_mobs = list(buckled_mob)
-		)
-		buckled_mob.show_message(
-			SPAN_DANGER("\The [user] starts ironing you[human ? "r [parse_zone(zone)]" : null] with \a [weapon]!"),
-			VISIBLE_MESSAGE,
-			SPAN_DANGER("You feel a hot, searing pain[human ? " in your [parse_zone(zone)]" : null]!")
-		)
-		var/sound_token = GLOB.sound_player.PlayLoopingSound(src, "\ref[src]", 'sound/effects/iron_sizzle.ogg', 80)
-		for (var/i = 1 to 5)
-			if (!do_after(user, 1 SECOND, buckled_mob, DO_PUBLIC_UNIQUE) || !user.use_sanity_check(src, weapon))
-				break
-			if (organ)
-				organ.take_external_damage(0, rand(3, 5), used_weapon = "Hot metal")
-			else
-				buckled_mob.take_overall_damage(0, rand(3, 5), "Hot metal")
-		qdel(sound_token)
-		return TRUE
-
-	return ..()
-
-
 /obj/structure/ironing_board/use_grab(obj/item/grab/grab, list/click_params)
-	// Put victim on board
 	if (deployed)
 		if (buckled_mob)
 			USE_FEEDBACK_GRAB_FAILURE("\The [src] already has \the [buckled_mob] on it.")
@@ -184,11 +142,14 @@
 	grab.affecting.show_message(
 		SPAN_NOTICE("\The [grab.assailant] starts buckling you to \the [src]!")
 	)
-	if (!do_after(grab.assailant, 3 SECONDS, src, DO_PUBLIC_UNIQUE) || QDELETED(grab) || !grab.assailant.use_sanity_check(src, grab.affecting))
+	if (!do_after(grab.assailant, 3 SECONDS, src, DO_PUBLIC_UNIQUE) || QDELETED(grab) || !grab.use_sanity_check(src))
 		return TRUE
 	if (!user_buckle_mob(grab.affecting, grab.assailant))
 		return TRUE
-	qdel_self()
+
+	deployed = TRUE
+	grab.affecting.remove_grabs_and_pulls()
+	update_icon()
 	return TRUE
 
 
@@ -217,7 +178,6 @@
 
 	// Iron - Iron contents or add iron
 	if (istype(tool, /obj/item/ironing_iron))
-		var/obj/item/ironing_iron/iron = tool
 		// Clothing
 		if (clothing)
 			user.visible_message(
@@ -226,19 +186,15 @@
 			)
 			if (!do_after(user, 5 SECONDS, src, DO_PUBLIC_UNIQUE) || !user.use_sanity_check(src, tool))
 				return TRUE
-			if (!iron.iron_enabled)
-				USE_FEEDBACK_FAILURE("\The [src] wasn't turned on!")
+			var/obj/item/ironing_iron/used_iron = tool
+			if (!used_iron.iron_enabled)
+				USE_FEEDBACK_FAILURE("\The [used_iron] wasn't turned on!")
 				return TRUE
 			clothing.ironed_state = WRINKLES_NONE
 			user.visible_message(
 				SPAN_NOTICE("\The [user] irons \a [clothing] on \the [src] with \a [tool]."),
 				SPAN_NOTICE("You iron \the [clothing] on \the [src] with \the [tool].")
 			)
-			return TRUE
-
-		// Mob - Feedback hint, this only works on harm.
-		if (buckled_mob)
-			USE_FEEDBACK_FAILURE("You refrain from ironing \the [buckled_mob].")
 			return TRUE
 
 		// Add Iron
@@ -268,7 +224,7 @@
 /obj/item/ironing_board
 	name = "ironing board"
 	desc = "A collapsed ironing board that can be carried around."
-	icon = 'icons/obj/ironing.dmi'
+	icon = 'icons/obj/structures/ironing.dmi'
 	icon_state = "basic-item"
 	item_state = "rbed"
 	slot_flags = SLOT_BACK
@@ -302,7 +258,7 @@
 /obj/item/ironing_iron
 	name = "iron"
 	desc = "An ironing iron for ironing your iro- err... clothes."
-	icon = 'icons/obj/ironing.dmi'
+	icon = 'icons/obj/structures/ironing.dmi'
 	icon_state = "iron"
 	item_state = "ironingiron"
 	slot_flags = SLOT_BELT
@@ -321,10 +277,44 @@
 		range = 3
 	)
 
+/obj/item/ironing_iron/use_before(mob/living/subject, mob/living/user, click_parameters)
+	if (!istype(subject) || !istype(user))
+		return
+	if (iron_enabled && subject.incapacitated())
+		var/zone = user.zone_sel.selecting
+		var/mob/living/carbon/human/human
+		var/obj/item/organ/external/organ
+		if (ishuman(subject))
+			human = subject
+			organ = human.get_organ(zone)
+			if (!organ)
+				USE_FEEDBACK_FAILURE("\The [subject] has no [parse_zone(zone)] to iron.")
+				return TRUE
+		user.visible_message(
+			SPAN_WARNING("\The [user] starts ironing \the [subject][human ? "'s [parse_zone(zone)]" : null] with \a [src]!"),
+			SPAN_DANGER("You start ironing \the [subject][human ? "'s [parse_zone(zone)]" : null] with \a [src]!"),
+			exclude_mobs = list(subject)
+		)
+		subject.show_message(
+			SPAN_DANGER("\The [user] starts ironing you[human ? "r [parse_zone(zone)]" : null] with \a [src]!"),
+			VISIBLE_MESSAGE,
+			SPAN_DANGER("You feel a hot, searing pain[human ? " in your [parse_zone(zone)]" : null]!")
+		)
+		var/sound_token = GLOB.sound_player.PlayLoopingSound(src, "\ref[src]", 'sound/effects/iron_sizzle.ogg', 80)
+		for (var/i = 1 to 5)
+			if (!do_after(user, 1 SECOND, subject, DO_PUBLIC_UNIQUE) || !user.use_sanity_check(subject, src))
+				break
+			if (organ)
+				organ.take_external_damage(0, rand(3, 5), used_weapon = "Hot metal")
+			else
+				subject.take_overall_damage(0, rand(3, 5), "Hot metal")
+		qdel(sound_token)
+		return TRUE
+
 
 /obj/random/ironing_board_structure
 	name = "random deployed ironing board"
-	icon = 'icons/obj/ironing.dmi'
+	icon = 'icons/obj/structures/ironing.dmi'
 	icon_state = "basic-down"
 
 
@@ -337,7 +327,7 @@
 
 /obj/random/ironing_board_item
 	name = "random collapsed ironing board"
-	icon = 'icons/obj/ironing.dmi'
+	icon = 'icons/obj/structures/ironing.dmi'
 	icon_state = "basic-item"
 
 

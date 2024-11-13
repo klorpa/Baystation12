@@ -89,7 +89,7 @@
 	// hide called by levelupdate if turf intact status changes
 	// change visibility status and force update of icon
 /obj/structure/disposalpipe/hide(intact)
-	set_invisibility(intact ? 101: 0)	// hide if floor is intact
+	set_invisibility(intact ? INVISIBILITY_ABSTRACT: 0)	// hide if floor is intact
 	update_icon()
 
 // expel the held objects into a turf
@@ -139,7 +139,7 @@
 				visible_message(SPAN_DANGER("Vomit spews out of the disposal pipe!"))
 				playsound(loc, 'sound/effects/splat.ogg', 50, 1)
 				if(istype(src.loc, /turf/simulated))
-					var/obj/effect/decal/cleanable/vomit/splat = new /obj/effect/decal/cleanable/vomit(src.loc)
+					var/obj/decal/cleanable/vomit/splat = new /obj/decal/cleanable/vomit(src.loc)
 					H.reagents.trans_to_obj(splat, min(15, H.reagents.total_volume))
 					splat.update_icon()
 
@@ -171,7 +171,7 @@
 				var/obj/structure/disposalpipe/broken/P = new(src.loc)
 				P.set_dir(D)
 
-	src.set_invisibility(101)	// make invisible (since we won't delete the pipe immediately)
+	src.set_invisibility(INVISIBILITY_ABSTRACT)	// make invisible (since we won't delete the pipe immediately)
 	var/obj/structure/disposalholder/H = locate() in src
 	if(H)
 		// holder was present
@@ -198,6 +198,32 @@
 	broken(prob(0.5))
 
 
+/obj/structure/disposalpipe/can_anchor(obj/item/tool, mob/user, silent)
+	. = ..()
+	if (!.)
+		return
+
+	if (!anchored)
+		// Plating
+		var/turf/turf = get_turf(src)
+		if (!turf.is_plating())
+			if (!silent)
+				USE_FEEDBACK_FAILURE("You must remove the plating before you can secure \the [src].")
+			return FALSE
+
+		// Catwalks
+		var/obj/structure/catwalk/catwalk = locate() in get_turf(src)
+		if (catwalk)
+			if (catwalk.plated_tile && !catwalk.hatch_open)
+				if (!silent)
+					USE_FEEDBACK_FAILURE("\The [catwalk]'s hatch needs to be opened before you can secure \the [src].")
+				return FALSE
+			else if (!catwalk.plated_tile)
+				if (!silent)
+					USE_FEEDBACK_FAILURE("\The [catwalk] is blocking access to the floor.")
+				return FALSE
+
+
 /obj/structure/disposalpipe/use_tool(obj/item/tool, mob/user, list/click_params)
 	// Welding Tool - Cut pipe
 	if (isWelder(tool))
@@ -209,7 +235,7 @@
 			SPAN_NOTICE("\The [user] starts slicing \the [src] with \a [tool]."),
 			SPAN_NOTICE("You start slicing \the [src] with \the [tool].")
 		)
-		if (!user.do_skilled(3 SECONDS, SKILL_CONSTRUCTION, src, do_flags = DO_REPAIR_CONSTRUCT) || !user.use_sanity_check(src, tool) || !welder.remove_fuel(1, user))
+		if (!user.do_skilled((tool.toolspeed * 3) SECONDS, SKILL_CONSTRUCTION, src, do_flags = DO_REPAIR_CONSTRUCT) || !user.use_sanity_check(src, tool) || !welder.remove_fuel(1, user))
 			return TRUE
 		welded()
 		user.visible_message(
@@ -751,6 +777,16 @@
 
 	update()
 	return
+
+/obj/structure/disposalpipe/trunk/Destroy()
+	if (linked)
+		if (istype(linked, /obj/machinery/disposal))
+			var/obj/machinery/disposal/linked_disposal = linked
+			if (linked_disposal.trunk == src)
+				linked_disposal.trunk = null
+		linked = null
+
+	. = ..()
 
 /obj/structure/disposalpipe/trunk/proc/getlinked()
 	linked = null

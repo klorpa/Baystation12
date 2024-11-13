@@ -25,6 +25,12 @@
 
 /datum/artifact_trigger/chemical/acid
 	name = "presence of acid"
+	required_chemicals = list(
+		/datum/reagent/acid,
+		/datum/reagent/acid/polyacid,
+		/datum/reagent/diethylamine
+	)
+	trigger_type = TRIGGER_COMPLEX
 
 /datum/artifact_trigger/chemical/acid/New()
 	required_chemicals = typesof(/datum/reagent/acid)
@@ -39,8 +45,10 @@
 		/datum/reagent/napalm,
 		/datum/reagent/napalm/b,
 		/datum/reagent/nitroglycerin,
-		/datum/reagent/toxin/phoron/oxygen
+		/datum/reagent/toxin/phoron/oxygen,
+		/datum/reagent/gunpowder
 	)
+	trigger_type = TRIGGER_COMPLEX
 
 /datum/artifact_trigger/chemical/toxic
 	name = "presence of toxins"

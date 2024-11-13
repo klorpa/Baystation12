@@ -90,9 +90,12 @@ var/global/floorIsLava = 0
 		<A HREF='?src=\ref[src];connections=\ref[M]'>Check Connections</A> |
 		<A HREF='?src=\ref[src];bans=\ref[M]'>Check Bans</A> |
 	"}
+	if (M.ckey)
+		body += {"<a target="_blank" href="https://www.byond.com/members/[M.ckey]">View Byond Account</a> | "}
 
 	if (!istype(M, /mob/new_player) && !istype(M, /mob/observer))
 		body += "<A HREF='?src=\ref[src];cryo=\ref[M]'>Cryo Character</A> | "
+		body += "<A HREF='?src=\ref[src];equip_loadout=\ref[M]'>Equip Loadout</A> | "
 
 	if(M.client)
 		body += "<A HREF='?src=\ref[src];sendtoprison=\ref[M]'>Prison</A> | "
@@ -1098,7 +1101,7 @@ GLOBAL_VAR_INIT(skip_allow_lists, FALSE)
 
 	if(!seedtype || !SSplants.seeds[seedtype])
 		return
-	new /obj/effect/vine(get_turf(usr), SSplants.seeds[seedtype])
+	new /obj/vine(get_turf(usr), SSplants.seeds[seedtype])
 	log_admin("[key_name(usr)] spawned [seedtype] vines at ([usr.x],[usr.y],[usr.z])")
 
 /datum/admins/proc/spawn_atom(object as text)
@@ -1317,7 +1320,7 @@ GLOBAL_VAR_INIT(skip_allow_lists, FALSE)
 		else
 			to_chat(usr, "<b>SOMETHING SILICON [key_name(S, usr)]'s laws:</b>")
 
-		if (S.laws == null)
+		if (isnull(S.laws))
 			to_chat(usr, "[key_name(S, usr)]'s laws are null?? Contact a coder.")
 		else
 			S.laws.show_laws(usr)
@@ -1388,7 +1391,7 @@ GLOBAL_VAR_INIT(skip_allow_lists, FALSE)
 	return check_rights(R_HOST, 0, C)
 
 //Prevents SDQL2 commands from changing admin permissions
-/datum/admins/SDQL_update(const/var_name, new_value)
+/datum/admins/SDQL_update(var_name, new_value)
 	return 0
 
 //
@@ -1422,6 +1425,7 @@ GLOBAL_VAR_INIT(skip_allow_lists, FALSE)
 	message_admins(SPAN_CLASS("adminnotice", "[key_name_admin(usr)] has put [frommob.ckey] in control of [tomob.name]."))
 	log_admin("[key_name(usr)] stuffed [frommob.ckey] into [tomob.name].")
 	tomob.ckey = frommob.ckey
+	tomob.teleop = null
 	qdel(frommob)
 	return 1
 
@@ -1580,7 +1584,7 @@ GLOBAL_VAR_INIT(skip_allow_lists, FALSE)
 		if(!P.stamped)
 			P.stamped = new
 		P.stamped += /obj/item/stamp/boss
-		P.overlays += stampoverlay
+		P.AddOverlays(stampoverlay)
 
 	var/obj/item/rcvdcopy
 	var/obj/machinery/photocopier/faxmachine/destination = P.destinations[1]
@@ -1609,31 +1613,54 @@ GLOBAL_VAR_INIT(skip_allow_lists, FALSE)
 		faxreply = null
 	return
 
-/datum/admins/proc/setroundlength()
+
+/datum/admins/proc/SetRoundLength()
 	set category = "Server"
-	set desc = "Set the time the round-end vote will start in minutes."
 	set name = "Set Round Length"
-
-	if (GAME_STATE > RUNLEVEL_LOBBY)
-		to_chat(usr, SPAN_WARNING("You cannot change the round length after the game has started!"))
-		return
-
-	var/time = input("Set the time until the round-end vote occurs (IN MINUTES). Default is [config.vote_autotransfer_initial / 600]", "Set Round Length", 0) as null | num
-
-	if (!time || !isnum(time) || time < 0)
-		return
-
-	transfer_controller.timerbuffer = time MINUTES
-	log_and_message_admins("set the initial round-end vote time to [time] minutes after round-start.")
-
-/datum/admins/proc/toggleroundendvote()
-	set category = "Server"
-	set desc = "Toggle the continue vote on/off. Toggling off will cause round-end to occur when the next continue vote time would be."
-	set name = "Toggle Continue Vote"
-
+	set desc = "Set the maximum length of a round in minutes."
 	if (GAME_STATE > RUNLEVEL_GAME)
 		to_chat(usr, SPAN_WARNING("The game is already ending!"))
 		return
+	var/current = round(round_duration_in_ticks / 600, 0.1)
+	var/response = input(usr, "Time in minutes when the round will end, or 0 to disable.\nCurrent time: [current]m") as null | num
+	if (!isnum(response))
+		return
+	if (!response)
+		log_and_message_admins("disabled max round length.")
+		config.maximum_round_length = response
+	else if (response > current)
+		log_and_message_admins("set max round length to [response] minutes.")
+		config.maximum_round_length = response
+	else
+		to_chat(usr, SPAN_WARNING("You cannot set a max round length in the past."))
 
-	transfer_controller.do_continue_vote = !transfer_controller.do_continue_vote
-	log_and_message_admins("toggled the continue vote [transfer_controller.do_continue_vote ? "ON" : "OFF"]")
+
+/datum/admins/proc/ToggleContinueVote()
+	set category = "Server"
+	set name = "Toggle Continue Vote"
+	set desc = "Toggle the continue vote on/off. Toggling off will cause round-end to occur when the next continue vote time would be."
+	if (GAME_STATE > RUNLEVEL_GAME)
+		to_chat(usr, SPAN_WARNING("The game is already ending!"))
+		return
+	SSroundend.vote_check = !SSroundend.vote_check
+	if (SSroundend.vote_check)
+		var/interval = config.vote_autotransfer_interval
+		if (!interval)
+			to_chat(usr, SPAN_WARNING("Continue votes not configured."))
+			SSroundend.vote_check = 0
+			return
+		SSroundend.vote_check = (round_duration_in_ticks / 600) + interval
+	log_and_message_admins("toggled continue votes [SSroundend.vote_check ? "ON" : "OFF"]")
+
+
+/datum/admins/proc/togglemoderequirementchecks()
+	set category = "Server"
+	set desc = "Toggle the gamemode requirement checks on/off. Toggling off will allow any gamemode to start regardless of readied players."
+	set name = "Toggle Gamemode Requirement Checks"
+
+	if (GAME_STATE > RUNLEVEL_LOBBY)
+		to_chat(usr, SPAN_WARNING("You cannot change the gamemode requirement checks after the game has started!"))
+		return
+
+	SSticker.skip_requirement_checks = !SSticker.skip_requirement_checks
+	log_and_message_admins("toggled the gamemode requirement checks [SSticker.skip_requirement_checks ? "OFF" : "ON"]")

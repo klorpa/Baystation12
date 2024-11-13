@@ -32,7 +32,7 @@ Pipelines + Other Objects -> Pipe network
 	var/obj/machinery/atmospherics/node2
 
 	var/atmos_initalized = FALSE
-	var/build_icon = 'icons/obj/pipe-item.dmi'
+	var/build_icon = 'icons/obj/atmospherics/pipe-item.dmi'
 	var/build_icon_state = "buildpipe"
 	var/colorable = FALSE
 
@@ -61,11 +61,6 @@ Pipelines + Other Objects -> Pipe network
 		layer = PIPE_LAYER
 	else
 		reset_plane_and_layer()
-
-/obj/machinery/atmospherics/attackby(atom/A, mob/user as mob)
-	if(istype(A, /obj/item/device/scanner/gas))
-		return
-	..()
 
 /obj/machinery/atmospherics/proc/add_underlay(turf/T, obj/machinery/atmospherics/node, direction, icon_connect_type)
 	if(node)

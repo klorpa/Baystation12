@@ -17,7 +17,7 @@ GLOBAL_LIST_INIT(cable_default_colors, list(
 	var/const/MAX_COIL_AMOUNT = 30
 
 	name = "multipurpose cable coil"
-	icon = 'icons/obj/power.dmi'
+	icon = 'icons/obj/machines/power/power_cond_white.dmi'
 	icon_state = "coil"
 	randpixel = 2
 	amount = MAX_COIL_AMOUNT
@@ -87,17 +87,16 @@ GLOBAL_LIST_INIT(cable_default_colors, list(
 			SetName(initial(name))
 
 
-/obj/item/stack/cable_coil/attack(mob/living/carbon/human/target, mob/living/user, def_zone)
-	if (user.a_intent != I_HELP)
-		return ..()
+/obj/item/stack/cable_coil/use_after(mob/living/carbon/human/target, mob/living/user)
 	if (!istype(target))
-		return ..()
+		return FALSE
 	var/obj/item/organ/external/organ = target.organs_by_name[user.zone_sel.selecting]
 	if (!organ)
 		to_chat(user, SPAN_WARNING("\The [target] is missing that organ."))
 		return TRUE
 	if (!BP_IS_ROBOTIC(organ))
-		return ..()
+		to_chat(user, SPAN_WARNING("\The [target]'s [organ.name] is not robotic. \The [src] is useless."))
+		return TRUE
 	if (BP_IS_BRITTLE(organ))
 		to_chat(user, SPAN_WARNING("\The [target]'s [organ.name] is hard and brittle - \the [src] cannot repair it."))
 		return TRUE
@@ -105,9 +104,10 @@ GLOBAL_LIST_INIT(cable_default_colors, list(
 	if (!can_use(use_amount))
 		to_chat(user, SPAN_WARNING("You don't have enough of \the [src] left to repair \the [target]'s [organ.name]."))
 		return TRUE
+
 	if (organ.robo_repair(3 * use_amount, DAMAGE_BURN, "some damaged wiring", src, user))
 		use(use_amount)
-	return TRUE
+		return TRUE
 
 
 /obj/item/stack/cable_coil/transfer_to(obj/item/stack/cable_coil/coil)
@@ -124,7 +124,7 @@ GLOBAL_LIST_INIT(cable_default_colors, list(
 	// Multitool - Recolor cable coil
 	if (isMultitool(tool))
 		var/new_color = input(user, "Select a color to change to:", "\The [src] - Color Change", null) as null|anything in GLOB.cable_default_colors
-		if (!new_color || !user.use_sanity_check(src))
+		if (!new_color || !user.use_sanity_check(src, tool))
 			return TRUE
 		var/new_color_code = GLOB.cable_default_colors["[new_color]"]
 		if (get_color() == new_color_code)
@@ -324,7 +324,7 @@ GLOBAL_LIST_INIT(cable_default_colors, list(
 
 
 /obj/random/single/color/cable_coil
-	icon = 'icons/obj/power.dmi'
+	icon = 'icons/obj/machines/power/power_cond_white.dmi'
 	icon_state = "coil"
 	spawn_object = /obj/item/stack/cable_coil
 

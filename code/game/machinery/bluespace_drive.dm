@@ -24,6 +24,12 @@
 	/// The token for the drive's idle loop
 	var/drive_sound
 
+	///Whether or not the BSD Instability event is active
+	var/instability_event_active = FALSE
+
+	///Chance to teleport someone to the interlude during a pulse.
+	var/interlude_chance = 55
+
 
 /obj/machinery/bluespacedrive/Destroy()
 	QDEL_NULL(drive_sound)
@@ -34,21 +40,21 @@
 /obj/machinery/bluespacedrive/Initialize()
 	. = ..()
 	drive_sound = GLOB.sound_player.PlayLoopingSound(src, "\ref[src]", 'sound/machines/BSD_idle.ogg', 50, 7)
-	particles = new /particles/bluespace_torus
-	set_light(1, 5, 15, 10, COLOR_CYAN)
+	AddParticles(/particles/torus/bluespace)
+	set_light(15, 1, COLOR_CYAN)
 	update_icon()
 
 
 /obj/machinery/bluespacedrive/on_update_icon()
-	overlays.Cut()
+	ClearOverlays()
 	if (state & STATE_BROKEN)
 		icon_state = "bsd_core_broken"
 	else
 		icon_state = "bsd_core"
 	if (state & STATE_UNSTABLE)
-		overlays += "bsd_c_u"
+		AddOverlays("bsd_c_u")
 	else
-		overlays += "bsd_c_s"
+		AddOverlays("bsd_c_s")
 
 
 /obj/machinery/bluespacedrive/emp_act(severity)
@@ -93,15 +99,17 @@
 		verbs -= verb
 	update_icon()
 
+/obj/machinery/bluespacedrive/use_grab(obj/item/grab/grab, list/click_params)
+	to_chat(grab.assailant, SPAN_WARNING("\The [src] pulls at \the [grab.affecting] but they're too heavy."))
+	return TRUE
 
-/obj/machinery/bluespacedrive/attackby(obj/item/item, mob/user)
-	if (istype(item, /obj/item/grab))
-		var/obj/item/grab/grab = item
-		to_chat(user, SPAN_WARNING("\The [src] pulls at \the [grab.affecting] but they're too heavy."))
+/obj/machinery/bluespacedrive/use_tool(obj/item/item, mob/living/user, list/click_params)
+	if ((. = ..()))
 		return
+
 	if (issilicon(user) || !user.unEquip(item, src))
 		to_chat(user, SPAN_WARNING("\The [src] pulls at \the [item] but it's attached to you."))
-		return
+		return TRUE
 	user.visible_message(
 		SPAN_WARNING("\The [user] reaches out \a [item] to \the [src], warping briefly as it disappears in a flash of blue light, scintillating motes left behind."),
 		SPAN_DANGER("You touch \the [src] with \the [item], the field buckling around it before retracting with a crackle as it leaves small, blue scintillas on your hand as you flinch away."),
@@ -109,16 +117,16 @@
 	)
 	qdel(item)
 	if (prob(5))
-		playsound(loc, 'sound/items/eatfood.ogg', 40)		//Yum
+		playsound(loc, 'sound/items/eatfood.ogg', 40)
 	else
 		playsound(loc, 'sound/machines/BSD_interact.ogg', 40)
+	return TRUE
 
 
 /obj/machinery/bluespacedrive/examine_damage_state(mob/user)
-	if (health_dead)
+	if (health_dead())
 		to_chat(user, SPAN_DANGER("Its field is completely destroyed, the core revealed under the arcing debris."))
 		return
-
 	var/damage_percentage = get_damage_percentage()
 	switch (damage_percentage)
 		if (0)
@@ -129,18 +137,106 @@
 			to_chat(user, SPAN_WARNING("Its damaged field is twitching and crackling dangerously!"))
 		else
 			to_chat(user, SPAN_DANGER("Its unstable field is cracking and shifting dangerously, revealing the core inside briefly!"))
+	if (instability_event_active && !damage_percentage)
+		to_chat(user, SPAN_WARNING("The core seems to be pulsing and lashing out at the contaiment field, as if trying to break free."))
 
 
-/particles/bluespace_torus
-	width = 700
-	height = 700
-	count = 2700
-	spawning = 260
-	lifespan = 0.75 SECONDS
-	fade = 0.95 SECONDS
-	position = generator("circle", 16, 24, NORMAL_RAND)
-	velocity = generator("circle", -6, 6, NORMAL_RAND)
-	friction = 0.15
-	gradient = list(0, COLOR_WHITE, 0.75, COLOR_BLUE_LIGHT)
-	color_change = 0.125
-	drift = generator("vector", list(-0.2, -0.2), list(0.2, 0.2))
+/// Creates an expanding bluespace pulse on all z-levels connected to the drive
+/obj/machinery/bluespacedrive/proc/do_pulse()
+	playsound(src, 'sound/effects/EMPulse.ogg', 100, TRUE)
+	var/datum/bubble_effect/bluespace_pulse/parent
+	for (var/level in GetConnectedZlevels(z))
+		parent = new (x, y, level, 1, 1, parent, interlude_teleport_chance = interlude_chance)
+
+
+/// Creates a blinding flash of light that will blind and deafen those in range, and change turfs to bluespace
+/obj/machinery/bluespacedrive/proc/create_flash(change_turf, range)
+	playsound(src, "sound/effects/supermatter.ogg", 100, TRUE)
+	var/list/victims = list()
+	var/list/objs = list()
+	get_mobs_and_objs_in_view_fast(loc, range, victims, objs)
+	for (var/mob/living/living in victims)
+		if (living.client)
+			to_chat(living, SPAN_DANGER(FONT_LARGE("The Drive's field cracks open briefly, emitting a blinding flash of blue light and a deafenening screech!")))
+		living.flash_eyes(FLASH_PROTECTION_MAJOR)
+		living.Stun(3)
+		living.mod_confused(15)
+		living.ear_damage += rand(0, 5)
+		living.ear_deaf = max(living.ear_deaf, 15)
+	if (!change_turf)
+		return
+	for (var/turf/simulated/floor/floor in range(range, src))
+		if (prob(25))
+			continue
+		floor.ChangeTurf(/turf/simulated/floor/bluespace)
+
+
+/datum/bubble_effect/bluespace_pulse
+	///List of mobs that can be swapped around when the pulse hits
+	var/list/mob/living/mobs_to_switch = list()
+	var/interlude_teleport_chance = 0
+
+/datum/bubble_effect/bluespace_pulse/New(interlude_teleport_chance = 50)
+	..()
+	src.interlude_teleport_chance = interlude_teleport_chance
+	START_PROCESSING(SSfastprocess, src)
+	var/list/zlevels = GetConnectedZlevels(z)
+	for (var/mob/living/L as anything in GLOB.alive_mobs)
+		if (!(L.z in zlevels))
+			continue
+		if (istype(L, /mob/living/exosuit))
+			continue
+		mobs_to_switch += L
+
+
+/datum/bubble_effect/bluespace_pulse/Destroy()
+	STOP_PROCESSING(SSfastprocess, src)
+	return ..()
+
+
+/datum/bubble_effect/bluespace_pulse/Process()
+	if (radius > 50)
+		qdel(src)
+		return PROCESS_KILL
+	Tick()
+
+
+/datum/bubble_effect/bluespace_pulse/TurfEffect(turf/turf)
+	if (TICK_CHECK)
+		return TRUE
+	if (radius <= 20)
+		new /obj/temporary (turf, 0.2 SECONDS, 'icons/effects/effects.dmi', "cyan_sparkles")
+	var/obj/machinery/light/light = locate() in turf
+	if (light && prob(20))
+		light.broken()
+	var/mob/living/being = locate() in turf
+	if (being && prob(50))
+		//swap places with another mob
+		var/list/zlevels = GetConnectedZlevels(being.z)
+		for (var/mob/living/mob as anything in mobs_to_switch)
+			if (!(mob.z in zlevels))
+				continue
+
+			if (GLOB.using_map.use_bluespace_interlude && prob(interlude_teleport_chance))
+				if (istype(mob, /mob/living/simple_animal) && prob(80))
+					return
+				var/turf/T = pick_area_turf_in_connected_z_levels(
+					list(/proc/is_not_space_area),
+					list(/proc/not_turf_contains_dense_objects, /proc/IsTurfAtmosSafe),
+					zlevels[1])
+				if (!T)
+					return
+				GLOB.using_map.do_interlude_teleport(mob, T, Frand(1, 2.5) MINUTES)
+				return
+			if (mob != being)
+				var/source_position = being.loc
+				var/other_position = mob.loc
+				do_teleport(mob, source_position)
+				do_teleport(being, other_position)
+				mobs_to_switch -= mob
+				mobs_to_switch -= being
+				to_chat(mob, SPAN_DANGER("A wave of energy washes over you, and you find yourself somewhere else!"))
+				to_chat(being, SPAN_DANGER("A wave of energy washes over you, and you find yourself somewhere else!"))
+				return
+	else
+		to_chat(being, SPAN_WARNING("A wave of energy washes over you, giving you a strange and uneasy feeling..."))

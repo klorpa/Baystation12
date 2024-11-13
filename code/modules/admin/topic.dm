@@ -1361,7 +1361,7 @@
 	// call dibs on IC messages (prays, emergency comms, faxes)
 	else if(href_list["take_ic"])
 
-		var/mob/M = locate(href_list["take_question"])
+		var/mob/M = locate(href_list["take_ic"])
 		if(ismob(M))
 			var/take_msg = SPAN_NOTICE("<b>[key_name(usr.client)]</b> is attending to <b>[key_name(M)]'s</b> message.")
 			for(var/client/X as anything in GLOB.admins)
@@ -1486,8 +1486,8 @@
 		log_admin("[key_name(M)] has been hit by Bluespace Artillery fired by [src.owner]")
 		message_admins("[key_name(M)] has been hit by Bluespace Artillery fired by [src.owner]")
 
-		var/obj/effect/stop/S
-		S = new /obj/effect/stop(M.loc)
+		var/obj/stop/S
+		S = new /obj/stop(M.loc)
 		S.victim = M
 		spawn(20)
 			qdel(S)
@@ -1591,6 +1591,7 @@
 		P.admindatum = src
 		P.origin = replyorigin
 
+		P.department = fax.department
 		P.destinations = get_fax_machines_by_department(fax.department)
 		P.sender = sender
 
@@ -1691,7 +1692,7 @@
 				if(!check_rights(R_FUN,0))
 					removed_paths += dirty_path
 					continue
-			else if(ispath(path, /obj/effect/bhole))
+			else if(ispath(path, /obj/bhole))
 				if(!check_rights(R_FUN,0))
 					removed_paths += dirty_path
 					continue
@@ -2132,6 +2133,39 @@
 			var/ghost = M.ghostize(FALSE)
 			if (ghost)
 				show_player_panel(M)
+			return
+
+	if (href_list["equip_loadout"])
+		var/mob/living/carbon/human/M = locate(href_list["equip_loadout"])
+		if (!ishuman(M))
+			return
+
+		var/response = alert("This will delete the player's current gear and spawn their loadout instead, are you sure?",,"Yes","No") == "Yes"
+
+		if (response)
+			var/datum/job/job = SSjobs.get_by_title(M.job)
+			var/list/spawn_in_storage
+
+			var/alt_title = null
+			if(M.mind)
+				alt_title = M.mind.role_alt_title
+
+			M.delete_inventory(TRUE)
+			job.equip(M, M.mind ? M.mind.role_alt_title : "", M.char_branch, M.char_rank)
+			spawn_in_storage = SSjobs.equip_custom_loadout(M, job)
+
+			var/mob/other_mob = job.handle_variant_join(M, alt_title)
+			if(other_mob)
+				job.post_equip_rank(other_mob, alt_title || rank)
+				return other_mob
+
+			if (spawn_in_storage)
+				for(var/datum/gear/G in spawn_in_storage)
+					G.spawn_in_storage_or_drop(M, M.client.prefs.Gear()[G.display_name])
+
+			log_and_message_admins("has equipped [M.ckey]/([M]) with their spawn loadout.")
+
+			show_player_panel(M)
 			return
 
 

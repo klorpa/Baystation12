@@ -15,8 +15,11 @@
 	var/list/datum/stack_recipe/recipes
 	var/singular_name
 	var/plural_name
+	/// String. The stack's base icon state. Used when the amount is 2 or lower.
 	var/base_state
+	/// String. The stack's icon state when amount is greater than 2.
 	var/plural_icon_state
+	/// String. The stack's icon state at the maximum amount.
 	var/max_icon_state
 	var/amount = 1
 	var/max_amount //also see stack recipes initialization, param "max_res_amount" must be equal to this max_amount
@@ -327,19 +330,18 @@
 		..()
 	return
 
-/obj/item/stack/attackby(obj/item/W as obj, mob/user as mob)
-	if (istype(W, /obj/item/stack))
-		var/obj/item/stack/S = W
-		src.transfer_to(S)
+/obj/item/stack/use_tool(obj/item/tool, mob/living/user, list/click_params)
+	if (istype(tool, /obj/item/stack))
+		var/obj/item/stack/new_stack = tool
+		transfer_to(new_stack)
 
 		spawn(0) //give the stacks a chance to delete themselves if necessary
-			if (S && usr.machine==S)
-				S.interact(usr)
-			if (src && usr.machine==src)
-				src.interact(usr)
-	else
-		return ..()
-
+			if (new_stack && user.machine == new_stack)
+				new_stack.interact(usr)
+			if (src && user.machine == src)
+				interact(user)
+		return TRUE
+	return ..()
 
 /**
  * Returns a string forming a basic name of the stack. By default, this is `name`.

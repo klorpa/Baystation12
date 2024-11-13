@@ -56,6 +56,15 @@
 				else
 					to_chat(Player, SPAN_COLOR("red", "<b>You did not survive the events on [station_name()]...</b>"))
 
+
+/datum/map/torch/ship_jump()
+	for(var/obj/overmap/visitable/ship/torch/torch)
+		new /obj/ftl (get_turf(torch))
+		qdel(torch)
+		animate(torch, time = 0.5 SECONDS)
+		animate(alpha = 0, time = 0.5 SECONDS)
+
+
 /datum/map/torch/roundend_summary(list/data)
 	var/desc
 	var/survivors = data["surviving_total"]
@@ -73,3 +82,16 @@
 		desc += "There were <b>no survivors</b>, <b>[offship_players] off-ship players</b>, (<b>[ghosts] ghosts</b>)."
 
 	return desc
+
+/datum/map/torch/do_interlude_teleport(atom/movable/target, atom/destination, duration = 30 SECONDS, precision, type)
+	var/turf/T = pick_area_turf(/area/bluespace_interlude/platform, list(/proc/not_turf_contains_dense_objects, /proc/IsTurfAtmosSafe))
+
+	if (!T && destination)
+		do_teleport(target, destination)
+		return
+
+	if (isliving(target))
+		to_chat(target, FONT_LARGE(SPAN_WARNING("Your vision goes blurry and nausea strikes your stomach. Where are you...?")))
+	do_teleport(target, T, precision, type)
+	if (destination)
+		addtimer(new Callback(GLOBAL_PROC, /proc/do_teleport, target, destination), duration)

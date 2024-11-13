@@ -9,10 +9,10 @@
 	ADD_TRANSFORMATION_MOVEMENT_HANDLER(src)
 	stunned = 1
 	icon = null
-	set_invisibility(101)
+	set_invisibility(INVISIBILITY_ABSTRACT)
 	for(var/t in organs)
 		qdel(t)
-	var/atom/movable/overlay/animation = new /atom/movable/overlay(src)
+	var/atom/movable/fake_overlay/animation = new /atom/movable/fake_overlay(src)
 	animation.icon_state = "blank"
 	animation.icon = 'icons/mob/mob.dmi'
 	flick("h2monkey", animation)
@@ -58,7 +58,7 @@
 		drop_from_inventory(W)
 	ADD_TRANSFORMATION_MOVEMENT_HANDLER(src)
 	icon = null
-	set_invisibility(101)
+	set_invisibility(INVISIBILITY_ABSTRACT)
 	return ..()
 
 /mob/proc/AIize(move=1)
@@ -79,21 +79,21 @@
 
 	if(move)
 		var/obj/loc_landmark
-		for(var/obj/effect/landmark/start/sloc in landmarks_list)
+		for(var/obj/landmark/start/sloc in landmarks_list)
 			if (sloc.name != "AI")
 				continue
 			if (locate(/mob/living) in sloc.loc)
 				continue
 			loc_landmark = sloc
 		if (!loc_landmark)
-			for(var/obj/effect/landmark/tripai in landmarks_list)
+			for(var/obj/landmark/tripai in landmarks_list)
 				if (tripai.name == "tripai")
 					if((locate(/mob/living) in tripai.loc) || (locate(/obj/structure/AIcore) in tripai.loc))
 						continue
 					loc_landmark = tripai
 		if (!loc_landmark)
 			to_chat(O, "Oh god sorry we can't find an unoccupied AI spawn location, so we're spawning you on top of someone.")
-			for(var/obj/effect/landmark/start/sloc in landmarks_list)
+			for(var/obj/landmark/start/sloc in landmarks_list)
 				if (sloc.name == "AI")
 					loc_landmark = sloc
 		if (!loc_landmark)
@@ -119,7 +119,7 @@
 	regenerate_icons()
 	ADD_TRANSFORMATION_MOVEMENT_HANDLER(src)
 	icon = null
-	set_invisibility(101)
+	set_invisibility(INVISIBILITY_ABSTRACT)
 	for(var/t in organs)
 		qdel(t)
 
@@ -160,7 +160,7 @@
 	regenerate_icons()
 	ADD_TRANSFORMATION_MOVEMENT_HANDLER(src)
 	icon = null
-	set_invisibility(101)
+	set_invisibility(INVISIBILITY_ABSTRACT)
 	for(var/t in organs)
 		qdel(t)
 
@@ -193,7 +193,7 @@
 	regenerate_icons()
 	ADD_TRANSFORMATION_MOVEMENT_HANDLER(src)
 	icon = null
-	set_invisibility(101)
+	set_invisibility(INVISIBILITY_ABSTRACT)
 	for(var/t in organs)	//this really should not be necessary
 		qdel(t)
 
@@ -222,7 +222,7 @@
 	regenerate_icons()
 	ADD_TRANSFORMATION_MOVEMENT_HANDLER(src)
 	icon = null
-	set_invisibility(101)
+	set_invisibility(INVISIBILITY_ABSTRACT)
 
 	for(var/t in organs)
 		qdel(t)

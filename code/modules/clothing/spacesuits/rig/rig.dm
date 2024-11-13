@@ -46,13 +46,13 @@
 
 	// Keeps track of what this rig should spawn with.
 	var/suit_type = "hardsuit"
-	var/list/initial_modules
-	var/chest_type = /obj/item/clothing/suit/space/rig
-	var/helm_type =  /obj/item/clothing/head/helmet/space/rig
-	var/boot_type =  /obj/item/clothing/shoes/magboots/rig
-	var/glove_type = /obj/item/clothing/gloves/rig
-	var/cell_type =  /obj/item/cell/high
-	var/air_type =   /obj/item/tank/oxygen
+	var/list/obj/item/rig_module/initial_modules
+	var/obj/item/clothing/suit/chest_type = /obj/item/clothing/suit/space/rig
+	var/obj/item/clothing/head/helm_type =  /obj/item/clothing/head/helmet/space/rig
+	var/obj/item/clothing/shoes/boot_type =  /obj/item/clothing/shoes/magboots/rig
+	var/obj/item/clothing/gloves/glove_type = /obj/item/clothing/gloves/rig
+	var/obj/item/cell/cell_type =  /obj/item/cell/high
+	var/obj/item/tank/air_type =   /obj/item/tank/oxygen
 
 	//Component/device holders.
 	var/obj/item/tank/air_supply                       // Air tank, if any.
@@ -98,7 +98,7 @@
 
 	// Wiring! How exciting.
 	var/datum/wires/rig/wires
-	var/datum/effect/effect/system/spark_spread/spark_system
+	var/datum/effect/spark_spread/spark_system
 
 	var/banned_modules = list()
 
@@ -610,7 +610,7 @@
 /obj/item/rig/on_update_icon(update_mob_icon)
 
 	//TODO: Maybe consider a cache for this (use mob_icon as blank canvas, use suit icon overlay).
-	overlays.Cut()
+	ClearOverlays()
 	if(!mob_icon || update_mob_icon)
 		var/species_icon = 'icons/mob/onmob/onmob_rig_back.dmi'
 		// Since setting mob_icon will override the species checks in
@@ -622,7 +622,8 @@
 	if(equipment_overlay_icon && LAZYLEN(installed_modules))
 		for(var/obj/item/rig_module/module in installed_modules)
 			if(module.suit_overlay)
-				chest.overlays += image("icon" = equipment_overlay_icon, "icon_state" = "[module.suit_overlay]", "dir" = SOUTH)
+				var/overlay = image("icon" = equipment_overlay_icon, "icon_state" = "[module.suit_overlay]", "dir" = SOUTH)
+				chest.AddOverlays(overlay)
 
 	if(wearer)
 		wearer.update_inv_shoes()
@@ -642,7 +643,8 @@
 	if(equipment_overlay_icon && LAZYLEN(installed_modules))
 		for(var/obj/item/rig_module/module in installed_modules)
 			if(module.suit_overlay)
-				ret.overlays += image("icon" = equipment_overlay_icon, "icon_state" = "[module.suit_overlay]")
+				var/overlay = image("icon" = equipment_overlay_icon, "icon_state" = "[module.suit_overlay]")
+				ret.AddOverlays(overlay)
 	return ret
 
 /obj/item/rig/get_req_access()

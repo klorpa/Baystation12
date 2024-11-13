@@ -18,7 +18,7 @@
 	name = "[fish_type] fillet"
 
 
-/obj/item/reagent_containers/food/snacks/fish/attackby(obj/item/item, mob/living/user)
+/obj/item/reagent_containers/food/snacks/fish/use_tool(obj/item/item, mob/living/user, list/click_params)
 	if (istype(item, /obj/item/reagent_containers/syringe) || !item.sharp)
 		return ..()
 	var/turf/turf = get_turf(src)
@@ -27,7 +27,7 @@
 		return TRUE
 	var/list/toxins = reagents.get_reagent_amount_list(/datum/reagent/toxin)
 	for (var/toxin_type in toxins)
-		if (user.skill_fail_prob(SKILL_COOKING, 90, SKILL_PROF))
+		if (user.skill_fail_prob(SKILL_COOKING, 90, SKILL_MASTER))
 			continue
 		reagents.remove_reagent(toxin_type, toxins[toxin_type])
 	var/transfer = floor(reagents.total_volume * 0.3)
@@ -181,7 +181,7 @@
 /obj/random/fish
 	name = "random fish fillet"
 	desc = "This is a random fish fillet."
-	icon = 'icons/obj/food.dmi'
+	icon = 'icons/obj/food/food.dmi'
 	icon_state = "fishfillet"
 	color = "#ff4040"
 

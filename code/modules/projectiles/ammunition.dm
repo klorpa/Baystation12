@@ -1,7 +1,7 @@
 /obj/item/ammo_casing
 	name = "bullet casing"
 	desc = "A bullet casing."
-	icon = 'icons/obj/ammo.dmi'
+	icon = 'icons/obj/weapons/ammo.dmi'
 	icon_state = "pistolcasing"
 	randpixel = 10
 	obj_flags = OBJ_FLAG_CONDUCTIBLE
@@ -16,6 +16,7 @@
 	var/spent_icon = "pistolcasing-spent"
 	var/fall_sounds = list('sound/weapons/guns/casingfall1.ogg','sound/weapons/guns/casingfall2.ogg','sound/weapons/guns/casingfall3.ogg')
 
+
 /obj/item/ammo_casing/Initialize()
 	if(ispath(projectile_type))
 		BB = new projectile_type(src)
@@ -23,6 +24,7 @@
 		pixel_x = rand(-randpixel, randpixel)
 		pixel_y = rand(-randpixel, randpixel)
 	. = ..()
+
 
 //removes the projectile from the ammo casing
 /obj/item/ammo_casing/proc/expend()
@@ -35,6 +37,7 @@
 		leave_residue()
 
 	update_icon()
+
 
 /obj/item/ammo_casing/proc/leave_residue()
 	var/mob/living/carbon/human/H = get_holder_of_type(src, /mob/living/carbon/human)
@@ -54,15 +57,17 @@
 	if(prob(30))
 		put_residue_on(get_turf(src))
 
+
 /obj/item/ammo_casing/proc/put_residue_on(atom/A)
 	if(A)
 		LAZYDISTINCTADD(A.gunshot_residue, caliber)
 
-/obj/item/ammo_casing/attackby(obj/item/W as obj, mob/user as mob)
+
+/obj/item/ammo_casing/use_tool(obj/item/W, mob/living/user, list/click_params)
 	if(isScrewdriver(W))
 		if(!BB)
-			to_chat(user, SPAN_NOTICE("There is no bullet in the casing to inscribe anything into."))
-			return
+			to_chat(user, SPAN_WARNING("There is no bullet in the casing to inscribe anything into."))
+			return TRUE
 
 		var/tmp_label = ""
 		var/label_text = sanitizeSafe(input(user, "Inscribe some text into \the [initial(BB.name)]","Inscription",tmp_label), MAX_NAME_LEN)
@@ -74,11 +79,15 @@
 		else
 			to_chat(user, SPAN_NOTICE("You inscribe \"[label_text]\" into \the [initial(BB.name)]."))
 			BB.SetName("[initial(BB.name)] (\"[label_text]\")")
-	else ..()
+		return TRUE
+
+	return ..()
+
 
 /obj/item/ammo_casing/on_update_icon()
 	if(spent_icon && !BB)
 		icon_state = spent_icon
+
 
 /obj/item/ammo_casing/examine(mob/user)
 	. = ..()
@@ -87,12 +96,13 @@
 	if (!BB)
 		to_chat(user, "This one is spent.")
 
+
 //An item that holds casings and can be used to put them inside guns
 /obj/item/ammo_magazine
 	name = "magazine"
 	desc = "A magazine for some kind of gun."
 	icon_state = "357"
-	icon = 'icons/obj/ammo.dmi'
+	icon = 'icons/obj/weapons/ammo.dmi'
 	obj_flags = OBJ_FLAG_CONDUCTIBLE
 	slot_flags = SLOT_BELT
 	item_state = "syringe_kit"
@@ -116,8 +126,10 @@
 	var/list/icon_keys = list()		//keys
 	var/list/ammo_states = list()	//values
 
+
 /obj/item/ammo_magazine/box
 	w_class = ITEM_SIZE_NORMAL
+
 
 /obj/item/ammo_magazine/Initialize()
 	. = ..()
@@ -136,20 +148,24 @@
 		SetName("[name] ([english_list(labels, and_text = ", ")])")
 	update_icon()
 
-/obj/item/ammo_magazine/attackby(obj/item/W as obj, mob/user as mob)
+
+/obj/item/ammo_magazine/use_tool(obj/item/W, mob/living/user, list/click_params)
 	if(istype(W, /obj/item/ammo_casing))
 		var/obj/item/ammo_casing/C = W
 		if(C.caliber != caliber)
-			to_chat(user, SPAN_WARNING("[C] does not fit into [src]."))
-			return
+			to_chat(user, SPAN_WARNING("\The [C] does not fit into \the [src]."))
+			return TRUE
 		if(length(stored_ammo) >= max_ammo)
-			to_chat(user, SPAN_WARNING("[src] is full!"))
-			return
+			to_chat(user, SPAN_WARNING("\The [src] is full!"))
+			return TRUE
 		if(!user.unEquip(C, src))
-			return
+			FEEDBACK_UNEQUIP_FAILURE(user, C)
+			return TRUE
 		stored_ammo.Add(C)
 		update_icon()
-	else ..()
+		return TRUE
+	return ..()
+
 
 /obj/item/ammo_magazine/attack_self(mob/user)
 	if(!length(stored_ammo))
@@ -177,7 +193,26 @@
 		..()
 		return
 
+
 /obj/item/ammo_magazine/on_update_icon()
+	ClearOverlays()
+
+	if (ammo_type == /obj/item/ammo_casing/pistol/rubber)
+		AddOverlays(image(icon, "[initial(icon_state)]_r"))
+	else if (ammo_type == /obj/item/ammo_casing/pistol/practice)
+		AddOverlays(image(icon, "[initial(icon_state)]_p"))
+
+	else if (ammo_type == /obj/item/ammo_casing/pistol/small/rubber)
+		AddOverlays(image(icon, "[initial(icon_state)]_r"))
+	else if (ammo_type == /obj/item/ammo_casing/pistol/small/practice)
+		AddOverlays(image(icon, "[initial(icon_state)]_p"))
+
+	else if (ammo_type == /obj/item/ammo_casing/rifle/military/practice)
+		AddOverlays(image(icon, "[initial(icon_state)]_p"))
+
+	else
+		icon_state = initial(icon_state)
+
 	if(multiple_sprites)
 		//find the lowest key greater than or equal to length(stored_ammo)
 		var/new_state = null
@@ -188,13 +223,16 @@
 				break
 		icon_state = (new_state)? new_state : initial(icon_state)
 
+
 /obj/item/ammo_magazine/examine(mob/user)
 	. = ..()
 	to_chat(user, "There [(length(stored_ammo) == 1)? "is" : "are"] [length(stored_ammo)] round\s left!")
 
+
 //magazine icon state caching
 var/global/list/magazine_icondata_keys = list()
 var/global/list/magazine_icondata_states = list()
+
 
 /proc/initialize_magazine_icondata(obj/item/ammo_magazine/M)
 	var/typestr = "[M.type]"
@@ -203,6 +241,7 @@ var/global/list/magazine_icondata_states = list()
 
 	M.icon_keys = magazine_icondata_keys[typestr]
 	M.ammo_states = magazine_icondata_states[typestr]
+
 
 /proc/magazine_icondata_cache_add(obj/item/ammo_magazine/M)
 	var/list/icon_keys = list()
@@ -213,6 +252,7 @@ var/global/list/magazine_icondata_states = list()
 		if(ammo_state in states)
 			icon_keys += i
 			ammo_states += ammo_state
+
 
 	magazine_icondata_keys["[M.type]"] = icon_keys
 	magazine_icondata_states["[M.type]"] = ammo_states

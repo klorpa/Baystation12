@@ -8,7 +8,7 @@ FLOOR SAFES
 /obj/structure/safe
 	name = "safe"
 	desc = "A huge chunk of metal with a dial embedded in it. Fine print on the dial reads \"Scarborough Arms - 2 tumbler safe, guaranteed thermite resistant, explosion resistant, and assistant resistant.\"."
-	icon = 'icons/obj/structures.dmi'
+	icon = 'icons/obj/structures/structures.dmi'
 	icon_state = "safe"
 	anchored = TRUE
 	density = TRUE
@@ -183,7 +183,7 @@ FLOOR SAFES
 	update_icon()
 
 /obj/structure/safe/floor/hide(intact)
-	set_invisibility(intact ? 101 : 0)
+	set_invisibility(intact ? INVISIBILITY_ABSTRACT : 0)
 
 /obj/structure/safe/floor/hides_under_flooring()
 	return 1

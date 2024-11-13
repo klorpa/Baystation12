@@ -71,7 +71,7 @@ var/global/list/adminhelp_ignored_words = list("unknown","the","a","an","of","mo
 		to_chat(src, SPAN_COLOR("red", "Error: Admin-PM: You cannot send adminhelps (Muted)."))
 		return
 
-	adminhelped = 1 //Determines if they get the message to reply by clicking the name.
+	adminhelped = TRUE
 
 
 	//clean the input msg
@@ -107,6 +107,7 @@ var/global/list/adminhelp_ignored_words = list("unknown","the","a","an","of","mo
 			to_chat(src, SPAN_WARNING("Error: Private-Message: Client not found. They may have lost connection, so please be patient!"))
 		return
 
+	ticket.last_message_time = world.time
 	ticket.msgs += new /datum/ticket_msg(src.ckey, null, original_msg)
 	update_ticket_panels()
 
@@ -123,7 +124,7 @@ var/global/list/adminhelp_ignored_words = list("unknown","the","a","an","of","mo
 			if(X.is_afk())
 				admin_number_afk++
 			if(X.get_preference_value(/datum/client_preference/staff/play_adminhelp_ping) == GLOB.PREF_HEAR)
-				sound_to(X, 'sound/ui/pm-notify.ogg')
+				sound_to(X, sound('sound/ui/pm-notify.ogg', volume = 40))
 			to_chat(X, msg)
 	//show it to the person adminhelping too
 	to_chat(src, SPAN_CLASS("staff_pm", "PM to-<b>Staff</b> (<a href='?src=\ref[usr];close_ticket=\ref[ticket]'>CLOSE</a>): [original_msg]"))

@@ -1,7 +1,9 @@
-/* *
-* Managed Globals
-*/
-
+/**
+ * Managed Globals datum. Any defined global vars can be accessed via `GLOB.varname`.
+ *
+ * New globals can be defined on the global scope (Outside of any class definitions) via the various `GLOBAL_*()`
+ * defines listed at the end of `code\__datastructures\globals.dm`.
+ */
 var/global/datum/globals/GLOB
 
 
@@ -9,10 +11,10 @@ var/global/datum/globals/GLOB
 	var/static/atom/movable/clickable_stat/__stat_line
 
 
-/datum/globals/Destroy(force)
+/datum/globals/Destroy()
 	if (!GLOB || GLOB == src)
 		GLOB = src
-		return 1 //QDEL_HINT_LETMELIVE
+		return QDEL_HINT_LETMELIVE
 	return ..()
 
 
@@ -62,23 +64,30 @@ var/global/datum/globals/GLOB
 	##X = V; \
 }
 
+/// Initializes the global constant `GLOB.[X]` with the value `[V]` as a managed global.
 #define GLOBAL_VAR_CONST(X, V) /datum/globals/var/const/##X = V;
 
+/// Initializes the global variable `GLOB.[X]` with no value (`null`) as a managed global.
 #define GLOBAL_VAR(X) /datum/globals/var/static/##X;
 
+/// Initializes the global variable `GLOB.[X]` with the value `[V]` as a managed global.
 #define GLOBAL_VAR_INIT(X, V) GLOBAL_VAR(X) GLOBAL_INIT(X, V)
 
+/// Initializes the global variable `GLOB.[X]` as an instance of `/static[P]` with no value (`null`) as a managed global.
 #define GLOBAL_DATUM(X, P) /datum/globals/var/static##P/##X;
 
+/// Initializes the global variable `GLOB.[X]` as an instance of `/static[P]` with the value `[V]` as a managed global.
 #define GLOBAL_DATUM_INIT(X, P, V) GLOBAL_DATUM(X, P) GLOBAL_INIT(X, V)
 
+/// Initializes the global variable `GLOB[X]` as a list with no value (`null`) as a managed global.
 #define GLOBAL_LIST(X) /datum/globals/var/static/list/##X;
 
+/// Initializes the global variable `GLOB[X]` as a list with value `[V]` as a managed global.
 #define GLOBAL_LIST_INIT(X, V) GLOBAL_LIST(X) GLOBAL_INIT(X, V)
 
+/// Initializes the global variable `GLOB[X]` as an empty list (`list()`) as a managed global.
 #define GLOBAL_LIST_EMPTY(X) GLOBAL_LIST_INIT(X, list())
 
-#if !defined(TESTING)
 /// Prevents the GLOB member from being shown in View Variables.
 #define GLOBAL_PROTECT(X) \
 /datum/globals/proc/GI_P_##X() { \
@@ -90,6 +99,3 @@ var/global/datum/globals/GLOB
 	done = TRUE; \
 	VV_hidden(#X); \
 }
-#else
-#define GLOBAL_PROTECT(X)
-#endif

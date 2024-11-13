@@ -2,6 +2,8 @@
 
 /datum/sound_player/synthesizer
 	volume = 40
+	range = 10
+	falloff = 1
 
 /obj/structure/synthesized_instrument/synthesizer
 	name = "The Synthesizer 3.0"
@@ -30,4 +32,4 @@
 	name = "space minimoog"
 	desc = "This is a minimoog, like a space piano, but more spacey!"
 	icon_state = "minimoog"
-	obj_flags = OBJ_FLAG_ROTATABLE
+	obj_flags = OBJ_FLAG_ROTATABLE | OBJ_FLAG_ANCHORABLE

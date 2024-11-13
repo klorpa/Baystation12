@@ -87,7 +87,7 @@
 
 /obj/machinery/computer/arcade/orion_trail/interact(mob/user)
 	var/dat = ""
-	if(event == null)
+	if(isnull(event))
 		newgame()
 	user.set_machine(src)
 	switch(view)
@@ -187,7 +187,7 @@
 				event_desc = "You and your crew were killed on the way to Orion, your ship left abandoned for scavengers to find."
 				next_event = ORION_TRAIL_GAMEOVER
 			if(port == 9)
-				win()
+				win(user)
 				return TOPIC_REFRESH
 			var/travel = min(rand(1000,10000),distance)
 			if(href_list["fix"])
@@ -201,7 +201,7 @@
 
 			if(!href_list["food"])
 				var/temp = supplies["5"] - travel/1000 * (href_list["slow"] ? 2 : 1)
-				if(temp < 0 && (distance-travel != 0) && next_event == null) //uh oh. Better start a fuel event.
+				if(temp < 0 && (distance-travel != 0) && isnull(next_event)) //uh oh. Better start a fuel event.
 					next_event = ORION_TRAIL_STUCK
 					travel -= (temp*-1)*1000/(href_list["slow"] ? 2 : 1)
 					temp = 0
@@ -219,7 +219,7 @@
 				event_desc = "You and your crew starved to death, never to reach Orion."
 				supplies["4"] = 0
 
-			if(distance == 0 && next_event == null) //POOORT!
+			if(distance == 0 && isnull(next_event)) //POOORT!
 				port++
 				event = ORION_TRAIL_SPACEPORT
 				distance = stop_distance[port]
@@ -294,7 +294,7 @@
 	if(!specific)
 		specific = rand(1,length(settlers))
 
-	event_info += "The crewmember, [settlers[specific]] [desc == null ? "has died!":"[desc]"]<BR>"
+	event_info += "The crewmember, [settlers[specific]] [isnull(desc) ? "has died!":"[desc]"]<BR>"
 	settlers -= settlers[specific]
 	if(num_traitors > 0 && prob(100/max(1,length(settlers)-1)))
 		num_traitors--
@@ -465,7 +465,7 @@
 	src.visible_message("\The [src] plays a triumphant tune, stating 'CONGRATULATIONS, YOU HAVE MADE IT TO ORION.'")
 	if(emagged)
 		new /obj/item/orion_ship(src.loc)
-		log_and_message_admins("made it to Orion on an emagged machine and got an explosive toy ship.")
+		log_and_message_admins("made it to Orion on an emagged machine and got an explosive toy ship.", user)
 	else
 		prizevend()
 	event = null

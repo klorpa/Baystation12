@@ -44,6 +44,7 @@ var/global/list/admin_verbs_admin = list(
 	/client/proc/cmd_admin_visible_narrate,
 	/client/proc/cmd_admin_audible_narrate,
 	/client/proc/cmd_admin_local_narrate,
+	/client/proc/cmd_admin_legion_narrate,
 	/client/proc/cmd_admin_world_narrate,	//sends text to all players with no padding,
 	/client/proc/cmd_admin_create_centcom_report,
 	/client/proc/check_ai_laws,			//shows AI and borg laws,
@@ -97,8 +98,10 @@ var/global/list/admin_verbs_admin = list(
 	/datum/admins/proc/sendFax,
 	/client/proc/check_fax_history,
 	/client/proc/cmd_admin_notarget,
-	/datum/admins/proc/setroundlength,
-	/datum/admins/proc/toggleroundendvote
+	/datum/admins/proc/SetRoundLength,
+	/datum/admins/proc/ToggleContinueVote,
+	/datum/admins/proc/togglemoderequirementchecks,
+	/client/proc/delete_crew_record
 )
 var/global/list/admin_verbs_ban = list(
 	/client/proc/unban_panel,
@@ -177,7 +180,6 @@ var/global/list/admin_verbs_debug = list(
 	/client/proc/apply_random_map,
 	/client/proc/overlay_random_map,
 	/client/proc/delete_random_map,
-	/datum/admins/proc/submerge_map,
 	/datum/admins/proc/map_template_load,
 	/datum/admins/proc/map_template_load_new_z,
 	/datum/admins/proc/map_template_upload,
@@ -242,6 +244,7 @@ var/global/list/admin_verbs_hideable = list(
 	/client/proc/cmd_admin_visible_narrate,
 	/client/proc/cmd_admin_audible_narrate,
 	/client/proc/cmd_admin_local_narrate,
+	/client/proc/cmd_admin_legion_narrate,
 	/client/proc/cmd_admin_world_narrate,
 	/client/proc/play_local_sound,
 	/client/proc/play_sound,
@@ -653,7 +656,7 @@ var/global/list/admin_verbs_mod = list(
 	if(!H) return
 
 	log_and_message_admins("is altering the appearance of [H].")
-	H.change_appearance(APPEARANCE_ALL, FALSE, usr, state = GLOB.admin_state)
+	H.change_appearance(APPEARANCE_ALL, usr, state = GLOB.admin_state)
 
 /client/proc/change_human_appearance_self()
 	set name = "Change Mob Appearance - Self"
@@ -671,11 +674,11 @@ var/global/list/admin_verbs_mod = list(
 
 	switch(alert("Do you wish for [H] to be allowed to select non-whitelisted races?","Alter Mob Appearance","Yes","No","Cancel"))
 		if("Yes")
-			log_and_message_admins("has allowed [H] to change \his appearance, including races that requires whitelisting")
-			H.change_appearance(APPEARANCE_COMMON, FALSE)
+			log_and_message_admins("has allowed [H] to change their appearance, ignoring allow lists.")
+			H.change_appearance(APPEARANCE_COMMON | APPEARANCE_SKIP_ALLOW_LIST_CHECK)
 		if("No")
-			log_and_message_admins("has allowed [H] to change \his appearance, excluding races that requires whitelisting.")
-			H.change_appearance(APPEARANCE_COMMON, TRUE)
+			log_and_message_admins("has allowed [H] to change their appearance, respecting allow lists.")
+			H.change_appearance(APPEARANCE_COMMON)
 
 /client/proc/change_security_level()
 	set name = "Set security level"
@@ -901,3 +904,28 @@ var/global/list/admin_verbs_mod = list(
 	if(!S) return
 	T.add_spell(new S)
 	log_and_message_admins("gave [key_name(T)] the spell [S].")
+
+/client/proc/delete_crew_record()
+	set category = "Admin"
+	set name = "Delete Crew Record"
+	set desc = "Delete a crew record from the global crew list."
+
+	var/list/entries = list()
+
+	for (var/datum/computer_file/report/crew_record/entry in GLOB.all_crew_records)
+		entries["[entry.get_name()], [entry.get_job()]"] = entry
+
+	if (!length(entries))
+		return
+
+	var/choice = input("Pick a record to delete:", "Delete Crew Record") as null | anything in entries
+
+	if (!choice)
+		return
+
+	var/check = alert("Are you sure you want to delete [choice]?", "Delete Record?", "Yes", "No")
+	var/datum/computer_file/report/crew_record/record = entries[choice]
+
+	if (check == "Yes")
+		GLOB.all_crew_records.Remove(record)
+		log_and_message_admins("has removed [record.get_name()], [record.get_job()]'s crew record.")

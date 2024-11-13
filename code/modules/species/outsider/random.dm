@@ -10,6 +10,7 @@
 	icobase = 'icons/mob/human_races/species/humanoid/body.dmi'
 	deform = 'icons/mob/human_races/species/humanoid/body.dmi'
 	bandages_icon = 'icons/mob/bandage.dmi'
+	preview_icon = null
 	appearance_flags = SPECIES_APPEARANCE_HAS_SKIN_COLOR
 	limb_blend = ICON_MULTIPLY
 
@@ -137,7 +138,7 @@
 /obj/structure/aliumizer
 	name = "alien monolith"
 	desc = "Your true form is calling. Use this to become an alien humanoid."
-	icon = 'icons/obj/xenoarchaeology.dmi'
+	icon = 'icons/obj/xenoarchaeology_finds.dmi'
 	icon_state = "ano51"
 	anchored = TRUE
 

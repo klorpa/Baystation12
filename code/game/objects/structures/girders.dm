@@ -65,7 +65,7 @@
 			SPAN_NOTICE("\The [user] starts dislodging \the [src] with \a [tool]."),
 			SPAN_NOTICE("You start dislodging \the [src] with \the [tool].")
 		)
-		if (!user.do_skilled(4 SECONDS, SKILL_CONSTRUCTION, src, do_flags = DO_REPAIR_CONSTRUCT) || !user.use_sanity_check(src, tool))
+		if (!user.do_skilled((tool.toolspeed * 4) SECONDS, SKILL_CONSTRUCTION, src, do_flags = DO_REPAIR_CONSTRUCT) || !user.use_sanity_check(src, tool))
 			return TRUE
 		if (!can_anchor(tool, user))
 			return TRUE
@@ -134,7 +134,7 @@
 					SPAN_NOTICE("\The [user] starts securing \the [src]'s support struts with \a [tool]."),
 					SPAN_NOTICE("You starts securing \the [src]'s support struts with \the [tool].")
 				)
-				if (!user.do_skilled(4 SECONDS, SKILL_CONSTRUCTION, src, do_flags = DO_REPAIR_CONSTRUCT) || !user.use_sanity_check(src, tool))
+				if (!user.do_skilled((tool.toolspeed * 4) SECONDS, SKILL_CONSTRUCTION, src, do_flags = DO_REPAIR_CONSTRUCT) || !user.use_sanity_check(src, tool))
 					return TRUE
 				if (state != GIRDER_STATE_REINFORCEMENT_UNSECURED)
 					USE_FEEDBACK_FAILURE("\The [src]'s state has changed.")
@@ -151,7 +151,7 @@
 					SPAN_NOTICE("\The [user] starts unsecuring \the [src]'s support struts with \a [tool]."),
 					SPAN_NOTICE("You starts unsecuring \the [src]'s support struts with \the [tool].")
 				)
-				if (!user.do_skilled(4 SECONDS, SKILL_CONSTRUCTION, src, do_flags = DO_REPAIR_CONSTRUCT) || !user.use_sanity_check(src, tool))
+				if (!user.do_skilled((tool.toolspeed * 4) SECONDS, SKILL_CONSTRUCTION, src, do_flags = DO_REPAIR_CONSTRUCT) || !user.use_sanity_check(src, tool))
 					return TRUE
 				if (state != GIRDER_STATE_REINFORCED)
 					USE_FEEDBACK_FAILURE("\The [src]'s state has changed.")
@@ -176,7 +176,7 @@
 					SPAN_NOTICE("\The [user] starts removing \the [src]'s support struts with \a [tool]."),
 					SPAN_NOTICE("You start removing \the [src]'s support struts with \the [tool].")
 				)
-				if (!user.do_skilled(4 SECONDS, SKILL_CONSTRUCTION, src, do_flags = DO_REPAIR_CONSTRUCT) || !user.use_sanity_check(src, tool))
+				if (!user.do_skilled((tool.toolspeed * 4) SECONDS, SKILL_CONSTRUCTION, src, do_flags = DO_REPAIR_CONSTRUCT) || !user.use_sanity_check(src, tool))
 					return TRUE
 				if (state != GIRDER_STATE_REINFORCEMENT_UNSECURED)
 					USE_FEEDBACK_FAILURE("\The [src]'s state has changed.")
@@ -203,7 +203,7 @@
 				SPAN_NOTICE("\The [user] starts dismantling \the [src] with \a [tool]."),
 				SPAN_NOTICE("You start dismantling \the [src] with \the [tool].")
 			)
-			if (!user.do_skilled(4 SECONDS, SKILL_CONSTRUCTION, src, do_flags = DO_REPAIR_CONSTRUCT) || !user.use_sanity_check(src, tool))
+			if (!user.do_skilled((tool.toolspeed * 4) SECONDS, SKILL_CONSTRUCTION, src, do_flags = DO_REPAIR_CONSTRUCT) || !user.use_sanity_check(src, tool))
 				return TRUE
 			if (state != GIRDER_STATE_NORMAL || !anchored)
 				USE_FEEDBACK_FAILURE("\The [src]'s state has changed.")
@@ -220,7 +220,7 @@
 			SPAN_NOTICE("\The [user] starts securing \the [src] with \a [tool]."),
 			SPAN_NOTICE("You start securing \the [src] with \the [tool].")
 		)
-		if (!user.do_skilled(4 SECONDS, SKILL_CONSTRUCTION, src, do_flags = DO_REPAIR_CONSTRUCT) || !user.use_sanity_check(src, tool))
+		if (!user.do_skilled((tool.toolspeed * 4) SECONDS, SKILL_CONSTRUCTION, src, do_flags = DO_REPAIR_CONSTRUCT) || !user.use_sanity_check(src, tool))
 			return TRUE
 		if (state != GIRDER_STATE_NORMAL || anchored)
 			USE_FEEDBACK_FAILURE("\The [src]'s state has changed.")
@@ -255,7 +255,7 @@
 	to_chat(user, SPAN_NOTICE("You begin adding the plating..."))
 
 	if(!do_after(user,4 SECONDS, src, DO_REPAIR_CONSTRUCT) || !S.use(2))
-		return 1 //once we've gotten this far don't call parent attackby()
+		return TRUE
 
 	if(anchored)
 		to_chat(user, SPAN_NOTICE("You added the plating!"))
@@ -289,7 +289,7 @@
 
 	to_chat(user, SPAN_NOTICE("Now reinforcing..."))
 	if (!do_after(user, 4 SECONDS, src, DO_REPAIR_CONSTRUCT) || !S.use(2))
-		return 1 //don't call parent attackby() past this point
+		return TRUE
 	to_chat(user, SPAN_NOTICE("You added reinforcement!"))
 
 	reinf_material = M
@@ -306,13 +306,6 @@
 /obj/structure/girder/proc/dismantle()
 	new /obj/item/stack/material/steel(get_turf(src))
 	qdel(src)
-
-/obj/structure/girder/attack_hand(mob/user as mob)
-	if (MUTATION_HULK in user.mutations)
-		visible_message(SPAN_DANGER("[user] smashes [src] apart!"))
-		dismantle()
-		return
-	return ..()
 
 /obj/structure/girder/cult
 	icon= 'icons/obj/cult.dmi'

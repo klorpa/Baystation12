@@ -3,12 +3,12 @@
 /obj/machinery/power/emitter
 	name = "emitter"
 	desc = "A massive, heavy-duty industrial laser. This design is a fixed installation, capable of shooting in only one direction."
-	icon = 'icons/obj/singularity.dmi'
+	icon = 'icons/obj/machines/power/emitter.dmi'
 	icon_state = "emitter"
 	anchored = FALSE
 	density = TRUE
 	active_power_usage = 100 KILOWATTS
-	obj_flags = OBJ_FLAG_ROTATABLE
+	obj_flags = OBJ_FLAG_ROTATABLE | OBJ_FLAG_ANCHORABLE
 
 	/// Access required to lock or unlock the emitter. Separate variable to prevent `req_access` from blocking use of the emitter while unlocked.
 	var/list/req_lock_access = list(access_engine_equip)
@@ -23,6 +23,8 @@
 	var/shot_number = 0
 	var/state = EMITTER_LOOSE
 	var/locked = FALSE
+	/// Type path (Type of `/obj/item/projectile`). The projectile type this emitter fires.
+	var/projectile_type = /obj/item/projectile/beam/emitter
 	core_skill = SKILL_ENGINES
 
 	uncreated_component_parts = list(
@@ -52,7 +54,7 @@
 		connect_to_network()
 
 /obj/machinery/power/emitter/Destroy()
-	log_and_message_admins("deleted \the [src]")
+	log_and_message_admins("deleted \the [src]", location = src)
 	investigate_log("[SPAN_COLOR("red", "deleted")] at ([x],[y],[z])","singulo")
 	return ..()
 
@@ -67,14 +69,14 @@
 			if (EMITTER_WELDED)
 				state_message = "It is firmly secured in place."
 		to_chat(user, SPAN_NOTICE(state_message))
-		if (emagged && (user.skill_check(core_skill, SKILL_ADEPT) || is_observer))
+		if (emagged && (user.skill_check(core_skill, SKILL_TRAINED) || is_observer))
 			to_chat(user, SPAN_WARNING("Its control locks have been fried."))
 
 /obj/machinery/power/emitter/on_update_icon()
-	if (active && powernet && avail(active_power_usage))
-		icon_state = "emitter_+a"
-	else
-		icon_state = "emitter"
+	ClearOverlays()
+	if(active && powernet && avail(active_power_usage))
+		AddOverlays(emissive_appearance(icon, "[icon_state]_lights"))
+		AddOverlays("[icon_state]_lights")
 
 /obj/machinery/power/emitter/interface_interact(mob/user)
 	if (!CanInteract(user, DefaultTopicState()))
@@ -138,6 +140,7 @@
 	efficiency *= 1 + (rand() - 1) * skill_modifier //subtract off between 0.8 and 0, depending on skill and luck.
 
 /obj/machinery/power/emitter/emp_act(severity)
+	SHOULD_CALL_PARENT(FALSE)
 	return
 
 /obj/machinery/power/emitter/Process()
@@ -172,68 +175,52 @@
 			fire_delay = get_rand_burst_delay()
 			shot_number = 0
 
-		//need to calculate the power per shot as the emitter doesn't fire continuously.
-		var/burst_time = (min_burst_delay + max_burst_delay) / 2 + 2 * (burst_shots - 1)
-		var/power_per_shot = (active_power_usage * efficiency) * (burst_time / 10) / burst_shots
-
 		if (prob(35))
-			var/datum/effect/effect/system/spark_spread/s = new /datum/effect/effect/system/spark_spread
+			var/datum/effect/spark_spread/s = new /datum/effect/spark_spread
 			s.set_up(5, 1, src)
 			s.start()
 
-		var/obj/item/projectile/beam/emitter/A = get_emitter_beam()
-		playsound(loc, A.fire_sound, 25, TRUE)
-		A.damage = round (power_per_shot / EMITTER_DAMAGE_POWER_TRANSFER)
-		A.launch( get_step(loc, dir) )
+		var/obj/item/projectile/proj = new projectile_type(get_turf(src))
+		proj.damage = get_emitter_damage()
+		playsound(loc, proj.fire_sound, 25, TRUE)
+		proj.launch( get_step(loc, dir) )
 
-/obj/machinery/power/emitter/attackby(obj/item/W, mob/user)
+/obj/machinery/power/emitter/post_anchor_change()
+	if (anchored)
+		state = EMITTER_WRENCHED
+	else
+		state = EMITTER_LOOSE
+	..()
 
+/obj/machinery/power/emitter/use_tool(obj/item/W, mob/living/user, list/click_params)
 	if (isWrench(W))
 		if (active)
 			to_chat(user, SPAN_WARNING("Turn \the [src] off first."))
-			return
-		switch(state)
-			if (EMITTER_LOOSE)
-				state = EMITTER_WRENCHED
-				playsound(loc, 'sound/items/Ratchet.ogg', 75, TRUE)
-				user.visible_message(
-					SPAN_NOTICE("\The [user] secures \the [src] to the floor."),
-					SPAN_NOTICE("You drop the external reinforcing bolts and secure them to the floor."),
-					SPAN_ITALIC("You hear ratcheting.")
-				)
-				anchored = TRUE
-			if (EMITTER_WRENCHED)
-				state = EMITTER_LOOSE
-				playsound(loc, 'sound/items/Ratchet.ogg', 75, TRUE)
-				user.visible_message(
-					SPAN_NOTICE("\The [user] unsecures \the [src] from the floor."),
-					SPAN_NOTICE("You undo the external reinforcing bolts."),
-					SPAN_ITALIC("You hear ratcheting.")
-				)
-				anchored = FALSE
-			if (EMITTER_WELDED)
-				to_chat(user, SPAN_WARNING("\The [src] needs to be unwelded from the floor before you raise its bolts."))
-		return
+			return TRUE
+
+		if (state == EMITTER_WELDED)
+			to_chat(user, SPAN_WARNING("\The [src] needs to be unwelded from the floor before you raise its bolts."))
+			return TRUE
 
 	if (isWelder(W))
 		var/obj/item/weldingtool/WT = W
 		if (active)
 			to_chat(user, SPAN_WARNING("Turn \the [src] off first."))
-			return
+			return TRUE
 		switch(state)
 			if (EMITTER_LOOSE)
 				to_chat(user, SPAN_WARNING("\The [src] needs to be wrenched to the floor."))
 			if (EMITTER_WRENCHED)
-				if (WT.remove_fuel(0, user))
+				if (WT.can_use(1, user))
 					playsound(loc, 'sound/items/Welder.ogg', 50, TRUE)
 					user.visible_message(
 						SPAN_NOTICE("\The [user] starts to weld \the [src] to the floor."),
 						SPAN_NOTICE("You start to weld \the [src] to the floor."),
 						SPAN_ITALIC("You hear welding.")
 					)
-					if (do_after(user, 2 SECONDS, src, DO_REPAIR_CONSTRUCT))
-						if (!WT.isOn())
-							return
+					if (do_after(user, (W.toolspeed * 2) SECONDS, src, DO_REPAIR_CONSTRUCT))
+						if (!WT.remove_fuel(1, user))
+							return TRUE
 						state = EMITTER_WELDED
 						playsound(loc, 'sound/items/Welder2.ogg', 50, TRUE)
 						user.visible_message(
@@ -242,19 +229,17 @@
 							SPAN_ITALIC("You hear welding.")
 						)
 						connect_to_network()
-				else
-					to_chat(user, SPAN_WARNING("You need more welding fuel to complete this task."))
 			if (EMITTER_WELDED)
-				if (WT.remove_fuel(0, user))
+				if (WT.can_use(1, user))
 					playsound(loc, 'sound/items/Welder.ogg', 50, TRUE)
 					user.visible_message(
 						SPAN_NOTICE("\The [user] starts to cut \the [src] free from the floor."),
 						SPAN_NOTICE("You start to cut \the [src] free from the floor."),
 						SPAN_ITALIC("You hear welding.")
 					)
-					if (do_after(user, 2 SECONDS, src, DO_REPAIR_CONSTRUCT))
-						if (!WT.isOn())
-							return
+					if (do_after(user, (W.toolspeed * 2) SECONDS, src, DO_REPAIR_CONSTRUCT))
+						if (!WT.remove_fuel(1, user))
+							return TRUE
 						state = EMITTER_WRENCHED
 						playsound(loc, 'sound/items/Welder2.ogg', 50, TRUE)
 						user.visible_message(
@@ -263,14 +248,12 @@
 							SPAN_ITALIC("You hear welding.")
 						)
 						disconnect_from_network()
-				else
-					to_chat(user, SPAN_WARNING("You need more welding fuel to complete this task."))
-		return
+		return TRUE
 
 	if (istype(W, /obj/item/card/id) || istype(W, /obj/item/modular_computer))
 		if (emagged)
 			to_chat(user, SPAN_WARNING("The control lock seems to be broken."))
-			return
+			return TRUE
 		if (has_access(req_lock_access, W.GetAccess()))
 			locked = !locked
 			user.visible_message(
@@ -279,9 +262,9 @@
 			)
 		else
 			to_chat(user, SPAN_WARNING("\The [src]'s controls flash an 'Access denied' warning."))
-		return
-	..()
-	return
+		return TRUE
+
+	return ..()
 
 /obj/machinery/power/emitter/emag_act(remaining_charges, mob/user)
 	if (!emagged)
@@ -302,8 +285,16 @@
 /obj/machinery/power/emitter/proc/get_burst_delay()
 	return 0.2 SECONDS // This value doesn't really affect normal emitters, but *does* affect subtypes like the gyrotron that can have very long delays
 
-/obj/machinery/power/emitter/proc/get_emitter_beam()
-	return new /obj/item/projectile/beam/emitter(get_turf(src))
+
+/**
+ * Calculates the damage the emitter should fire with its projectile.
+ */
+/obj/machinery/power/emitter/proc/get_emitter_damage()
+	//need to calculate the power per shot as the emitter doesn't fire continuously.
+	var/burst_time = (min_burst_delay + max_burst_delay) / 2 + 2 * (burst_shots - 1)
+	var/power_per_shot = (active_power_usage * efficiency) * (burst_time / 10) / burst_shots
+	return round(power_per_shot / EMITTER_DAMAGE_POWER_TRANSFER)
+
 
 /singleton/public_access/public_method/toggle_emitter
 	name = "toggle emitter"

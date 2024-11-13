@@ -8,7 +8,7 @@
 	max_w_class = ITEM_SIZE_SMALL
 	max_storage_space = ITEM_SIZE_SMALL * 3
 	slot_flags = SLOT_ID
-	can_hold = list(
+	contents_allowed = list(
 		/obj/item/spacecash,
 		/obj/item/card,
 		/obj/item/clothing/mask/smokable,
@@ -27,6 +27,7 @@
 		/obj/item/paper,
 		/obj/item/pen,
 		/obj/item/photo,
+		/obj/item/phototrinket,
 		/obj/item/reagent_containers/pill,
 		/obj/item/device/encryptionkey,
 		/obj/item/key,
@@ -37,7 +38,8 @@
 		/obj/item/passport,
 		/obj/item/clothing/accessory/pride_pin,
 		/obj/item/clothing/accessory/pronouns,
-		/obj/item/storage/chewables/rollable
+		/obj/item/storage/chewables/rollable,
+		/obj/item/storage/fancy/matches/matchbook
 	)
 
 	/// If this wallet contains ID cards, the one that is displayed through its window.
@@ -67,7 +69,7 @@
 
 
 /obj/item/storage/wallet/on_update_icon()
-	overlays.Cut()
+	ClearOverlays()
 	if (front_id)
 		var/tiny_state = "id-generic"
 		var/check_state = "id-[front_id.icon_state]"
@@ -75,7 +77,7 @@
 			tiny_state = check_state
 		var/image/tiny_image = new/image(icon, icon_state = tiny_state)
 		tiny_image.appearance_flags = DEFAULT_APPEARANCE_FLAGS | RESET_COLOR
-		overlays += tiny_image
+		AddOverlays(tiny_image)
 
 
 /obj/item/storage/wallet/GetIdCard()
@@ -96,7 +98,7 @@
 	if (istype(id))
 		remove_from_storage(id, get_turf(user))
 		user.put_in_hands(id)
-		return
+		return TRUE
 	return ..()
 
 

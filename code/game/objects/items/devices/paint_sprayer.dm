@@ -4,7 +4,7 @@
 
 /obj/item/device/paint_sprayer
 	name = "paint sprayer"
-	icon = 'icons/obj/paint_sprayer.dmi'
+	icon = 'icons/obj/tools/paint_sprayer.dmi'
 	icon_state = "paint_sprayer"
 	item_state = "paint_sprayer"
 	desc = "A slender and none-too-sophisticated device capable of applying paint on floors, walls, exosuits and certain airlocks."
@@ -12,28 +12,28 @@
 	var/paint_color
 
 	var/list/decals = list(
-		"Quarter-turf" =      list("path" = /obj/effect/floor_decal/corner, "precise" = 1, "colored" = 1),
-		"Monotile full" =     list("path" = /obj/effect/floor_decal/corner/white/mono, "colored" = 1),
-		"Monotile halved" =   list("path" = /obj/effect/floor_decal/corner/white/half, "colored" = 1),
-		"Hazard stripes" =    list("path" = /obj/effect/floor_decal/industrial/warning/fulltile),
-		"Border, hazard" =    list("path" = /obj/effect/floor_decal/industrial/warning),
-		"Corner, hazard" =    list("path" = /obj/effect/floor_decal/industrial/warning/corner),
-		"Hatched marking" =   list("path" = /obj/effect/floor_decal/industrial/hatch, "colored" = 1),
-		"Dashed outline" =    list("path" = /obj/effect/floor_decal/industrial/outline, "colored" = 1),
-		"Loading sign" =      list("path" = /obj/effect/floor_decal/industrial/loading),
-		"Mosaic, large" =     list("path" = /obj/effect/floor_decal/chapel),
-		"1" =                 list("path" = /obj/effect/floor_decal/sign),
-		"2" =                 list("path" = /obj/effect/floor_decal/sign/two),
-		"A" =                 list("path" = /obj/effect/floor_decal/sign/a),
-		"B" =                 list("path" = /obj/effect/floor_decal/sign/b),
-		"C" =                 list("path" = /obj/effect/floor_decal/sign/c),
-		"D" =                 list("path" = /obj/effect/floor_decal/sign/d),
-		"M" =                 list("path" = /obj/effect/floor_decal/sign/m),
-		"V" =                 list("path" = /obj/effect/floor_decal/sign/v),
-		"CMO" =               list("path" = /obj/effect/floor_decal/sign/cmo),
-		"Ex" =                list("path" = /obj/effect/floor_decal/sign/ex),
-		"Psy" =               list("path" = /obj/effect/floor_decal/sign/p),
-		"Remove all decals" = list("path" = /obj/effect/floor_decal/reset),
+		"Quarter-turf" =      list("path" = /obj/floor_decal/corner, "precise" = 1, "colored" = 1),
+		"Monotile full" =     list("path" = /obj/floor_decal/corner/white/mono, "colored" = 1),
+		"Monotile halved" =   list("path" = /obj/floor_decal/corner/white/half, "colored" = 1),
+		"Hazard stripes" =    list("path" = /obj/floor_decal/industrial/warning/fulltile),
+		"Border, hazard" =    list("path" = /obj/floor_decal/industrial/warning),
+		"Corner, hazard" =    list("path" = /obj/floor_decal/industrial/warning/corner),
+		"Hatched marking" =   list("path" = /obj/floor_decal/industrial/hatch, "colored" = 1),
+		"Dashed outline" =    list("path" = /obj/floor_decal/industrial/outline, "colored" = 1),
+		"Loading sign" =      list("path" = /obj/floor_decal/industrial/loading),
+		"Mosaic, large" =     list("path" = /obj/floor_decal/chapel),
+		"1" =                 list("path" = /obj/floor_decal/sign),
+		"2" =                 list("path" = /obj/floor_decal/sign/two),
+		"A" =                 list("path" = /obj/floor_decal/sign/a),
+		"B" =                 list("path" = /obj/floor_decal/sign/b),
+		"C" =                 list("path" = /obj/floor_decal/sign/c),
+		"D" =                 list("path" = /obj/floor_decal/sign/d),
+		"M" =                 list("path" = /obj/floor_decal/sign/m),
+		"V" =                 list("path" = /obj/floor_decal/sign/v),
+		"CMO" =               list("path" = /obj/floor_decal/sign/cmo),
+		"Ex" =                list("path" = /obj/floor_decal/sign/ex),
+		"Psy" =               list("path" = /obj/floor_decal/sign/p),
+		"Remove all decals" = list("path" = /obj/floor_decal/reset),
 		)
 
 	var/list/paint_dirs = list(
@@ -81,14 +81,14 @@
 	. = ..()
 
 /obj/item/device/paint_sprayer/on_update_icon()
-	overlays.Cut()
-	overlays += overlay_image(icon, "paint_sprayer_color", paint_color)
+	ClearOverlays()
+	AddOverlays(overlay_image(icon, "paint_sprayer_color", paint_color))
 	update_held_icon()
 
 /obj/item/device/paint_sprayer/get_mob_overlay(mob/user_mob, slot, bodypart)
 	var/image/ret = ..()
 	var/image/overlay = overlay_image(ret.icon, "paint_sprayer_color", paint_color)
-	ret.overlays += overlay
+	ret.AddOverlays(overlay)
 	return ret
 
 /obj/item/device/paint_sprayer/on_active_hand(mob/user)
@@ -112,10 +112,11 @@
 		GLOB.module_deselected_event.unregister(user, src, /obj/item/device/paint_sprayer/proc/remove_click_handler)
 		GLOB.module_deactivated_event.unregister(user, src, /obj/item/device/paint_sprayer/proc/remove_click_handler)
 
-/obj/item/device/paint_sprayer/afterattack(atom/A, mob/user, proximity, params)
-	if (!proximity)
-		return
-	apply_paint(A, user, params)
+/obj/item/device/paint_sprayer/use_before(atom/target, mob/living/user, click_parameters)
+	if (apply_paint(target, user, click_parameters))
+		return TRUE
+
+	return ..()
 
 /obj/item/device/paint_sprayer/proc/pick_color(atom/A, mob/user)
 	if (!user.Adjacent(A) || user.incapacitated())
@@ -146,7 +147,6 @@
 		to_chat(user, SPAN_WARNING("\The [src] can only be used on floors, windows, walls, exosuits or certain airlocks."))
 		. = FALSE
 	if (.)
-		add_fingerprint(user)
 		playsound(get_turf(src), 'sound/effects/spray3.ogg', 30, 1, -6)
 	return .
 
@@ -210,7 +210,7 @@
 		to_chat(user, SPAN_WARNING("\The [src] flashes an error light. You might need to reconfigure it."))
 		return FALSE
 
-	if((F.decals && length(F.decals) > 5) && !ispath(painting_decal, /obj/effect/floor_decal/reset))
+	if((F.decals && length(F.decals) > 5) && !ispath(painting_decal, /obj/floor_decal/reset))
 		to_chat(user, SPAN_WARNING("\The [F] has been painted too much; you need to clear it off."))
 		return FALSE
 
@@ -306,14 +306,14 @@
 /obj/item/device/paint_sprayer/AltClick()
 	if (!isturf(loc))
 		choose_preset_color()
-	else
-		. = ..()
+		return TRUE
+	return ..()
 
 /obj/item/device/paint_sprayer/CtrlClick()
 	if (!isturf(loc))
 		choose_color()
-	else
-		. = ..()
+		return TRUE
+	return ..()
 
 /obj/item/device/paint_sprayer/verb/choose_color()
 	set name = "Choose color"

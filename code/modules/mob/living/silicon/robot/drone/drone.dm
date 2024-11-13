@@ -36,9 +36,9 @@ var/global/list/mob_hat_cache = list()
 	lawupdate = FALSE
 	density = TRUE
 	req_access = list(access_engine, access_robotics)
-	integrated_light_max_bright = 0.5
+	integrated_light_power = 0.5
 	local_transmit = 1
-	possession_candidate = 1
+	possession_candidate = TRUE
 
 	can_pull_size = ITEM_SIZE_NORMAL
 	can_pull_mobs = MOB_PULL_SMALLER
@@ -164,17 +164,18 @@ var/global/list/mob_hat_cache = list()
 
 /mob/living/silicon/robot/drone/on_update_icon()
 
-	overlays.Cut()
+	ClearOverlays()
 	if(stat == 0)
 		if(emagged)
-			overlays += "eyes-[icon_state]-emag"
+			AddOverlays("eyes-[icon_state]-emag")
 		else
-			overlays += "eyes-[icon_state]"
+			AddOverlays("eyes-[icon_state]")
 	else
-		overlays -= "eyes"
+		CutOverlays("eyes")
 
 	if(hat) // Let the drones wear hats.
-		overlays |= get_hat_icon(hat, hat_x_offset, hat_y_offset)
+		var/hat_icon = get_hat_icon(hat, hat_x_offset, hat_y_offset)
+		AddOverlays(hat_icon)
 
 /mob/living/silicon/robot/drone/choose_icon()
 	return
@@ -277,7 +278,8 @@ var/global/list/mob_hat_cache = list()
 	clear_inherent_laws()
 	QDEL_NULL(laws)
 	laws = new /datum/ai_laws/syndicate_override
-	set_zeroth_law("Only [user.real_name] and people \he designates as being such are operatives.")
+	var/datum/pronouns/pronouns = user.choose_from_pronouns()
+	set_zeroth_law("Only [user.real_name] and people [pronouns.he] designates as being such are operatives.")
 
 //DRONE LIFE/DEATH
 //For some goddamn reason robots have this hardcoded. Redefining it for our fragile friends here.

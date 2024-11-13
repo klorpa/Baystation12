@@ -35,7 +35,7 @@ var/global/const/HOLOPAD_MODE = RANGE_BASED
 	name = "holopad"
 	desc = "It's a floor-mounted device for projecting holographic images."
 	icon_state = "holopad-B0"
-
+	icon = 'icons/obj/machines/holopads.dmi'
 	layer = ABOVE_TILE_LAYER
 
 	var/power_per_hologram = 500 //per usage per hologram
@@ -57,6 +57,8 @@ var/global/const/HOLOPAD_MODE = RANGE_BASED
 	var/base_icon = "holopad-B"
 
 	var/allow_ai = TRUE
+
+	var/list/linked_pdas
 
 /obj/machinery/hologram/holopad/New()
 	..()
@@ -127,7 +129,7 @@ var/global/const/HOLOPAD_MODE = RANGE_BASED
 				var/zlevels_long = list()
 				if(GLOB.using_map.use_overmap && holopadType == HOLOPAD_LONG_RANGE)
 					for(var/zlevel in map_sectors)
-						var/obj/effect/overmap/visitable/O = map_sectors["[zlevel]"]
+						var/obj/overmap/visitable/O = map_sectors["[zlevel]"]
 						if(!isnull(O))
 							zlevels_long |= O.map_z
 				for(var/obj/machinery/hologram/holopad/H in SSmachines.machinery)
@@ -161,6 +163,12 @@ var/global/const/HOLOPAD_MODE = RANGE_BASED
 	playsound(targetpad.loc, 'sound/machines/chime.ogg', 25, 5)
 	targetpad.icon_state = "[targetpad.base_icon]1"
 	targetpad.audible_message("<b>\The [src]</b> announces, \"Incoming communications request from [targetpad.sourcepad.loc.loc].\"")
+	// Notify any linked PDAs
+	if (LAZYLEN(targetpad.linked_pdas))
+		for (var/obj/item/modular_computer/pda/pda as anything in targetpad.linked_pdas)
+			if (!AreConnectedZLevels(get_z(targetpad), get_z(pda)))
+				continue
+			pda.receive_notification("Call at [targetpad.loc.loc] holopad.")
 	to_chat(user, SPAN_NOTICE("Trying to establish a connection to the holopad in [targetpad.loc.loc]... Please await confirmation from recipient."))
 	targetpad.addrecentcall(get_area(src))
 
@@ -225,6 +233,33 @@ var/global/const/HOLOPAD_MODE = RANGE_BASED
 	else
 		to_chat(caller_id, "[SPAN_DANGER("ERROR:")] Unable to project hologram.")
 	return
+
+/obj/machinery/hologram/holopad/use_tool(obj/item/O, mob/user)
+	if (istype(O, /obj/item/modular_computer/pda))
+		if (LAZYISIN(linked_pdas, O))
+			unlink_pda(O)
+			to_chat(user, SPAN_NOTICE("You remove \the [O] from \the [src]'s notifications list."))
+			return TRUE
+		link_pda(O)
+		to_chat(user, SPAN_NOTICE("You add \the [O] to \the [src]'s notifications list. It will now be pinged whenever a call is received."))
+		return TRUE
+
+	return ..()
+
+/**
+ * Proc to link/unlink PDAs
+ */
+
+/obj/machinery/hologram/holopad/proc/link_pda(obj/item/modular_computer/pda/pda)
+	if (!istype(pda))
+		return
+	LAZYADD(linked_pdas, pda)
+	GLOB.destroyed_event.register(pda, src, .proc/unlink_pda)
+
+
+/obj/machinery/hologram/holopad/proc/unlink_pda(obj/item/modular_computer/pda/pda)
+	LAZYREMOVE(linked_pdas, pda)
+	GLOB.destroyed_event.unregister(pda, src, .proc/unlink_pda)
 
 /*This is the proc for special two-way communication between AI and holopad/people talking near holopad.
 For the other part of the code, check silicon say.dm. Particularly robot talk.*/
@@ -299,17 +334,17 @@ For the other part of the code, check silicon say.dm. Particularly robot talk.*/
 			master.show_message(rendered, type)
 
 /obj/machinery/hologram/holopad/proc/create_holo(mob/living/silicon/ai/A, mob/living/carbon/caller_id, turf/T = loc)
-	var/obj/effect/overlay/hologram = new(T)//Spawn a blank effect at the location.
+	var/obj/overlay/hologram = new(T)//Spawn a blank effect at the location.
 	if(caller_id)
-		hologram.overlays += getHologramIcon(getFlatIcon(caller_id), hologram_color = holopadType) // Add the callers image as an overlay to keep coloration!
+		hologram.AddOverlays(getHologramIcon(getFlatIcon(caller_id), hologram_color = holopadType))
 	else if(A)
 		if(holopadType == HOLOPAD_LONG_RANGE)
-			hologram.overlays += A.holo_icon_longrange
+			hologram.AddOverlays(A.holo_icon_longrange)
 		else
-			hologram.overlays += A.holo_icon // Add the AI's configured holo Icon
+			hologram.AddOverlays(A.holo_icon)
 	if(A)
 		if(A.holo_icon_malf == TRUE)
-			hologram.overlays += icon("icons/effects/effects.dmi", "malf-scanline")
+			hologram.AddOverlays(icon("icons/effects/effects.dmi", "malf-scanline"))
 	hologram.mouse_opacity = 0//So you can't click on it.
 	hologram.layer = ABOVE_HUMAN_LAYER //Above all the other objects/mobs. Or the vast majority of them.
 	hologram.anchored = TRUE//So space wind cannot drag it.
@@ -321,9 +356,9 @@ For the other part of the code, check silicon say.dm. Particularly robot talk.*/
 		hologram.SetName("[A.name] (Hologram)") //If someone decides to right click.
 		A.holo = src
 		masters[A] = hologram
-	hologram.set_light(1, 0.1, 2)	//hologram lighting
+	hologram.set_light(2, 0.1)	//hologram lighting
 	hologram.color = color //painted holopad gives coloured holograms
-	set_light(1, 0.1, 2)			//pad lighting
+	set_light(2, 0.1)			//pad lighting
 	icon_state = "[base_icon]1"
 	return 1
 
@@ -372,7 +407,7 @@ For the other part of the code, check silicon say.dm. Particularly robot talk.*/
 /obj/machinery/hologram/holopad/proc/move_hologram(mob/living/silicon/ai/user)
 	if(masters[user])
 		step_to(masters[user], user.eyeobj) // So it turns.
-		var/obj/effect/overlay/H = masters[user]
+		var/obj/overlay/H = masters[user]
 		H.dropInto(user.eyeobj)
 		masters[user] = H
 
@@ -393,7 +428,7 @@ For the other part of the code, check silicon say.dm. Particularly robot talk.*/
 
 /obj/machinery/hologram/holopad/proc/set_dir_hologram(new_dir, mob/living/silicon/ai/user)
 	if(masters[user])
-		var/obj/effect/overlay/hologram = masters[user]
+		var/obj/overlay/hologram = masters[user]
 		hologram.dir = new_dir
 
 
@@ -423,6 +458,12 @@ For the other part of the code, check silicon say.dm. Particularly robot talk.*/
 /obj/machinery/hologram/holopad/Destroy()
 	for (var/mob/living/master in masters)
 		clear_holo(master)
+
+	if (LAZYLEN(linked_pdas))
+		for (var/obj/item/modular_computer/pda/pda as anything in linked_pdas)
+			unlink_pda(pda)
+		linked_pdas = null
+
 	return ..()
 
 /*
@@ -432,7 +473,7 @@ Holographic project of everything else.
 	set name = "Hologram Debug New"
 	set category = "CURRENT DEBUG"
 
-	var/obj/effect/overlay/hologram = new(loc)//Spawn a blank effect at the location.
+	var/obj/overlay/hologram = new(loc)//Spawn a blank effect at the location.
 	var/icon/flat_icon = icon(getFlatIcon(src,0))//Need to make sure it's a new icon so the old one is not reused.
 	flat_icon.ColorTone(rgb(125,180,225))//Let's make it bluish.
 	flat_icon.ChangeOpacity(0.5)//Make it half transparent.
@@ -453,7 +494,7 @@ Holographic project of everything else.
 /obj/machinery/hologram/projector
 	name = "hologram projector"
 	desc = "It makes a hologram appear...with magnets or something..."
-	icon = 'icons/obj/stationobjs.dmi'
+	icon = 'icons/obj/structures/coatrack.dmi'
 	icon_state = "hologram0"
 
 /obj/machinery/hologram/holopad/longrange

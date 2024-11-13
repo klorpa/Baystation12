@@ -123,7 +123,7 @@ var/global/list/obj/machinery/telecomms/telecomms_list = list()
 	..()
 	return INITIALIZE_HINT_LATELOAD
 
-/obj/machinery/telecomms/LateInitialize()
+/obj/machinery/telecomms/LateInitialize(mapload)
 	//Set the listening_levels if there's none.
 	if(!listening_levels)
 		//Defaults to our Z level!
@@ -138,8 +138,8 @@ var/global/list/obj/machinery/telecomms/telecomms_list = list()
 		else
 			for(var/obj/machinery/telecomms/T in telecomms_list)
 				add_link(T)
-	. = ..()
 	update_power()
+	update_icon()
 
 /obj/machinery/telecomms/Destroy()
 	telecomms_list -= src
@@ -159,10 +159,14 @@ var/global/list/obj/machinery/telecomms/telecomms_list = list()
 					links |= T
 
 /obj/machinery/telecomms/on_update_icon()
+	ClearOverlays()
+
+	if(panel_open)
+		AddOverlays("[icon_state]_panel")
+
 	if(on && !overloaded_for)
-		icon_state = initial(icon_state)
-	else
-		icon_state = "[initial(icon_state)]_off"
+		AddOverlays("[icon_state]_lights_working")
+		AddOverlays(emissive_appearance(icon, "[icon_state]_lights_working"))
 
 /obj/machinery/telecomms/Move()
 	. = ..()
@@ -264,7 +268,7 @@ var/global/list/obj/machinery/telecomms/telecomms_list = list()
 
 /obj/machinery/telecomms/receiver
 	name = "subspace receiver"
-	icon = 'icons/obj/stationobjs.dmi'
+	icon = 'icons/obj/machines/telecomms.dmi'
 	icon_state = "broadcast receiver"
 	desc = "This machine has a dish-like shape and green lights. It is designed to detect and process subspace radio activity."
 	density = TRUE
@@ -317,7 +321,7 @@ var/global/list/obj/machinery/telecomms/telecomms_list = list()
 
 /obj/machinery/telecomms/hub
 	name = "telecommunication hub"
-	icon = 'icons/obj/stationobjs.dmi'
+	icon = 'icons/obj/machines/telecomms.dmi'
 	icon_state = "hub"
 	desc = "A mighty piece of hardware used to send/receive massive amounts of data."
 	density = TRUE
@@ -352,7 +356,7 @@ var/global/list/obj/machinery/telecomms/telecomms_list = list()
 
 /obj/machinery/telecomms/bus
 	name = "bus mainframe"
-	icon = 'icons/obj/stationobjs.dmi'
+	icon = 'icons/obj/machines/telecomms.dmi'
 	icon_state = "bus"
 	desc = "A mighty piece of hardware used to send massive amounts of data quickly."
 	density = TRUE
@@ -406,7 +410,7 @@ var/global/list/obj/machinery/telecomms/telecomms_list = list()
 
 /obj/machinery/telecomms/processor
 	name = "processor unit"
-	icon = 'icons/obj/stationobjs.dmi'
+	icon = 'icons/obj/machines/telecomms.dmi'
 	icon_state = "processor"
 	desc = "This machine is used to process large quantities of information."
 	density = TRUE
@@ -446,7 +450,7 @@ var/global/list/obj/machinery/telecomms/telecomms_list = list()
 
 /obj/machinery/telecomms/server
 	name = "telecommunication server"
-	icon = 'icons/obj/stationobjs.dmi'
+	icon = 'icons/obj/machines/telecomms.dmi'
 	icon_state = "comm_server"
 	desc = "A machine used to store data and network statistics."
 	density = TRUE

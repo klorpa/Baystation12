@@ -65,7 +65,7 @@
 
 /obj/item/clothing/head/helmet/space/rig/industrial
 	light_overlay = "helmet_light_wide"
-	camera = /obj/machinery/camera/network/mining
+	camera = /obj/machinery/camera/network/helmet
 	species_restricted = list(SPECIES_HUMAN,SPECIES_SKRELL,SPECIES_UNATHI,SPECIES_IPC)
 
 /obj/item/clothing/suit/space/rig/industrial
@@ -92,7 +92,7 @@
 /obj/item/rig/industrial/equipped
 
 	initial_modules = list(
-		/obj/item/rig_module/mounted/plasmacutter,
+		/obj/item/rig_module/mounted/energy/plasmacutter,
 		/obj/item/rig_module/device/drill,
 		/obj/item/rig_module/device/orescanner,
 		/obj/item/rig_module/device/rcd,
@@ -131,7 +131,7 @@
 
 /obj/item/clothing/head/helmet/space/rig/eva
 	light_overlay = "helmet_light_alt"
-	camera = /obj/machinery/camera/network/engineering
+	camera = /obj/machinery/camera/network/helmet
 	species_restricted = list(SPECIES_HUMAN,SPECIES_SKRELL,SPECIES_UNATHI,SPECIES_IPC)
 	sprite_sheets = list(
 		SPECIES_SKRELL = 'icons/mob/species/skrell/onmob_head_skrell.dmi',
@@ -171,7 +171,7 @@
 /obj/item/rig/eva/equipped
 
 	initial_modules = list(
-		/obj/item/rig_module/mounted/plasmacutter,
+		/obj/item/rig_module/mounted/energy/plasmacutter,
 		/obj/item/rig_module/maneuvering_jets,
 		/obj/item/rig_module/device/rcd,
 		/obj/item/rig_module/vision/meson,
@@ -209,7 +209,7 @@
 	initial_modules = list(
 		/obj/item/rig_module/ai_container,
 		/obj/item/rig_module/maneuvering_jets,
-		/obj/item/rig_module/mounted/plasmacutter,
+		/obj/item/rig_module/mounted/energy/plasmacutter,
 		/obj/item/rig_module/device/rcd,
 		/obj/item/rig_module/device/flash,
 		/obj/item/rig_module/vision/meson,
@@ -220,7 +220,7 @@
 
 /obj/item/clothing/head/helmet/space/rig/ce
 	light_overlay = "helmet_light_alt"
-	camera = /obj/machinery/camera/network/engineering
+	camera = /obj/machinery/camera/network/helmet
 	species_restricted = list(SPECIES_HUMAN,SPECIES_SKRELL,SPECIES_UNATHI,SPECIES_IPC)
 	sprite_sheets = list(
 		SPECIES_UNATHI = 'icons/mob/species/unathi/onmob_head_unathi.dmi',
@@ -278,7 +278,7 @@
 
 /obj/item/clothing/head/helmet/space/rig/hazmat
 	light_overlay = "helmet_light_dual"
-	camera = /obj/machinery/camera/network/research
+	camera = /obj/machinery/camera/network/helmet
 	species_restricted = list(SPECIES_HUMAN,SPECIES_SKRELL,SPECIES_UNATHI,SPECIES_IPC)
 
 /obj/item/clothing/suit/space/rig/hazmat
@@ -342,7 +342,7 @@
 
 /obj/item/clothing/head/helmet/space/rig/medical
 	light_overlay = "helmet_light_wide"
-	camera = /obj/machinery/camera/network/medbay
+	camera = /obj/machinery/camera/network/helmet
 	species_restricted = list(SPECIES_HUMAN, SPECIES_UNATHI, SPECIES_SKRELL, SPECIES_IPC)
 	sprite_sheets = list(
 		SPECIES_UNATHI = 'icons/mob/species/unathi/onmob_head_unathi.dmi',
@@ -409,7 +409,7 @@
 
 /obj/item/clothing/head/helmet/space/rig/hazard
 	light_overlay = "helmet_light_dual"
-	camera = /obj/machinery/camera/network/security
+	camera = /obj/machinery/camera/network/helmet
 	species_restricted = list(SPECIES_HUMAN,SPECIES_SKRELL,SPECIES_UNATHI, SPECIES_IPC)
 
 /obj/item/clothing/suit/space/rig/hazard
@@ -437,7 +437,7 @@
 		/obj/item/rig_module/vision/sechud,
 		/obj/item/rig_module/maneuvering_jets,
 		/obj/item/rig_module/grenade_launcher,
-		/obj/item/rig_module/mounted/taser,
+		/obj/item/rig_module/mounted/energy/taser,
 		/obj/item/rig_module/cooling_unit
 	)
 
@@ -489,6 +489,8 @@
 		/obj/item/tank,
 		/obj/item/device/suit_cooling_unit
 	)
+	max_w_class = null
+	slots = null
 
 /obj/item/rig/zero/on_update_icon(update_mob_icon)
 	..()
@@ -501,4 +503,3 @@
 	//Do not further append if current state already indicates gender
 	if(user.gender == FEMALE && !findtext(chest.icon_state,"_f", -2))
 		chest.icon_state = "[chest.icon_state]_f"
-	chest.update_icon(1)

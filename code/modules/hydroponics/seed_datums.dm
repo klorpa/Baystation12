@@ -190,7 +190,7 @@
 	display_name = "blood tomato plant"
 	mutants = list("killer")
 	chems = list(/datum/reagent/nutriment = list(1,10), /datum/reagent/blood = list(1,5))
-	splat_type = /obj/effect/decal/cleanable/blood/splatter
+	splat_type = /obj/decal/cleanable/blood/splatter
 
 /datum/seed/tomato/blood/New()
 	..()
@@ -345,7 +345,7 @@
 	display_name = "chanterelle cluster"
 	mutants = list("reishi","amanita","plumphelmet")
 	chems = list(/datum/reagent/nutriment = list(1,25))
-	splat_type = /obj/effect/vine
+	splat_type = /obj/vine
 	kitchen_tag = "mushroom"
 
 /datum/seed/mushroom/New()
@@ -648,7 +648,7 @@
 	name = "peanut"
 	seed_name = "peanut"
 	display_name = "peanut plant"
-	chems = list(/datum/reagent/nutriment = list(1,10))
+	chems = list(/datum/reagent/nutriment/groundpeanuts = list(3,5))
 	kitchen_tag = "peanut"
 
 /datum/seed/peanuts/New()
@@ -1560,7 +1560,7 @@
 	name = "hrukhza"
 	seed_name = "hrukhza flower"
 	display_name = "hrukhza flower"
-	chems = list(/datum/reagent/drink/alien/unathijuice = list(10,10), /datum/reagent/nutriment = list(5,5))
+	chems = list(/datum/reagent/drink/unathijuice = list(10,10), /datum/reagent/nutriment = list(5,5))
 
 /datum/seed/hrukhza/New()
 	..()
@@ -1582,7 +1582,7 @@
 	seed_noun = SEED_NOUN_SPORES
 	display_name = "o'krri cluster"
 	chems = list(/datum/reagent/nutriment = list(1,25), /datum/reagent/drugs/psilocybin = list(1,3))
-	splat_type = /obj/effect/vine
+	splat_type = /obj/vine
 	kitchen_tag = "mushroom"
 
 /datum/seed/okrri/New()
@@ -1601,7 +1601,7 @@
 
 /datum/seed/ximikoa
 	name = "ximikoa"
-	seed_name = "ximi'koa stalks"
+	seed_name = "ximi'koa"
 	display_name = "ximi'koa patch"
 	chems = list(/datum/reagent/nutriment = list(1,2), /datum/reagent/sugar = list(4,5))
 	fruit_size = ITEM_SIZE_TINY
@@ -1623,7 +1623,7 @@
 	name = "qokkloa"
 	seed_name = "qokk'loa moss"
 	display_name = "qokk'loa moss"
-	chems = list(/datum/reagent/drugs/hextro = list(1,25), /datum/reagent/ethanol/alien/qokkloa = list(10,10) )
+	chems = list(/datum/reagent/drugs/hextro = list(1,25), /datum/reagent/ethanol/qokkloa = list(10,10) )
 
 /datum/seed/qokkloa/New()
 	..()
@@ -1823,7 +1823,7 @@
 	name = "almond"
 	seed_name = "almond"
 	display_name = "almond plant"
-	chems = list(/datum/reagent/nutriment = list(1,10))
+	chems = list(/datum/reagent/nutriment/almondmeal = list(4,7))
 	kitchen_tag = "almond"
 
 /datum/seed/almond/New()

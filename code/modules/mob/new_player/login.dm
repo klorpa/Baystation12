@@ -20,6 +20,8 @@
 
 	new_player_panel()
 
+	AddDefaultRenderers()
+
 	if(!SScharacter_setup.initialized)
 		SScharacter_setup.newplayers_requiring_init += src
 	else
@@ -31,7 +33,6 @@
 /mob/new_player/proc/deferred_login()
 	if(client)
 		client.playtitlemusic()
-		maybe_send_staffwarns("connected as new player")
 		if(client.get_preference_value(/datum/client_preference/goonchat) == GLOB.PREF_YES)
 			client.chatOutput.start()
 

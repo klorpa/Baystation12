@@ -72,11 +72,11 @@
 
 /obj/item/ammo_magazine/shotholder/on_update_icon()
 	..()
-	overlays.Cut()
+	ClearOverlays()
 	if(marking_color)
 		var/image/I = image(icon, "shotholder-marking")
 		I.color = marking_color
-		overlays += I
+		AddOverlays(I)
 
 /obj/item/ammo_magazine/shotholder/attack_hand(mob/user)
 	if((user.a_intent == I_HURT) && (length(stored_ammo)))
@@ -322,7 +322,7 @@
 	caliber = CALIBER_RIFLE_MILITARY
 	matter = list(MATERIAL_STEEL = 1800)
 	ammo_type = /obj/item/ammo_casing/rifle/military
-	max_ammo = 15
+	max_ammo = 18
 	multiple_sprites = 1
 
 /obj/item/ammo_magazine/mil_rifle/heavy
@@ -339,7 +339,7 @@
 	icon_state = "bullpup_light"
 	labels = list("light")
 	ammo_type = /obj/item/ammo_casing/rifle/military/light
-	max_ammo = 20
+	max_ammo = 14
 
 /obj/item/ammo_magazine/mil_rifle/light/empty
 	initial_ammo = 0
@@ -368,3 +368,40 @@
 	matter = list(MATERIAL_STEEL = 1500)
 	max_ammo = 8
 	multiple_sprites = TRUE
+
+/obj/item/ammo_magazine/box/minigun
+	name = "minigun box"
+	icon_state = "minigun"
+	origin_tech = list(TECH_COMBAT = 4)
+	mag_type = MAGAZINE
+	caliber = CALIBER_PISTOL_SMALL
+	matter = list(MATERIAL_STEEL = 10000)
+	ammo_type = /obj/item/ammo_casing/pistol/small
+	max_ammo = 200
+	multiple_sprites = TRUE
+
+/obj/item/ammo_magazine/box/minigun/empty
+	initial_ammo = 0
+
+/obj/item/ammo_magazine/shotgunmag
+	name = "shotgun magazine"
+	desc = "A magazine for semi-automatic shotguns."
+	icon_state = "drum"
+	caliber = CALIBER_SHOTGUN
+	mag_type = MAGAZINE
+	ammo_type = /obj/item/ammo_casing/shotgun
+	matter = list(MATERIAL_STEEL = 2400)
+	max_ammo = 15
+	multiple_sprites = TRUE
+
+/obj/item/ammo_magazine/shotgunmag/shot
+	labels = list("shot")
+	ammo_type = /obj/item/ammo_casing/shotgun/pellet
+
+/obj/item/ammo_magazine/shotgunmag/flechette
+	labels = list("flechette")
+	ammo_type = /obj/item/ammo_casing/shotgun/flechette
+
+/obj/item/ammo_magazine/shotgunmag/beanbag
+	labels = list("beanbag")
+	ammo_type = /obj/item/ammo_casing/shotgun/beanbag

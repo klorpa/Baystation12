@@ -18,7 +18,7 @@
 
 	skin_material = MATERIAL_SKIN_CHITIN
 	bone_material = null
-	speech_sounds = list('sound/voice/bug.ogg')
+	speech_sounds = list('sound/voice/Bug.ogg')
 	speech_chance = 2
 
 	warning_low_pressure = 50
@@ -78,7 +78,7 @@
 
 	breathing_organ = BP_TRACH
 
-	move_trail = /obj/effect/decal/cleanable/blood/tracks/snake
+	move_trail = /obj/decal/cleanable/blood/tracks/snake
 
 	has_organ = list(    // which required-organ checks are conducted.
 		BP_BRAIN =    /obj/item/organ/internal/brain/insectoid/nabber,
@@ -287,11 +287,7 @@
 
 			var/image/threat_image = skin_overlays[image_key]
 			if(!threat_image)
-				var/icon/base_icon = icon(H.stand_icon)
-				var/icon/I = new('icons/mob/human_races/species/nabber/threat.dmi', "threat")
-				base_icon.Blend(COLOR_BLACK, ICON_MULTIPLY)
-				base_icon.Blend(I, ICON_ADD)
-				threat_image  = image(base_icon)
+				threat_image = image('icons/mob/human_races/species/nabber/threat.dmi', "threat")
 				skin_overlays[image_key] = threat_image
 
 			return(threat_image)
@@ -402,10 +398,3 @@
 /datum/species/nabber/check_background(datum/job/job, datum/preferences/prefs)
 	var/singleton/cultural_info/culture/nabber/grade = SSculture.get_culture(prefs.cultural_info[TAG_CULTURE])
 	. = istype(grade) ? (job.type in grade.valid_jobs) : ..()
-
-/datum/species/nabber/skills_from_age(age)	//Converts an age into a skill point allocation modifier. Can be used to give skill point bonuses/penalities not depending on job.
-	switch(age)
-		if(0 to 18) 	. = 8
-		if(19 to 27) 	. = 2
-		if(28 to 40)	. = -2
-		else			. = -4

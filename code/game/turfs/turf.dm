@@ -28,7 +28,7 @@
 	var/movement_delay
 
 	var/fluid_can_pass
-	var/obj/effect/flood/flood_object
+	var/obj/flood/flood_object
 	var/fluid_blocked_dirs = 0
 	var/flooded // Whether or not this turf is absolutely flooded ie. a water source.
 	var/height = 0 // Determines if fluids can overflow onto next turf
@@ -43,7 +43,7 @@
 	var/has_opaque_atom
 
 	/// Reference to the turf fire on the turf
-	var/obj/effect/turf_fire/turf_fire
+	var/obj/turf_fire/turf_fire
 
 /turf/Initialize(mapload, ...)
 	. = ..()
@@ -52,7 +52,14 @@
 	else
 		luminosity = 1
 
-	RecalculateOpacity()
+	if (light_power && light_range)
+		update_light()
+
+	if (!mapload || (!istype(src, /turf/space) && is_outside()))
+		SSambient_lighting.queued += src
+
+	if (opacity)
+		has_opaque_atom = TRUE
 
 	if (mapload && permit_ao)
 		queue_ao()
@@ -92,7 +99,7 @@
 		QDEL_NULL(mimic_proxy)
 
 	..()
-	return QDEL_HINT_IWILLGC
+	return QDEL_HINT_LETMELIVE
 
 /turf/proc/is_solid_structure()
 	return 1
@@ -127,12 +134,15 @@
 	if(Adjacent(user))
 		attack_hand(user)
 
-/turf/attackby(obj/item/W as obj, mob/user as mob)
-	if(istype(W, /obj/item/storage))
-		var/obj/item/storage/S = W
-		if(S.use_to_pickup && S.collection_mode)
-			S.gather_all(src, user)
+
+/turf/use_tool(obj/item/item, mob/living/user, list/click_params)
+	if (istype(item, /obj/item/storage))
+		var/obj/item/storage/storage = item
+		if (storage.allow_quick_gather && !storage.quick_gather_single)
+			storage.gather_all(src, user)
+			return TRUE
 	return ..()
+
 
 /turf/Enter(atom/movable/mover as mob|obj, atom/forget as mob|obj|turf|area)
 
@@ -189,14 +199,7 @@ var/global/const/enterloopsanity = 100
 
 	if(ismob(A))
 		var/mob/M = A
-		if(!M.check_solid_ground())
-			inertial_drift(M)
-			//we'll end up checking solid ground again but we still need to check the other things.
-			//Ususally most people aren't in space anyways so hopefully this is acceptable.
-			M.update_floating()
-		else
-			M.inertia_dir = 0
-			M.make_floating(0) //we know we're not on solid ground so skip the checks to save a bit of processing
+		M.make_floating(0) //we know we're not on solid ground so skip the checks to save a bit of processing
 
 	var/objects = 0
 	if(A && (A.movable_flags & MOVABLE_FLAG_PROXMOVE))
@@ -218,20 +221,6 @@ var/global/const/enterloopsanity = 100
 
 /turf/proc/protects_atom(atom/A)
 	return FALSE
-
-/turf/proc/inertial_drift(atom/movable/A)
-	if(!(A.last_move))	return
-	if((ismob(A) && src.x > 2 && src.x < (world.maxx - 1) && src.y > 2 && src.y < (world.maxy-1)))
-		var/mob/M = A
-		if(M.Allow_Spacemove(1)) //if this mob can control their own movement in space then they shouldn't be drifting
-			M.inertia_dir  = 0
-			return
-		spawn(5)
-			if(M && !(M.anchored) && !(M.pulledby) && (M.loc == src))
-				if(!M.inertia_dir)
-					M.inertia_dir = M.last_move
-				step(M, M.inertia_dir)
-	return
 
 /turf/proc/levelupdate()
 	for(var/obj/O in src)
@@ -292,8 +281,8 @@ var/global/const/enterloopsanity = 100
 	source.reagents.trans_to_turf(src, 1, 10)	//10 is the multiplier for the reaction effect. probably needed to wet the floor properly.
 
 /turf/proc/remove_cleanables(skip_blood = TRUE)
-	for(var/obj/effect/O in src)
-		if(istype(O,/obj/effect/rune) || (istype(O,/obj/effect/decal/cleanable) && (!skip_blood || !istype(O, /obj/effect/decal/cleanable/blood))))
+	for(var/obj/O in src)
+		if(istype(O,/obj/rune) || (istype(O,/obj/decal/cleanable) && (!skip_blood || !istype(O, /obj/decal/cleanable/blood))))
 			qdel(O)
 
 /turf/proc/update_blood_overlays()
@@ -313,11 +302,14 @@ var/global/const/enterloopsanity = 100
 			if(length(M.pinned))
 				return
 
-		var/intial_dir = TT.init_dir
-		spawn(2)
-			step(AM, turn(intial_dir, 180))
+			if(M.pinned)
+				return
+		addtimer(new Callback(src, /turf/proc/bounce_off, AM, TT.init_dir), 2)
 
 	..()
+
+/turf/proc/bounce_off(atom/movable/AM, direction)
+	step(AM, turn(direction, 180))
 
 /turf/proc/can_engrave()
 	return FALSE
@@ -332,7 +324,7 @@ var/global/const/enterloopsanity = 100
 		return
 
 	var/too_much_graffiti = 0
-	for(var/obj/effect/decal/writing/W in src)
+	for(var/obj/decal/writing/W in src)
 		too_much_graffiti++
 	if(too_much_graffiti >= 5)
 		to_chat(vandal, SPAN_WARNING("There's too much graffiti here to add more."))
@@ -351,7 +343,7 @@ var/global/const/enterloopsanity = 100
 		return FALSE
 
 	vandal.visible_message(SPAN_DANGER("\The [vandal] carves some graffiti into \the [src]."))
-	var/obj/effect/decal/writing/graffiti = new(src)
+	var/obj/decal/writing/graffiti = new(src)
 	graffiti.message = message
 	graffiti.author = vandal.ckey
 	vandal.update_personal_goal(/datum/goal/achievement/graffiti, TRUE)
@@ -449,3 +441,16 @@ var/global/const/enterloopsanity = 100
 
 /turf/proc/IgniteTurf(power, fire_colour)
 	return
+
+//Maybe we want to make this stateful at some point
+/turf/proc/is_outside()
+
+	//For the purposes of light, dense turfs should not be considered to be outside
+	if(density)
+		return FALSE
+
+	var/area/A = get_area(src)
+	if(A.area_flags & AREA_FLAG_EXTERNAL)
+		return TRUE
+
+	//TODO: CitRP has some concept of outside based on turfs above. We don't really have any use cases right now, revisit this function if this changes

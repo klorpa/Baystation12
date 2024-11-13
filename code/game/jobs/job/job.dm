@@ -5,8 +5,8 @@
 	var/list/access = list()              // The job's default access tokens
 	var/list/software_on_spawn = list()   // Defines the software files that spawn on tablets and labtops
 	var/department_flag = 0
-	var/total_positions = 0               // How many players can be this job
-	var/spawn_positions = 0               // How many players can spawn in as this job
+	var/total_positions = 0               // How many players can be this job. Set to -1 for unlimited.
+	var/spawn_positions = 0               // How many players can spawn in as this job. Set to -1 for unlimited.
 	var/current_positions = 0             // How many players have this job
 	var/availablity_chance = 100          // Percentage chance job is available each round
 
@@ -37,8 +37,7 @@
 
 	var/min_skill = list()				  //Minimum skills allowed for the job. List should contain skill (as in /singleton/hierarchy/skill path), with values which are numbers.
 	var/max_skill = list()				  //Maximum skills allowed for the job.
-	var/skill_points = 16				  //The number of unassigned skill points the job comes with (on top of the minimum skills).
-	var/no_skill_buffs = FALSE			  //Whether skills can be buffed by age/species modifiers.
+	var/skill_points = 22				  //The number of unassigned skill points the job comes with (on top of the minimum skills).
 	var/available_by_default = TRUE
 
 	var/list/possible_goals
@@ -413,7 +412,7 @@
 
 /datum/job/proc/get_roundstart_spawnpoint()
 	var/list/loc_list = list()
-	for(var/obj/effect/landmark/start/sloc in landmarks_list)
+	for(var/obj/landmark/start/sloc in landmarks_list)
 		if(sloc.name != title)	continue
 		if(locate(/mob/living) in sloc.loc)	continue
 		loc_list += sloc

@@ -1,14 +1,14 @@
-/mob/Destroy()//This makes sure that mobs with clients/keys are not just deleted from the game.
+/mob/Destroy()
 	STOP_PROCESSING_MOB(src)
 	GLOB.dead_mobs -= src
 	GLOB.alive_mobs -= src
 	GLOB.player_list -= src
 	unset_machine()
+	QDEL_NULL(ability_master)
 	QDEL_NULL(hud_used)
 	if(istype(skillset))
 		QDEL_NULL(skillset)
-	for(var/obj/item/grab/G in grabbed_by)
-		qdel(G)
+	remove_grabs_and_pulls()
 	clear_fullscreen()
 	if(client)
 		remove_screen_obj_references()
@@ -20,8 +20,7 @@
 	if(mind && mind.current == src)
 		spellremove(src)
 	ghostize()
-	..()
-	return QDEL_HINT_HARDDEL
+	return ..()
 
 /mob/proc/remove_screen_obj_references()
 	hands = null
@@ -209,17 +208,18 @@
 	return -1
 
 
-/mob/proc/movement_delay()
+/mob/proc/movement_delay(singleton/move_intent/using_intent = move_intent)
 	. = 0
-	if(istype(loc, /turf))
-		var/turf/T = loc
-		. += T.movement_delay
-
+	if(isturf(loc))
+		var/turf/turf = loc
+		. += turf.movement_delay
 	if (drowsyness > 0)
 		. += 6
 	if(lying) //Crawling, it's slower
 		. += (8 + ((weakened * 3) + (confused * 2)))
-	. += move_intent.move_delay
+	if (ispath(using_intent))
+		using_intent = GET_SINGLETON(using_intent)
+	. += using_intent.move_delay
 	. += encumbrance() * (0.5 + 1.5 * (SKILL_MAX - get_skill_value(SKILL_HAULING))/(SKILL_MAX - SKILL_MIN)) //Varies between 0.5 and 2, depending on skill
 
 //How much the stuff the mob is pulling contributes to its movement delay.
@@ -325,60 +325,11 @@
 	return
 
 
-/mob/verb/examinate(atom/A as mob|obj|turf in view())
+/mob/verb/ExaminateVerb(atom/A as mob|obj|turf in view())
 	set name = "Examine"
 	set category = "IC"
 
-	if((is_blind(src) || usr && usr.stat) && !isobserver(src))
-		to_chat(src, SPAN_NOTICE("Something is there but you can't see it."))
-		return 1
-	face_atom(A)
-	if(!isghost(src))
-		if(A.loc != src || IsHolding(A))
-			for(var/mob/M in viewers(4, src))
-				if(M == src)
-					continue
-				if(M.client && M.client.get_preference_value(/datum/client_preference/examine_messages) == GLOB.PREF_SHOW)
-					if(M.is_blind() || is_invisible_to(M))
-						continue
-					to_chat(M, SPAN_SUBTLE("<b>\The [src]</b> looks at \the [A]."))
-	var/distance = INFINITY
-	if(isghost(src) || stat == DEAD)
-		distance = 0
-	else
-		var/turf/source_turf = get_turf(src)
-		var/turf/target_turf = get_turf(A)
-		if(source_turf && source_turf.z == target_turf?.z)
-			distance = get_dist(source_turf, target_turf)
-	if(!A.examine(src, distance))
-		crash_with("Improper /examine() override: [log_info_line(A)]")
-	if(get_skill_value(SKILL_FORENSICS) >= SKILL_EXPERT && get_dist(src, A) <= (get_skill_value(SKILL_FORENSICS) - SKILL_ADEPT))
-		var/clue
-		if(LAZYLEN(A.suit_fibers))
-			to_chat(src, SPAN_NOTICE("You notice some fibers embedded in \the [A]."))
-			clue = 1
-		if(LAZYLEN(A.fingerprints))
-			to_chat(src, SPAN_NOTICE("You notice a partial print on \the [A]."))
-			clue = 1
-		if(LAZYLEN(A.gunshot_residue))
-			if(isliving(src))
-				var/mob/living/M = src
-				if(M.isSynthetic())
-					to_chat(src, SPAN_NOTICE("You notice faint black residue on \the [A]."))
-				else
-					to_chat(src, SPAN_NOTICE("You notice a faint acrid smell coming from \the [A]."))
-			else if(isrobot(src))
-				to_chat(src, SPAN_NOTICE("You notice faint black residue on \the [A]."))
-			else
-				to_chat(src, SPAN_NOTICE("You notice a faint acrid smell coming from \the [A]."))
-			clue = 1
-		//Noticing wiped blood is a bit harder
-		if((get_skill_value(SKILL_FORENSICS) >= SKILL_PROF) && LAZYLEN(A.blood_DNA))
-			to_chat(src, SPAN_WARNING("You notice faint blood traces on \The [A]."))
-			clue = 1
-		if(clue && has_client_color(/datum/client_color/noir))
-			playsound_local(null, pick('sound/effects/clue1.ogg','sound/effects/clue2.ogg'), 60, is_global = TRUE)
-
+	examinate(usr, A)
 
 /mob/verb/pointed(atom/A as mob|obj|turf in view())
 	set name = "Point To"
@@ -386,15 +337,17 @@
 
 	if(!src || !isturf(src.loc) || !(A in view(src.loc)))
 		return 0
-	if(istype(A, /obj/effect/decal/point))
+	if(istype(A, /obj/decal/point))
 		return 0
 
-	var/tile = get_turf(A)
+	var/turf/tile = get_turf(A)
 	if (!tile)
 		return 0
 
-	var/obj/P = new /obj/effect/decal/point(tile)
+	var/turf/mob_tile = get_turf(src)
+	var/obj/P = new /obj/decal/point(mob_tile)
 	P.set_invisibility(invisibility)
+	animate(P, pixel_x = (tile.x - mob_tile.x) * world.icon_size + A.pixel_x, pixel_y = (tile.y - mob_tile.y) * world.icon_size + A.pixel_y, time = 3, easing = EASE_OUT)
 	face_atom(A)
 	return 1
 
@@ -516,7 +469,7 @@
 	if (.)
 		return
 	if (href_list["flavor_change"] && !isadmin(usr) && (usr != src))
-		log_and_message_admins(usr, "is suspected of trying to change flavor text on [key_name_admin(src)] via Topic exploits.")
+		log_and_message_admins("is suspected of trying to change flavor text on [key_name_admin(src)] via Topic exploits.")
 	return ..()
 
 /mob/proc/pull_damage()
@@ -568,7 +521,11 @@
 
 /mob/proc/start_pulling(atom/movable/AM)
 
-	if ( !AM || !usr || src==AM || !isturf(src.loc) )	//if there's no person pulling OR the person is pulling themself OR the object being pulled is inside something: abort!
+	if ( !AM || !usr || src==AM || !isturf(src.loc))	//if there's no person pulling OR the person is pulling themself OR the object being pulled is inside something: abort!
+		return
+
+	if (!Adjacent(AM))
+		to_chat(src, SPAN_WARNING("You must remain next to \the [AM]."))
 		return
 
 	if (AM.anchored)
@@ -586,7 +543,7 @@
 			if(prob(25))
 				visible_message(SPAN_WARNING("\The [src] fails to pull \the [G.assailant] away from \the [G.affecting]!"), SPAN_WARNING("You fail to pull \the [G.assailant] away from \the [G.affecting]!"))
 				return
-			qdel(G) // Makes sure dragging the assailant away from their victim makes them release the grab instead of holding it at long range forever.
+			G.current_grab.let_go(G) // Makes sure dragging the assailant away from their victim makes them release the grab instead of holding it at long range forever.
 
 		if(!can_pull_mobs || !can_pull_size)
 			to_chat(src, SPAN_WARNING("It won't budge!"))
@@ -662,10 +619,6 @@
 		if(istype(C))
 			C.leave_evidence(src)
 
-	//Attempted fix for people flying away through space when cuffed and dragged.
-	if(ismob(AM))
-		var/mob/pulled = AM
-		pulled.inertia_dir = 0
 
 /mob/proc/can_use_hands()
 	return
@@ -686,14 +639,20 @@
 
 
 /mob/choose_from_pronouns()
-	if(!pronouns)
-		var/datum/gender/G = gender_datums[gender]
-		return G
-	else
-		var/datum/pronouns/P = GLOB.pronouns.by_key[pronouns]
-		if(P.types)
-			P = GLOB.pronouns.by_key[pick(P.types)]
-		return P
+	if (!pronouns)
+		return ..()
+
+	var/datum/pronouns/P = GLOB.pronouns.by_key[pronouns]
+	if(P.types)
+		P = GLOB.pronouns.by_key[pick(P.types)]
+	return P
+
+
+/mob/proc/get_formal_pronouns()
+	var/datum/pronouns/P = GLOB.pronouns_from_gender[gender]
+	if (pronouns)
+		P = GLOB.pronouns.by_key[pronouns]
+	return P.formal_term
 
 
 /mob/proc/see(message)
@@ -714,17 +673,12 @@
 
 	if(statpanel("Status"))
 		if(GAME_STATE >= RUNLEVEL_LOBBY)
-			stat("Local Time", stationtime2text())
-			stat("Local Date", stationdate2text())
 			stat("Round Duration", roundduration2text())
 		if(client.holder || isghost(client.mob))
 			stat("Location:", "([x], [y], [z]) [loc]")
 
 	if(client.holder)
 		if(statpanel("MC"))
-			stat("CPU:","[world.cpu]")
-			stat("Instances:","[length(world.contents)]")
-			stat(null)
 			var/time = Uptime()
 			if(Master)
 				Master.UpdateStat(time)
@@ -913,6 +867,59 @@
 /mob/proc/AdjustSleeping(amount)
 	sleeping = max(sleeping + amount,0)
 	return
+
+
+/**
+ * Sets a mob's confused value.
+ *
+ * Parameters:
+ * - `amount` (Positive Int) - The confused value to set. Decimal values are rounded.
+ * - `limit` (Positive Int, default `CONFUSED_MAX`) - The maximum value `confused` can be set to. Decimal values are rounded.
+ *
+ * Returns integer. The new value of `confused`.
+ */
+/mob/proc/set_confused(amount, limit = CONFUSED_MAX)
+	confused = clamp(round(amount), 0, round(limit))
+	return confused
+
+
+/**
+ * Modifies a mob's confused value by `mod_amount`.
+ *
+ * Parameters:
+ * - `mod_amount` (Integer) - The amount to modify `confused` by. Allows negative values for subtraction. Decimal values are rounded.
+ * - `floor` (Positive Integer, default `0`) - The minimum value to set `confused` to. Decimal values are rounded.
+ * - `ceiling` (Positive Integer, default `CONFUSED_MAX`) - The maximum value to set `confused` to. Decimal values are rounded.
+ *
+ * Returns integer. The new value of `confused`.
+ */
+/mob/proc/mod_confused(mod_amount, floor = 0, ceiling = CONFUSED_MAX)
+	confused += round(mod_amount)
+	confused = clamp(confused, round(floor), round(ceiling))
+	return confused
+
+
+/**
+ * Sets a mob's confused value to `0`.
+ *
+ * Returns integer. The new value of `confused`.
+ */
+/mob/proc/clear_confused()
+	confused = 0
+	return confused
+
+
+/**
+ * Whether or not the mob's confusion level is at the threshhold.
+ *
+ * Parameters:
+ * - `threshhold` (Positive Integer, default `1`) - The threshhold at which the mob should be considered confused.
+ *
+ * Returns boolean.
+ */
+/mob/proc/is_confused(threshhold = 1)
+	return confused >= threshhold
+
 
 /mob/proc/get_species()
 	return ""
@@ -1268,3 +1275,6 @@
 			return FALSE
 	else
 		return FALSE
+
+/mob/get_mass()
+	return mob_size

@@ -23,6 +23,7 @@
 	name = "body bag"
 	desc = "A plastic bag designed for the storage and transportation of cadavers."
 	icon = 'icons/obj/closets/bodybag.dmi'
+	icon_state = "closed"
 	closet_appearance = null
 	open_sound = 'sound/items/zip.ogg'
 	close_sound = 'sound/items/zip.ogg'
@@ -75,11 +76,11 @@
 	if(opened)
 		icon_state = "open"
 	else
-		icon_state = "closed_unlocked"
+		icon_state = "closed"
 
-	src.overlays.Cut()
+	ClearOverlays()
 	if(label)
-		src.overlays += image(src.icon, "bodybag_label")
+		AddOverlays("bodybag_label")
 
 /obj/structure/closet/body_bag/store_mobs(stored_units)
 	contains_body = ..()

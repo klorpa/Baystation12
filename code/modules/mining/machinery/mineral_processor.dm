@@ -5,6 +5,7 @@
 
 /obj/machinery/mineral/processing_unit
 	name = "mineral processor"
+	icon = 'icons/obj/machines/mining/mining_machines.dmi'
 	icon_state = "furnace_0"
 	console = /obj/machinery/computer/mining
 	input_turf =  NORTH
@@ -174,7 +175,7 @@
 		console.updateUsrDialog()
 
 /obj/machinery/mineral/processing_unit/on_update_icon()
-	overlays.Cut()
+	ClearOverlays()
 	if(active)
 		icon_state = "furnace_1"
 	else

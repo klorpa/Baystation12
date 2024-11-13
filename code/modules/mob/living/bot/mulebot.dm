@@ -240,11 +240,11 @@
 	new /obj/item/stack/material/rods(Tsec)
 	new /obj/item/stack/cable_coil/cut(Tsec)
 
-	var/datum/effect/effect/system/spark_spread/s = new /datum/effect/effect/system/spark_spread
+	var/datum/effect/spark_spread/s = new /datum/effect/spark_spread
 	s.set_up(3, 1, src)
 	s.start()
 
-	new /obj/effect/decal/cleanable/blood/oil(Tsec)
+	new /obj/decal/cleanable/blood/oil(Tsec)
 	..()
 
 /mob/living/bot/mulebot/proc/GetBeaconList()
@@ -286,7 +286,7 @@
 	if(C.layer < layer)
 		C.layer = layer + 0.1
 	C.plane = plane
-	overlays += C
+	AddOverlays(C)
 
 	if(ismob(C))
 		var/mob/M = C
@@ -301,7 +301,7 @@
 		return
 
 	busy = 1
-	overlays.Cut()
+	ClearOverlays()
 
 	load.forceMove(loc)
 	load.pixel_y -= 9

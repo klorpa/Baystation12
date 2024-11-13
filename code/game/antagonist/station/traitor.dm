@@ -5,7 +5,7 @@ GLOBAL_DATUM_INIT(traitors, /datum/antagonist/traitor, new)
 	id = MODE_TRAITOR
 	antaghud_indicator = "hud_traitor"
 	blacklisted_jobs = list(/datum/job/ai, /datum/job/submap)
-	protected_jobs = list(/datum/job/officer, /datum/job/warden, /datum/job/detective, /datum/job/captain, /datum/job/lawyer, /datum/job/hos)
+	restricted_jobs = list(/datum/job/captain, /datum/job/lawyer, /datum/job/hos)
 	flags = ANTAG_SUSPICIOUS | ANTAG_RANDSPAWN | ANTAG_VOTABLE
 	skill_setter = /datum/antag_skill_setter/station
 
@@ -75,7 +75,7 @@ GLOBAL_DATUM_INIT(traitors, /datum/antagonist/traitor, new)
 		if(istype(traitor_mob, /mob/living/silicon/robot))
 			var/mob/living/silicon/robot/R = traitor_mob
 			R.SetLockdown(0)
-			R.emagged = TRUE // Provides a traitor robot with its module's emag item
+			R.emag_act()
 			R.verbs |= /mob/living/silicon/robot/proc/ResetSecurityCodes
 			R.status_flags &= ~CANWEAKEN // Apply optical matrix protection (Flash resistance)
 		return 1

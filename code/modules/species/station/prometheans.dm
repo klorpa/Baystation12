@@ -6,10 +6,11 @@ var/global/datum/species/shapeshifter/promethean/prometheans
 	name =             SPECIES_PROMETHEAN
 	name_plural =      "Prometheans"
 	description =            "What has Science done?"
+	preview_icon = null
 	show_ssd =         "totally quiescent"
 	death_message =    "rapidly loses cohesion, splattering across the ground..."
 	knockout_message = "collapses inwards, forming a disordered puddle of goo."
-	remains_type = /obj/effect/decal/cleanable/ash
+	remains_type = /obj/decal/cleanable/ash
 
 	meat_type = null
 	bone_material = null
@@ -78,7 +79,7 @@ var/global/datum/species/shapeshifter/promethean/prometheans
 	prometheans = src
 
 /datum/species/shapeshifter/promethean/hug(mob/living/carbon/human/H,mob/living/target)
-	var/datum/gender/G = gender_datums[target.gender]
+	var/datum/gender/G = GLOB.gender_datums[target.gender]
 	H.visible_message(SPAN_NOTICE("\The [H] glomps [target] to make [G.him] feel better!"), \
 					SPAN_NOTICE("You glomps [target] to make [G.him] feel better!"))
 	H.apply_stored_shock_to(target)
@@ -90,7 +91,7 @@ var/global/datum/species/shapeshifter/promethean/prometheans
 
 	var/turf/T = H.loc
 	if(istype(T))
-		var/obj/effect/decal/cleanable/C = locate() in T
+		var/obj/decal/cleanable/C = locate() in T
 		if(C)
 			if(H.nutrition < 300)
 				H.adjust_nutrition(rand(10,20))
@@ -146,7 +147,7 @@ var/global/datum/species/shapeshifter/promethean/prometheans
 
 	if(!stored_shock_by_ref["\ref[H]"])
 		return
-	var/datum/gender/G = gender_datums[H.gender]
+	var/datum/gender/G = GLOB.gender_datums[H.gender]
 
 	switch(stored_shock_by_ref["\ref[H]"])
 		if(1 to 10)

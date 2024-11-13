@@ -34,11 +34,11 @@ a creative player the means to solve many problems.  Circuits are held inside an
 	. = ..()
 	external_examine(user)
 
-/obj/item/integrated_circuit/ShiftClick(mob/living/user)
-	if(istype(user))
+/obj/item/integrated_circuit/ShiftClick(mob/user)
+	if (isliving(user))
 		interact(user)
-	else
-		..()
+		return TRUE
+	return ..()
 
 // This should be used when someone is examining while the case is opened.
 /obj/item/integrated_circuit/proc/internal_examine(mob/user)
@@ -266,7 +266,7 @@ a creative player the means to solve many problems.  Circuits are held inside an
 		if(istype(held_item, /obj/item/device/integrated_electronics/debugger))
 			var/obj/item/device/integrated_electronics/debugger/D = held_item
 			if(D.accepting_refs)
-				D.afterattack(src, usr, TRUE)
+				D.use_after(src, usr)
 				. = IC_TOPIC_REFRESH
 			else
 				to_chat(usr, SPAN_WARNING("The debugger's 'ref scanner' needs to be on."))
@@ -285,7 +285,7 @@ a creative player the means to solve many problems.  Circuits are held inside an
 		. = IC_TOPIC_REFRESH
 
 	else if(href_list["remove"] && assembly)
-		if(istype(held_item, /obj/item/screwdriver))
+		if (isScrewdriver(held_item))
 			disconnect_all()
 			dropInto(loc)
 			playsound(src, 'sound/items/Crowbar.ogg', 50, 1)

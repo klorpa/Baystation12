@@ -2,7 +2,7 @@ var/global/list/all_gps_units = list()
 /obj/item/device/gps
 	name = "global coordinate system"
 	desc = "A handheld relay used to triangulate the approximate co-ordinates of the device."
-	icon = 'icons/obj/locator.dmi'
+	icon = 'icons/obj/tools/locator.dmi'
 	icon_state = "gps"
 	item_state = "gps"
 	origin_tech = list(TECH_MATERIAL = 2, TECH_DATA = 2, TECH_BLUESPACE = 2)
@@ -180,6 +180,7 @@ var/global/list/all_gps_units = list()
 	update_icon()
 
 /obj/item/device/gps/emp_act(severity)
+	SHOULD_CALL_PARENT(FALSE)
 	if(emped) // Without a fancy callback system, this will have to do.
 		return
 	if(tracking)
@@ -190,6 +191,7 @@ var/global/list/all_gps_units = list()
 	emped = TRUE
 	update_icon()
 	addtimer(new Callback(src, .proc/reset_emp), duration)
+	GLOB.empd_event.raise_event(src, severity)
 
 /obj/item/device/gps/proc/reset_emp()
 	emped = FALSE
@@ -198,11 +200,11 @@ var/global/list/all_gps_units = list()
 		to_chat(loc, SPAN_NOTICE("\The [src] appears to be functional again."))
 
 /obj/item/device/gps/on_update_icon()
-	overlays.Cut()
+	ClearOverlays()
 	if(emped)
-		overlays.Add("gps_emp")
+		AddOverlays("gps_emp")
 	else if(tracking)
-		overlays.Add("gps_on")
+		AddOverlays("gps_on")
 
 /obj/item/device/gps/attack_self(mob/user)
 	ui_interact(user)
@@ -345,3 +347,4 @@ var/global/list/all_gps_units = list()
 
 /obj/item/device/gps/AltClick(mob/user)
 	toggle_tracking(user)
+	return TRUE

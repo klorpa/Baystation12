@@ -236,8 +236,7 @@
 			if (machine.check_eye(src) < 0)
 				reset_view(null)
 		else
-			if(client && !client.adminobs)
-				reset_view(null)
+			reset_view(null)
 
 	return 1
 
@@ -285,9 +284,9 @@
 	update_icon()
 
 /mob/living/silicon/robot/update_fire()
-	overlays -= image("icon"='icons/mob/OnFire.dmi', "icon_state"="Standing")
-	if(on_fire)
-		overlays += image("icon"='icons/mob/OnFire.dmi', "icon_state"="Standing")
+	CutOverlays(image("icon"='icons/mob/OnFire.dmi', "icon_state"="Standing"))
+	if (on_fire)
+		AddOverlays(image("icon"='icons/mob/OnFire.dmi', "icon_state"="Standing"))
 
 /mob/living/silicon/robot/fire_act(datum/gas_mixture/air, exposed_temperature, exposed_volume)
 	if (status_flags & GODMODE)

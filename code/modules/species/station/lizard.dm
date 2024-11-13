@@ -1,7 +1,6 @@
 /datum/species/unathi
 	name = SPECIES_UNATHI
 	name_plural = SPECIES_UNATHI
-	icon_template = 'icons/mob/human_races/species/template_tall.dmi'
 	icobase = 'icons/mob/human_races/species/unathi/skin.dmi'
 	deform = 'icons/mob/human_races/species/unathi/deformed.dmi'
 	husk_icon = 'icons/mob/human_races/species/unathi/husk.dmi'
@@ -13,6 +12,7 @@
 	tail_blend = ICON_MULTIPLY
 	hidden_from_codex = FALSE
 	skin_material =   MATERIAL_SKIN_LIZARD
+	icon_template = 'icons/mob/human_races/species/unathi/template.dmi'
 
 	unarmed_types = list(/datum/unarmed_attack/stomp, /datum/unarmed_attack/tail, /datum/unarmed_attack/claws, /datum/unarmed_attack/punch, /datum/unarmed_attack/bite/sharp)
 	primitive_form = "Stok"
@@ -57,7 +57,7 @@
 	blood_color = "#f24b2e"
 	organs_icon = 'icons/mob/human_races/species/unathi/organs.dmi'
 
-	move_trail = /obj/effect/decal/cleanable/blood/tracks/claw
+	move_trail = /obj/decal/cleanable/blood/tracks/claw
 
 	heat_discomfort_level = 320
 	heat_discomfort_strings = list(
@@ -160,7 +160,7 @@
 	)
 
 	footwear_trail_overrides = list(
-		/obj/item/clothing = /obj/effect/decal/cleanable/blood/tracks/claw // Needs to apply to both shoes and space suits.
+		/obj/item/clothing = /obj/decal/cleanable/blood/tracks/claw // Needs to apply to both shoes and space suits.
 	)
 
 /datum/species/unathi/equip_survival_gear(mob/living/carbon/human/H)

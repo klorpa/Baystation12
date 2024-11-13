@@ -3,7 +3,7 @@
 
 /obj/machinery/oxygen_pump
 	name = "emergency oxygen pump"
-	icon = 'icons/obj/walllocker.dmi'
+	icon = 'icons/obj/structures/walllocker.dmi'
 	desc = "A wall mounted oxygen pump with a retractable face mask that you can pull over your face in case of emergencies."
 	icon_state = "emerg"
 
@@ -130,14 +130,14 @@
 		to_chat(user, SPAN_WARNING("There is no tank in \the [src]."))
 		return
 	if(GET_FLAGS(stat, MACHINE_STAT_MAINT))
-		to_chat(user, SPAN_WARNING("Please close \the maintenance hatch first."))
+		to_chat(user, SPAN_WARNING("Please close the maintenance hatch first."))
 		return
 	if(!Adjacent(target))
 		to_chat(user, SPAN_WARNING("Please stay close to \the [src]."))
 		return
 	//when there is a breather:
 	if(breather && target != breather)
-		to_chat(user, SPAN_WARNING("\The pump is already in use."))
+		to_chat(user, SPAN_WARNING("The pump is already in use."))
 		return
 	//Checking if breather is still valid
 	if(target == breather && target.wear_mask != contained)
@@ -145,7 +145,7 @@
 		return
 	return 1
 
-/obj/machinery/oxygen_pump/attackby(obj/item/W as obj, mob/user as mob)
+/obj/machinery/oxygen_pump/use_tool(obj/item/W, mob/living/user, list/click_params)
 	if(isScrewdriver(W))
 		toggle_stat(MACHINE_STAT_MAINT)
 		user.visible_message(
@@ -156,18 +156,24 @@
 			icon_state = icon_state_open
 		if(!stat)
 			icon_state = icon_state_closed
-		//TO-DO: Open icon
+		return TRUE
+
 	if(istype(W, /obj/item/tank) && (GET_FLAGS(stat, MACHINE_STAT_MAINT)))
 		if(tank)
 			to_chat(user, SPAN_WARNING("\The [src] already has a tank installed!"))
-		else
-			if(!user.unEquip(W, src))
-				return
-			tank = W
-			user.visible_message(SPAN_NOTICE("\The [user] installs \the [tank] into \the [src]."), SPAN_NOTICE("You install \the [tank] into \the [src]."))
-			src.add_fingerprint(user)
+			return TRUE
+
+		if(!user.unEquip(W, src))
+			return TRUE
+		tank = W
+		user.visible_message(SPAN_NOTICE("\The [user] installs \the [tank] into \the [src]."), SPAN_NOTICE("You install \the [tank] into \the [src]."))
+		return TRUE
+
 	if(istype(W, /obj/item/tank) && !stat)
-		to_chat(user, SPAN_WARNING("Please open the maintenance hatch first."))
+		to_chat(user, SPAN_WARNING("You need to open the maintenance hatch first."))
+		return TRUE
+
+	return ..()
 
 /obj/machinery/oxygen_pump/examine(mob/user)
 	. = ..()

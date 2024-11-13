@@ -3,7 +3,7 @@
 /obj/item/magic_rock
 	name = "magical rock"
 	desc = "Legends say that this rock will unlock the true potential of anyone who touches it."
-	icon = 'icons/obj/wizard.dmi'
+	icon = 'icons/obj/cult.dmi'
 	icon_state = "magic rock"
 	w_class = ITEM_SIZE_SMALL
 	throw_speed = 1
@@ -59,7 +59,7 @@
 		return
 
 	var/obj/O = new /obj(T)
-	O.set_light(-10, 0.1, 10, 2, "#ffffff")
+	O.set_light(10, -10, "#ffffff")
 
 	spawn(duration)
 		qdel(O)
@@ -89,6 +89,8 @@
 
 	drop_items = 0
 
+/spell/targeted/shapeshift/true_form/check_valid_targets(list/targets)
+	return TRUE
 
 //UNATHI
 /spell/moghes_blessing

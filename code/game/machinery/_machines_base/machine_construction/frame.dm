@@ -14,18 +14,17 @@
 /singleton/machine_construction/frame/unwrenched/attackby(obj/item/I, mob/user, obj/machinery/machine)
 	if(isWrench(I))
 		playsound(machine.loc, 'sound/items/Ratchet.ogg', 50, 1)
-		if(do_after(user, 2 SECONDS, machine, DO_REPAIR_CONSTRUCT))
+		if(do_after(user, (I.toolspeed * 2) SECONDS, machine, DO_REPAIR_CONSTRUCT))
 			TRANSFER_STATE(/singleton/machine_construction/frame/wrenched)
 			to_chat(user, SPAN_NOTICE("You wrench \the [machine] into place."))
 			machine.anchored = TRUE
 	if(isWelder(I))
 		var/obj/item/weldingtool/WT = I
-		if(!WT.remove_fuel(0, user))
-			to_chat(user, "The welding tool must be on to complete this task.")
+		if(!WT.can_use(3, user))
 			return TRUE
 		playsound(machine.loc, 'sound/items/Welder.ogg', 50, 1)
-		if(do_after(user, 2 SECONDS, machine, DO_REPAIR_CONSTRUCT))
-			if(!WT.isOn())
+		if(do_after(user, (I.toolspeed * 2) SECONDS, machine, DO_REPAIR_CONSTRUCT))
+			if (!WT.remove_fuel(3, user))
 				return TRUE
 			TRANSFER_STATE(/singleton/machine_construction/default/deconstructed)
 			to_chat(user, SPAN_NOTICE("You deconstruct \the [machine]."))
@@ -51,7 +50,7 @@
 /singleton/machine_construction/frame/wrenched/attackby(obj/item/I, mob/user, obj/machinery/machine)
 	if(isWrench(I))
 		playsound(machine.loc, 'sound/items/Ratchet.ogg', 50, 1)
-		if(do_after(user, 2 SECONDS, machine, DO_REPAIR_CONSTRUCT))
+		if(do_after(user, (I.toolspeed * 2) SECONDS, machine, DO_REPAIR_CONSTRUCT))
 			TRANSFER_STATE(/singleton/machine_construction/frame/unwrenched)
 			to_chat(user, SPAN_NOTICE("You unfasten \the [machine]."))
 			machine.anchored = FALSE

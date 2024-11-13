@@ -1,7 +1,7 @@
 /obj/structure/janitorialcart
 	name = "janitorial cart"
 	desc = "The ultimate in janitorial carts! Has space for water, mops, signs, trash bags, and more!"
-	icon = 'icons/obj/janitor.dmi'
+	icon = 'icons/obj/carts.dmi'
 	icon_state = "cart"
 	anchored = FALSE
 	density = TRUE
@@ -52,7 +52,7 @@
 		if (!user.unEquip(tool, src))
 			FEEDBACK_UNEQUIP_FAILURE(tool, src)
 			return TRUE
-		mybag = tool
+		myreplacer = tool
 		update_icon()
 		updateUsrDialog()
 		user.visible_message(
@@ -204,17 +204,17 @@
 
 
 /obj/structure/janitorialcart/on_update_icon()
-	overlays.Cut()
+	ClearOverlays()
 	if(mybag)
-		overlays += "cart_garbage"
+		AddOverlays("cart_garbage")
 	if(mymop)
-		overlays += "cart_mop"
+		AddOverlays("cart_mop")
 	if(myspray)
-		overlays += "cart_spray"
+		AddOverlays("cart_spray")
 	if(myreplacer)
-		overlays += "cart_replacer"
+		AddOverlays("cart_replacer")
 	if(signs)
-		overlays += "cart_sign[signs]"
+		AddOverlays("cart_sign[signs]")
 
 
 //old style cart
